@@ -20,7 +20,8 @@ d3.json('data/Topics_Layer_1.json').then(data=>{
       text: n.label, 
       type:'label', 
       x:n.x, 
-      y:n.y};
+      y:n.y
+    };
     labelNodes.push(l);
     labelEdges.push({source: n, target:l});
   }
@@ -103,63 +104,81 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   //  })
   //  .distance(d=>0)
   //)
-  .force('charge', 
-    d3.forceManyBody()
-    .strength(d=>d.type!=='label' ? 0.05/nodes.length:0)
-  )
+  // .force('charge', 
+  //   d3.forceManyBody()
+  //   .strength(d=>d.type!=='label' ? 0.05/nodes.length:0)
+  // )
   .force('collide', 
     d3.forceCollide()
     .radius(d=>{
       if(d.type=='label'){
         return 0;
       }else{
-        return 4;
+        return 2;
       }
     })
-    .strength(0.001)
+    .strength(0.01)
   )
-  .force('link-real', 
-    d3.forceLink(edges)
-    .id(d => d.id)
-    .strength(function(d,i){
-      // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
-      // let ap = (d.source.perplexity + d.target.perplexity)/2;
-      return 0.9;
-    })
-    .distance(d=>1)
+  // .force('link-real', 
+  //   d3.forceLink(edges)
+  //   .id(d => d.id)
+  //   .strength(function(d,i){
+  //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
+  //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
+  //     return 0.1;
+  //   })
+  //   .distance(d=>5)
+  // )
+  .force('stress', 
+   forceStress(virtualEdges, 0.99)
+   .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
+   .targetDist(e=>e.weight*1)
+   .strength(10)
   )
-  //.force('stress', 
-  //  forceStress(virtualEdges, 1/nodes.length/5)
-  //  .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
-  //  .targetDist(e=>e.weight)
-  //  .strength(10)
-  //)
   .force('post', forcePost(edges, 2))
   // .force('center', d3.forceCenter(0,0));
   window.simulation = simulation;
 
   let drag = simulation => {
-
-    function dragstarted(d) {
-      if (!d3.event.active){
-        simulation.alphaTarget(0.4).restart();
-      }
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-    function dragged(d) {
-      d.fx = sx.invert(d3.event.sourceEvent.offsetX);
-      d.fy = sy.invert(d3.event.sourceEvent.offsetY);
-    }
-    function dragended(d) {
-      if (!d3.event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
     return d3.drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);
+    .on('start', (d)=>{
+      if (!d3.event.active){
+        simulation.alphaTarget(0.1).restart();
+      }
+      if(d.type !== 'label'){
+        d.fx = d.x;
+        d.fy = d.y;
+      }else{
+        d.fx = d.for.x;
+        d.fy = d.for.y;
+      }
+      
+    })
+      .on('drag', (d)=>{
+
+        if(d.type !== 'label'){
+          console.log('not label');
+          d.fx = sx.invert(d3.event.sourceEvent.offsetX);
+          d.fy = sy.invert(d3.event.sourceEvent.offsetY);
+        }else{
+          console.log('label');
+
+          d.for.fx = sx.invert(d3.event.sourceEvent.offsetX);
+          d.for.fy = sy.invert(d3.event.sourceEvent.offsetY);
+        }
+    })
+      .on('end', (d)=>{
+      if (!d3.event.active){
+        simulation.alphaTarget(0);
+      }
+      if(d.type !== 'label'){
+        d.fx = null;
+        d.fy = null;
+      }else{
+        d.for.fx = null;
+        d.for.fy = null;
+      }
+    });
   };
 
 
@@ -309,5 +328,5 @@ sx, sy, transform){
   });
   labelTexts
   .attr('x', d=>sx(d.for.x))
-  .attr('y', d=>sy(d.for.y))
+  .attr('y', d=>sy(d.for.y)-5)
 }

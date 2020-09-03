@@ -10,15 +10,29 @@ d3.json('data/Topics_Layer_1.json').then(data=>{
     e.source = data.nodes[nodeIds.indexOf(e.source)];
     e.target = data.nodes[nodeIds.indexOf(e.target)];
   }
+  let labelNodes = [];
+  let labelEdges = [];
+  for(let n of data.nodes){
+    let labelId = `label-for-${n.id}`;
+    let l = {
+      for: n,
+      id: labelId, 
+      text: n.label, 
+      type:'label', 
+      x:n.x, 
+      y:n.y};
+    labelNodes.push(l);
+    labelEdges.push({source: n, target:l});
+  }
   window.data = data;
-  main(data.nodes, data.edges, data.virtual_edges);
+  main(data.nodes, data.edges, data.virtual_edges, labelNodes, labelEdges);
 });
 
 
 
 
 // //--------code----------
-function main(nodes, edges, virtual_edges){
+function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
 
   let width = window.innerWidth;
   let height = window.innerHeight;
@@ -26,9 +40,10 @@ function main(nodes, edges, virtual_edges){
   .attr('width', width)
   .attr('height', height)
   .style('background', '#333');
+  svg.append('defs').node().innerHTML = whiteOutline();
 
   let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([3,1]);
-
+  
   let [sx, sy] = getScales(nodes, svg);
   let ax = d3.axisBottom(sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
   let ay = d3.axisLeft(sy);//.tickSize(-(sx.range()[1]-sx.range()[0]));
@@ -66,7 +81,9 @@ function main(nodes, edges, virtual_edges){
     gx.call(ax);
     gy.call(ay);
     nodeCircles.attr('r', d=>sr(d.level)*Math.sqrt(transform.k));
-    draw(nodes, edges, nodeCircles, linkLines, sx, sy, transform);
+    draw(nodes, edges, labelNodes, labelEdges, 
+    nodeCircles, linkLines, labelTexts,
+    sx, sy, transform);
   });
   svg.call(zoom);
 
@@ -75,18 +92,29 @@ function main(nodes, edges, virtual_edges){
   let niter = 3e6;
 
 
-  const simulation = d3.forceSimulation(nodes)
+  const simulation = d3.forceSimulation(nodes.concat(labelNodes))
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
   .force('pre', forcePre())
+  //.force('attach-text', d3.forceLink(labelEdges)
+  //  .id(d => d.id)
+  //  .strength(function(d,i){
+  //    return 1.1;
+  //  })
+  //  .distance(d=>0)
+  //)
   .force('charge', 
     d3.forceManyBody()
-    .strength(d=>0.05/nodes.length)
+    .strength(d=>d.type!=='label' ? 0.05/nodes.length:0)
   )
   .force('collide', 
     d3.forceCollide()
     .radius(d=>{
-      return 4;
+      if(d.type=='label'){
+        return 0;
+      }else{
+        return 4;
+      }
     })
     .strength(0.001)
   )
@@ -101,7 +129,7 @@ function main(nodes, edges, virtual_edges){
     .distance(d=>1)
   )
   //.force('stress', 
-  //  forceStress(virtual_edges, 1/nodes.length/5)
+  //  forceStress(virtualEdges, 1/nodes.length/5)
   //  .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
   //  .targetDist(e=>e.weight)
   //  .strength(10)
@@ -154,11 +182,26 @@ function main(nodes, edges, virtual_edges){
   .attr('stroke', '#eee')
   .attr('stroke-width', 0)
   .call(drag(simulation));
-
   
+  const labelTexts = svg
+  .selectAll('.labelText')
+  .data(labelNodes)
+  .join('text')
+  .attr('class', 'labelText')
+  .style('fill', '#eee')
+  //.style('stroke', '#333')
+  //.style('font-weight', 'bold')
+  .style('text-anchor', 'middle')
+  .style('filter', 'url(#whiteOutlineEffect)')
+  .text(d=>d.text)
+  .call(drag(simulation));
+
+
   simulation.on('tick', () => {
     //if(Math.random() > 0.8){
-    draw(nodes, edges, nodeCircles, linkLines, sx, sy, transform);
+    draw(nodes, edges, labelNodes, labelEdges, 
+    nodeCircles, linkLines, labelTexts,
+    sx, sy, transform);
     //}
   });
 
@@ -230,36 +273,41 @@ function getScales(nodes, svg){
   return [sx, sy];
 }
 
-function draw(nodes, edges, nodeCircles, linkLines, sx, sy, transform){
-    //let [sx, sy] = getScales(nodes, svg);
-    for(let i=0; i<edges.length; i++){
-      edges[i].crossed = false;
-    }
-    for(let i=0; i<edges.length; i++){
-      for(let j=i+1; j<edges.length; j++){
-        let e0 = edges[i];
-        let e1 = edges[j];
-        let isIncident = e0.source.id == e1.source.id 
-        || e0.source.id == e1.target.id 
-        || e0.target.id == e1.source.id 
-        || e0.target.id == e1.target.id;
-        if(!isIncident && isCrossed(e0,e1)){
-          e0.crossed = true;
-          e1.crossed = true;
-        }
+function draw(nodes, edges, labelNodes, labelEdges, 
+nodeCircles, linkLines, labelTexts,
+sx, sy, transform){
+
+  for(let i=0; i<edges.length; i++){
+    edges[i].crossed = false;
+  }
+  for(let i=0; i<edges.length; i++){
+    for(let j=i+1; j<edges.length; j++){
+      let e0 = edges[i];
+      let e1 = edges[j];
+      let isIncident = e0.source.id == e1.source.id 
+      || e0.source.id == e1.target.id 
+      || e0.target.id == e1.source.id 
+      || e0.target.id == e1.target.id;
+      if(!isIncident && isCrossed(e0,e1)){
+        e0.crossed = true;
+        e1.crossed = true;
       }
-    }   
-    linkLines
-    .attr('x1', d => sx(d.source.x))
-    .attr('y1', d => sy(d.source.y))
-    .attr('x2', d => sx(d.target.x))
-    .attr('y2', d => sy(d.target.y))
-    .attr('stroke', d=>d.crossed?'red':'#aaa')
-    .attr('opacity', e=>sa(Math.max(e.source.level, e.target.level), transform.k)  )
-    nodeCircles
-    .attr('cx', d => sx(d.x))
-    .attr('cy', d => sy(d.y))
-    .attr('opacity', d=>{
-      return sa(d.level, transform.k);
-    });
+    }
+  }   
+  linkLines
+  .attr('x1', d => sx(d.source.x))
+  .attr('y1', d => sy(d.source.y))
+  .attr('x2', d => sx(d.target.x))
+  .attr('y2', d => sy(d.target.y))
+  .attr('stroke', d=>d.crossed?'red':'#aaa')
+  .attr('opacity', e=>sa(Math.max(e.source.level, e.target.level), transform.k)  )
+  nodeCircles
+  .attr('cx', d => sx(d.x))
+  .attr('cy', d => sy(d.y))
+  .attr('opacity', d=>{
+    return sa(d.level, transform.k);
+  });
+  labelTexts
+  .attr('x', d=>sx(d.for.x))
+  .attr('y', d=>sy(d.for.y))
 }

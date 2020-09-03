@@ -59,3 +59,17 @@ function signOf(p, l0, l1){
     return 0;
   }
 }
+
+
+function whiteOutline(){
+  return `
+  <filter id="whiteOutlineEffect" width="200%" height="200%" x="-50%" y="-50%">
+    <feMorphology in="SourceAlpha" result="MORPH" operator="dilate" radius="1.5" />
+    <feColorMatrix in="MORPH" result="WHITENED" type="matrix" values="0 0 0 0.1 0, 0 0 0 0.1 0, 0 0 0 0.1 0, 0 0 0 1 0" />
+    <feMerge>
+      <feMergeNode in="WHITENED" />
+      <feMergeNode in="SourceGraphic" />
+    </feMerge>
+  </filter>
+  `;
+}

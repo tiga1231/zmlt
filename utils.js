@@ -1,3 +1,52 @@
+//https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+function isRectCollide(rect1, rect2){
+  return (
+       rect1.x < rect2.x + rect2.width 
+    && rect1.x + rect1.width > rect2.x 
+    && rect1.y < rect2.y + rect2.height 
+    && rect1.y + rect1.height > rect2.y
+  );
+}
+
+
+
+function rectCollide(rect1, rect2){
+  let res = {
+    magnitude: 0,
+    dir: {x:0, y:0},
+  };
+  if(isRectCollide(rect1, rect2)){
+    let c1 = [rect1.x+rect1.width/2, rect1.y+rect1.height/2];
+    let c2 = [rect2.x+rect2.width/2, rect2.y+rect2.height/2];
+    res.magnitude = 1.0;
+    res.dir.x = c1[0]>c2[0]?+1:-1; 
+    res.dir.y = c1[1]>c2[1]?+1:-1;
+  }
+  return res;
+}
+
+
+///ref:
+///https://stackoverflow.com/questions/1955048/get-computed-font-size-for-dom-element-in-js
+function getStyle(el,styleProp) {
+  var camelize = function (str) {
+    return str.replace(/\-(\w)/g, function(str, letter){
+      return letter.toUpperCase();
+    });
+  };
+
+  if (el.currentStyle) {
+    return el.currentStyle[camelize(styleProp)];
+  } else if (document.defaultView && document.defaultView.getComputedStyle) {
+    return document.defaultView.getComputedStyle(el,null)
+                               .getPropertyValue(styleProp);
+  } else {
+    return el.style[camelize(styleProp)]; 
+  }
+}
+
+
+
 function interpolate(a, b, t=0.5){
   return a*(1-t) + b*(t);
 }

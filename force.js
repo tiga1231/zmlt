@@ -1,3 +1,53 @@
+function forceLabelCollide(labelTexts, scales){
+  this.labels = labelTexts.nodes();
+  this.weight = (e)=>1.0;
+
+  let force = (alpha)=>{
+    let vx = Array(this.nodes.length).fill(0);
+    let vy = Array(this.nodes.length).fill(0);
+
+    for(let i=0; i<this.labels.length; i++){
+      let li = this.labels[i];
+      let bbi = li.getBoundingClientRect();
+      // console.log(getStyle(li, 'font-size'));
+      for(let j=i+1; j<this.labels.length; j++){
+        let lj = this.labels[j];
+        let bbj = lj.getBoundingClientRect();
+        let force = rectCollide(bbi, bbj);
+        if(force.magnitude > 0){
+          vx[i] += force.dir.x * force.magnitude;
+          vy[i] += force.dir.y * force.magnitude;
+          vx[j] -= force.dir.x * force.magnitude;
+          vy[j] -= force.dir.y * force.magnitude;
+        }
+      }
+    }
+    for(let i=0; i<this.labels.length; i++){
+      vx[i] *= this.weight();
+      vy[i] *= this.weight();
+      vx[i] = Math.sign(vx[i]) * Math.min(2, Math.abs(vx[i])); //at most 2 pixel each iteration
+      vy[i] = Math.sign(vy[i]) * Math.min(2, Math.abs(vy[i])); //at most 2 pixel each iteration
+      this.nodes[i].vx += scales.sx.invert(vx[i]) - scales.sx.invert(0);
+      this.nodes[i].vy += scales.sy.invert(vy[i]) - scales.sy.invert(0);
+    }
+  };
+
+  force.initialize = (nodes)=>{
+    this.nodes = nodes;
+    return force;
+  };
+
+  force.weight = (accessor)=>{
+    this.weight = accessor;
+    return force;
+  };
+
+  return force;
+}
+
+
+
+
 function forcePre(decay=0.4){
   let force = (alpha)=>{
     for(let n of this.nodes){
@@ -90,6 +140,8 @@ function forceStress(edges, ratio=0.1){
     }else{
       sampleSize = Math.ceil(ratio);
     }
+
+
     let samples = _.sample(this.edges, sampleSize);
     for(let e of samples){
     // for(let e of this.edges){

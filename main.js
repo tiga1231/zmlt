@@ -1,5 +1,18 @@
 //--------data----------
 d3.json('data/Topics_Layer_1.json').then(data=>{
+//precomputed node positions
+d3.json('data/Topics_Layer_1_nodes-2.json').then(nodes=>{
+  data.nodes = nodes;
+  
+
+
+  //capitalize labels
+  data.nodes = data.nodes.map((d)=>{
+    d.label = d.label.charAt(0).toUpperCase() + d.label.slice(1);
+    return d;
+  });
+
+
   //preprocess edges
   let nodeIds = data.nodes.map(d=>d.id);
   for(let e of data.edges){
@@ -18,7 +31,7 @@ d3.json('data/Topics_Layer_1.json').then(data=>{
       for: n,
       id: labelId, 
       text: n.label, 
-      type:'label', 
+      type: 'label', 
       x:n.x, 
       y:n.y
     };
@@ -27,8 +40,10 @@ d3.json('data/Topics_Layer_1.json').then(data=>{
   }
   window.data = data;
   main(data.nodes, data.edges, data.virtual_edges, labelNodes, labelEdges);
-});
 
+
+});
+});
 
 
 
@@ -43,17 +58,18 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .style('background', '#333');
   svg.append('defs').node().innerHTML = whiteOutline();
 
-  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([3,1]);
+  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([5,4]);
   
-  let [sx, sy] = getScales(nodes, svg);
-  let ax = d3.axisBottom(sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
-  let ay = d3.axisLeft(sy);//.tickSize(-(sx.range()[1]-sx.range()[0]));
+  let scales = getScales(nodes, svg);
+
+  let ax = d3.axisBottom(scales.sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
+  let ay = d3.axisLeft(scales.sy);//.tickSize(-(sx.range()[1]-sx.range()[0]));
   let gx = svg.selectAll('.gx')
   .data([0,])
   .enter()
   .append('g')
   .attr('class', 'gx')
-  .attr('transform', `translate(0,${sy.range()[1]})`)
+  .attr('transform', `translate(0,${scales.sy.range()[1]})`)
   .style('color', '#aaa')
   .call(ax);
   let gy = svg.selectAll('.gy')
@@ -66,119 +82,77 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .call(ay);
 
   let sx0, sy0;
-  let transform = {};
+  let transform = d3.zoomIdentity;
   let zoom = d3.zoom()
-  .on('zoom', ()=>{
-    transform = d3.event.transform;
+  .on('zoom', (transform)=>{
+    if(transform === undefined){
+      transform = d3.event.transform;
+    }
+    
     console.log(transform.k);
     if(sx0 === undefined){
-      sx0 = sx;
-      sy0 = sy;
+      sx0 = scales.sx;
+      sy0 = scales.sy;
     }
-    sx = transform.rescaleX(sx0);
-    sy = transform.rescaleY(sy0);
-    ax.scale(sx);
-    ay.scale(sy);
+    scales.sx = transform.rescaleX(sx0);
+    scales.sy = transform.rescaleY(sy0);
+    ax.scale(scales.sx);
+    ay.scale(scales.sy);
     gx.call(ax);
     gy.call(ay);
     nodeCircles.attr('r', d=>sr(d.level)*Math.sqrt(transform.k));
     draw(nodes, edges, labelNodes, labelEdges, 
     nodeCircles, linkLines, labelTexts,
-    sx, sy, transform);
+    scales.sx, scales.sy, transform);
   });
   svg.call(zoom);
 
 
   var maxPerplexity = d3.max(nodes, d => d.perplexity);
-  let niter = 3e6;
-
-
-  const simulation = d3.forceSimulation(nodes.concat(labelNodes))
-  .velocityDecay(0.4)
-  .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  .force('pre', forcePre())
-  //.force('attach-text', d3.forceLink(labelEdges)
-  //  .id(d => d.id)
-  //  .strength(function(d,i){
-  //    return 1.1;
-  //  })
-  //  .distance(d=>0)
-  //)
-  // .force('charge', 
-  //   d3.forceManyBody()
-  //   .strength(d=>d.type!=='label' ? 0.05/nodes.length:0)
-  // )
-  .force('collide', 
-    d3.forceCollide()
-    .radius(d=>{
-      if(d.type=='label'){
-        return 0;
-      }else{
-        return 2;
-      }
-    })
-    .strength(0.01)
-  )
-  // .force('link-real', 
-  //   d3.forceLink(edges)
-  //   .id(d => d.id)
-  //   .strength(function(d,i){
-  //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
-  //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
-  //     return 0.1;
-  //   })
-  //   .distance(d=>5)
-  // )
-  .force('stress', 
-   forceStress(virtualEdges, 0.99)
-   .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
-   .targetDist(e=>e.weight*1)
-   .strength(10)
-  )
-  .force('post', forcePost(edges, 2))
-  // .force('center', d3.forceCenter(0,0));
-  window.simulation = simulation;
+  let niter = 5000;
+  const simulation = d3.forceSimulation(nodes);
+  
 
   let drag = simulation => {
     return d3.drag()
-    .on('start', (d)=>{
-      if (!d3.event.active){
-        simulation.alphaTarget(0.1).restart();
-      }
-      if(d.type !== 'label'){
-        d.fx = d.x;
-        d.fy = d.y;
-      }else{
-        d.fx = d.for.x;
-        d.fy = d.for.y;
-      }
+    // .on('start', (d)=>{
+    //   if (!d3.event.active){
+    //     simulation.alphaTarget(0.1).restart();
+    //   }
+    //   if(d.type !== 'label'){
+    //     d.fx = d.x;
+    //     d.fy = d.y;
+    //   }else{
+    //     d.fx = d.for.x;
+    //     d.fy = d.for.y;
+    //   }
       
-    })
-      .on('drag', (d)=>{
+    // })
+    //   .on('drag', (d)=>{
 
-        if(d.type !== 'label'){
-          console.log('not label');
-          d.fx = sx.invert(d3.event.sourceEvent.offsetX);
-          d.fy = sy.invert(d3.event.sourceEvent.offsetY);
-        }else{
-          console.log('label');
+    //     if(d.type !== 'label'){
+    //       console.log('not label');
+    //       d.fx = sx.invert(d3.event.sourceEvent.offsetX);
+    //       d.fy = sy.invert(d3.event.sourceEvent.offsetY);
+    //     }else{
+    //       console.log('label');
 
-          d.for.fx = sx.invert(d3.event.sourceEvent.offsetX);
-          d.for.fy = sy.invert(d3.event.sourceEvent.offsetY);
-        }
-    })
-      .on('end', (d)=>{
-      if (!d3.event.active){
-        simulation.alphaTarget(0);
-      }
-      if(d.type !== 'label'){
-        d.fx = null;
-        d.fy = null;
-      }else{
-        d.for.fx = null;
-        d.for.fy = null;
-      }
-    });
+    //       d.for.fx = sx.invert(d3.event.sourceEvent.offsetX);
+    //       d.for.fy = sy.invert(d3.event.sourceEvent.offsetY);
+    //     }
+    // })
+    //   .on('end', (d)=>{
+    //   if (!d3.event.active){
+    //     simulation.alphaTarget(0);
+    //   }
+    //   if(d.type !== 'label'){
+    //     d.fx = null;
+    //     d.fy = null;
+    //   }else{
+    //     d.for.fx = null;
+    //     d.for.fy = null;
+    //   }
+    // });
   };
 
 
@@ -200,7 +174,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .attr('fill', d=>d3.schemeAccent[d.level-1])
   .attr('stroke', '#eee')
   .attr('stroke-width', 0)
-  .call(drag(simulation));
+  // .call(drag(simulation));
   
   const labelTexts = svg
   .selectAll('.labelText')
@@ -210,20 +184,95 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .style('fill', '#eee')
   //.style('stroke', '#333')
   //.style('font-weight', 'bold')
+  .style('font-size', '16px')
   .style('text-anchor', 'middle')
+  .style('alignment-baseline', 'middle')
   .style('filter', 'url(#whiteOutlineEffect)')
   .text(d=>d.text)
-  .call(drag(simulation));
+  // .call(drag(simulation));
+  window.labelTexts = labelTexts;
+
+  simulation
+  .velocityDecay(0.4)
+  .alphaDecay(1 - Math.pow(0.001, 1 / niter))
+  .force('pre', forcePre())
+  // .force('attach-text', d3.forceLink(labelEdges)
+  //  .id(d => d.id)
+  //  .strength(function(d,i){
+  //    return 1.3;
+  //  })
+  //  .distance(d=>0)
+  // )
+  // .force('charge', 
+  //   d3.forceManyBody()
+  //   .strength(d=>-1.5/nodes.length)
+  // )
+  // .force('collide', 
+  //   d3.forceCollide()
+  //   .radius(d=>{
+  //     return 1;
+  //   })
+  //   .strength(0.1)
+  // )
+  // .force('link-real', 
+  //   d3.forceLink(edges)
+  //   .id(d => d.id)
+  //   .strength(function(d,i){
+  //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
+  //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
+  //     return 0.02;
+  //   })
+  //   .distance(e=>e.weight)
+  // )
+  // .force('stress', 
+  //  forceStress(virtualEdges, 0.5)
+  //  .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
+  //  .targetDist(e=>e.weight*1)
+  //  .strength(3)
+  // )
+  .force('label-collide', 
+    forceLabelCollide(labelTexts, scales)
+    .weight(()=>0.5)
+  )
+  .force('post', forcePost(edges, 1))
+  // .force('center', d3.forceCenter(0,0))
+  window.simulation = simulation;
+  // window.setTimeout(()=>{simulation.stop()}, 10e3);
 
 
   simulation.on('tick', () => {
+    console.log('tick');
     //if(Math.random() > 0.8){
     draw(nodes, edges, labelNodes, labelEdges, 
     nodeCircles, linkLines, labelTexts,
-    sx, sy, transform);
+    scales.sx, scales.sy, transform);
     //}
   });
 
+  let shouldTick = true;
+  window.addEventListener('keydown', (event)=>{
+    let key = event.key;
+    if(key === 'p'){
+      shouldTick = !shouldTick;
+      if(shouldTick){
+        simulation.restart();
+      }else{
+        simulation.stop();
+      }
+    }else if(key === 'r'){
+      simulation.alpha(0.8).restart();
+    }
+  });
+
+
+  //off-line training
+  simulation.stop();
+  // simulation.tick(150);
+  zoom.on('zoom')(transform); //draw
+  
+
+  
+  
 }
 
 
@@ -268,6 +317,17 @@ function getScales(nodes, svg){
   let yExtent = d3.extent(nodes, d=>d.y);
   let xSize = xExtent[1] - xExtent[0];
   let ySize = yExtent[1] - yExtent[0];
+
+  //scale up
+  let scale = 0.5;
+  let xCenter = (xExtent[0] + xExtent[1])/2;
+  let yCenter = (yExtent[0] + yExtent[1])/2;
+  xExtent[0] = xCenter - xSize/2*scale;
+  xExtent[1] = xCenter + xSize/2*scale;
+  yExtent[0] = yCenter - ySize/2*scale;
+  yExtent[1] = yCenter + ySize/2*scale;
+
+
   let xViewport = [50, width-50];
   let yViewport = [50, height-50];
   let drawWidth = xViewport[1] - xViewport[0];
@@ -289,7 +349,7 @@ function getScales(nodes, svg){
   let sy = d3.scaleLinear()
   .domain(yExtent)
   .range(yViewport);
-  return [sx, sy];
+  return {sx, sy};
 }
 
 function draw(nodes, edges, labelNodes, labelEdges, 
@@ -328,5 +388,8 @@ sx, sy, transform){
   });
   labelTexts
   .attr('x', d=>sx(d.for.x))
-  .attr('y', d=>sy(d.for.y)-5)
+  .attr('y', d=>sy(d.for.y))
+  // labelTexts
+  // .attr('x', d=>sx(d.x))
+  // .attr('y', d=>sy(d.y))
 }

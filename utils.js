@@ -1,3 +1,24 @@
+//https://github.com/d3/d3-quadtree
+function searchQuadtree(quadtree, xmin, xmax, ymin, ymax) {
+  const results = [];
+  quadtree.visit(function(node, x1, y1, x2, y2) {
+    if (!node.length) {
+      do {
+        var d = node.data;
+        let bb = d.getBoundingClientRect();
+        let x = bb.x + bb.width/2;
+        let y = bb.y + bb.height/2;
+        if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
+          results.push(d.i);
+        }
+      } while (node = node.next);
+    }
+    return x1 >= xmax || y1 >= ymax || x2 < xmin || y2 < ymin;
+  });
+  return results;
+}
+
+
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 function isRectCollide(rect1, rect2){
   return (

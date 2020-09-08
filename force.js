@@ -1,27 +1,68 @@
-function forceLabelCollide(labelTexts, scales){
-  this.labels = labelTexts.nodes();
+function forceLabelCollide(labelTexts, scales, simulation){
+  this.labels = labelTexts.nodes()
+  .map((l,i)=>{
+    l.i = i; 
+    return l;
+  });
+
   this.weight = (e)=>1.0;
+  let tree, labels;
 
   let force = (alpha)=>{
+        
+    if(tree === undefined || Math.random()>0.8){
+      //train on shown text only
+      labels = this.labels.filter(d=>getStyle(d, 'opacity')>0.5);
+      tree = d3.quadtree()
+      .x(d=>{
+        let bb = d.getBoundingClientRect();
+        return bb.x + bb.width/2;
+      })
+      .y(d=>{
+        let bb = d.getBoundingClientRect();
+        return bb.y + bb.height/2;
+      })
+      .addAll(labels);
+      window.tree = tree;
+    }
+
     let vx = Array(this.nodes.length).fill(0);
     let vy = Array(this.nodes.length).fill(0);
 
-    for(let i=0; i<this.labels.length; i++){
-      let li = this.labels[i];
+    for(let i=0; i<labels.length; i++){
+      let li = labels[i];
       let bbi = li.getBoundingClientRect();
-      // console.log(getStyle(li, 'font-size'));
-      for(let j=i+1; j<this.labels.length; j++){
+
+      let xmin = bbi.x - bbi.width;
+      let xmax = bbi.x + bbi.width*2;
+      let ymin = bbi.y - bbi.height*2;
+      let ymax = bbi.y + bbi.height*3;
+      let neighbors = searchQuadtree(tree, xmin, xmax, ymin, ymax);
+      for(let j of neighbors){
         let lj = this.labels[j];
+        // let j = n.i;
         let bbj = lj.getBoundingClientRect();
         let force = rectCollide(bbi, bbj);
         if(force.magnitude > 0){
-          vx[i] += force.dir.x * force.magnitude;
-          vy[i] += force.dir.y * force.magnitude;
+          vx[li.i] += force.dir.x * force.magnitude;
+          vy[li.i] += force.dir.y * force.magnitude;
           vx[j] -= force.dir.x * force.magnitude;
           vy[j] -= force.dir.y * force.magnitude;
         }
       }
+      // for(let j=i+1; j<this.labels.length; j++){
+      //   let lj = this.labels[j];
+      //   let bbj = lj.getBoundingClientRect();
+      //   let force = rectCollide(bbi, bbj);
+      //   if(force.magnitude > 0){
+      //     vx[i] += force.dir.x * force.magnitude;
+      //     vy[i] += force.dir.y * force.magnitude;
+      //     vx[j] -= force.dir.x * force.magnitude;
+      //     vy[j] -= force.dir.y * force.magnitude;
+      //   }
+      // }
     }
+
     for(let i=0; i<this.labels.length; i++){
       vx[i] *= this.weight();
       vy[i] *= this.weight();

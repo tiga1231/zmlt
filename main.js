@@ -1,7 +1,7 @@
 //--------data----------
-d3.json('data/Topics_Layer_1.json').then(data=>{
+d3.json('data/Topics_Layer_2.json').then(data=>{
 //precomputed node positions
-d3.json('data/Topics_Layer_1_nodes-2.json').then(nodes=>{
+d3.json('data/Topics_Layer_2_nodes-2.json').then(nodes=>{
   data.nodes = nodes;
   
 
@@ -84,9 +84,11 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   let sx0, sy0;
   let transform = d3.zoomIdentity;
   let zoom = d3.zoom()
-  .on('zoom', (transform)=>{
-    if(transform === undefined){
+  .on('zoom', (transform0)=>{
+    if(transform0 === undefined){
       transform = d3.event.transform;
+    }else{
+      transform = transform0;
     }
     
     console.log(transform.k);
@@ -161,7 +163,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .data(edges.filter(e=>e.type==='real'))
   .join('line')
   .attr('class', 'link')
-  .attr('stroke-width', e => e.source.level==1 && e.target.level==1 ? 2.0 : 0.8)
+  .attr('stroke-width', e => e.source.level==1 && e.target.level==1 ? 1.0 : 1.0)
   .attr('stroke', '#eee');
 
   const nodeCircles = svg
@@ -205,7 +207,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   // )
   // .force('charge', 
   //   d3.forceManyBody()
-  //   .strength(d=>-1.5/nodes.length)
+  //   .strength(d=>-0.1/Math.sqrt(nodes.length))
   // )
   // .force('collide', 
   //   d3.forceCollide()
@@ -220,18 +222,18 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   //   .strength(function(d,i){
   //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
   //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
-  //     return 0.02;
+  //     return 0.15;
   //   })
   //   .distance(e=>e.weight)
   // )
   // .force('stress', 
-  //  forceStress(virtualEdges, 0.5)
+  //  forceStress(virtualEdges, 0.1)
   //  .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
   //  .targetDist(e=>e.weight*1)
   //  .strength(3)
   // )
   .force('label-collide', 
-    forceLabelCollide(labelTexts, scales)
+    forceLabelCollide(labelTexts, scales, simulation)
     .weight(()=>0.5)
   )
   .force('post', forcePost(edges, 1))
@@ -319,7 +321,7 @@ function getScales(nodes, svg){
   let ySize = yExtent[1] - yExtent[0];
 
   //scale up
-  let scale = 0.5;
+  let scale = 0.25;
   let xCenter = (xExtent[0] + xExtent[1])/2;
   let yCenter = (yExtent[0] + yExtent[1])/2;
   xExtent[0] = xCenter - xSize/2*scale;
@@ -389,6 +391,9 @@ sx, sy, transform){
   labelTexts
   .attr('x', d=>sx(d.for.x))
   .attr('y', d=>sy(d.for.y))
+  .attr('opacity', d=>{
+    return sa(d.for.level, transform.k);
+  });
   // labelTexts
   // .attr('x', d=>sx(d.x))
   // .attr('y', d=>sy(d.y))

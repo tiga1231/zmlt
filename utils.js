@@ -1,15 +1,18 @@
 //https://github.com/d3/d3-quadtree
-function searchQuadtree(quadtree, xmin, xmax, ymin, ymax) {
+function searchQuadtree(quadtree, xGetter, yGetter, xmin, xmax, ymin, ymax) {
   const results = [];
   quadtree.visit(function(node, x1, y1, x2, y2) {
     if (!node.length) {
       do {
         var d = node.data;
-        let bb = d.getBoundingClientRect();
-        let x = bb.x + bb.width/2;
-        let y = bb.y + bb.height/2;
+        // let bb = d.getBoundingClientRect();
+        // let x = bb.x + bb.width/2;
+        // let y = bb.y + bb.height/2;
+        let x = xGetter(d);
+        let y = yGetter(d);
+
         if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
-          results.push(d.i);
+          results.push(d.index);
         }
       } while (node = node.next);
     }
@@ -21,6 +24,7 @@ function searchQuadtree(quadtree, xmin, xmax, ymin, ymax) {
 
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 function isRectCollide(rect1, rect2){
+ 
   return (
        rect1.x < rect2.x + rect2.width 
     && rect1.x + rect1.width > rect2.x 
@@ -40,8 +44,14 @@ function rectCollide(rect1, rect2){
     let c1 = [rect1.x+rect1.width/2, rect1.y+rect1.height/2];
     let c2 = [rect2.x+rect2.width/2, rect2.y+rect2.height/2];
     res.magnitude = 1.0;
-    res.dir.x = c1[0]>c2[0]?+1:-1; 
-    res.dir.y = c1[1]>c2[1]?+1:-1;
+    // res.dir.x = Math.sign(c1[0] - c2[0]) / 2 / 8; 
+    // res.dir.y = Math.sign(c1[1] - c2[1]) / 2;
+    let dw = c1[0] - c2[0];
+    let dh = c1[1] - c2[1];
+    let w = (rect1.width + rect2.width)/2;
+    let h = (rect1.height + rect2.height)/2;
+    res.dir.x = Math.sign(dw) * ( 1 - Math.abs(dw)/w ); 
+    res.dir.y = Math.sign(dh) * ( 1 - Math.abs(dh)/h );
   }
   return res;
 }

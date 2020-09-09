@@ -1,17 +1,30 @@
 //--------data----------
 d3.json('data/Topics_Layer_2.json').then(data=>{
 //precomputed node positions
-d3.json('data/Topics_Layer_2_nodes-2.json').then(nodes=>{
-  data.nodes = nodes;
-  
+d3.json('data/Topics_Layer_2_nodes-4.json').then(nodes=>{
 
+  window.data = data;
+  preprocess(data, nodes);
+  main(data.nodes, data.edges, data.virtual_edges, data.labelNodes, data.labelEdges);
+
+});
+});
+
+
+
+// //--------code----------
+// 
+function preprocess(data, nodes){
+  if(nodes !== undefined){
+    data.nodes = nodes;
+  }
 
   //capitalize labels
   data.nodes = data.nodes.map((d)=>{
     d.label = d.label.charAt(0).toUpperCase() + d.label.slice(1);
+    d.norm = Math.sqrt(d.x*d.x + d.y*d.y);
     return d;
   });
-
 
   //preprocess edges
   let nodeIds = data.nodes.map(d=>d.id);
@@ -23,31 +36,27 @@ d3.json('data/Topics_Layer_2_nodes-2.json').then(nodes=>{
     e.source = data.nodes[nodeIds.indexOf(e.source)];
     e.target = data.nodes[nodeIds.indexOf(e.target)];
   }
-  let labelNodes = [];
-  let labelEdges = [];
-  for(let n of data.nodes){
-    let labelId = `label-for-${n.id}`;
-    let l = {
-      for: n,
-      id: labelId, 
-      text: n.label, 
-      type: 'label', 
-      x:n.x, 
-      y:n.y
-    };
-    labelNodes.push(l);
-    labelEdges.push({source: n, target:l});
-  }
-  window.data = data;
-  main(data.nodes, data.edges, data.virtual_edges, labelNodes, labelEdges);
+  data.labelNodes = [];
+  data.labelEdges = [];
+  // for(let i=0; i<data.nodes.length; i++){
+  //   let n = data.nodes[i];
+  //   let labelId = `label-for-${n.id}`;
+  //   let l = {
+  //     for: n,
+  //     id: labelId, 
+  //     text: n.label, 
+  //     type: 'label', 
+  //     x: n.x, 
+  //     y: n.y,
+  //     index: i
+  //   };
+  //   data.labelNodes.push(l);
+  //   data.labelEdges.push({source: n, target:l});
+  // }
+}
 
+const colorscheme = d3.schemeAccent;//schemePastel1
 
-});
-});
-
-
-
-// //--------code----------
 function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
 
   let width = window.innerWidth;
@@ -58,8 +67,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .style('background', '#333');
   svg.append('defs').node().innerHTML = whiteOutline();
 
-  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([5,4]);
-  
+  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([8,6]);
   let scales = getScales(nodes, svg);
 
   let ax = d3.axisBottom(scales.sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
@@ -82,14 +90,17 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .call(ay);
 
   let sx0, sy0;
-  let transform = d3.zoomIdentity;
+  let scale0 = 2;
+  let transform = d3.zoomIdentity.scale(scale0);
+
   let zoom = d3.zoom()
   .on('zoom', (transform0)=>{
     if(transform0 === undefined){
-      transform = d3.event.transform;
+      transform = d3.event.transform.scale(scale0);
     }else{
       transform = transform0;
     }
+    window.transform = transform;
     
     console.log(transform.k);
     if(sx0 === undefined){
@@ -102,7 +113,12 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
     ay.scale(scales.sy);
     gx.call(ax);
     gy.call(ay);
-    nodeCircles.attr('r', d=>sr(d.level)*Math.sqrt(transform.k));
+
+    nodeCircles
+    .attr('r', d=>sr(d.level)*Math.sqrt(transform.k));
+    linkLines
+    .attr('stroke-width', e => Math.sqrt(transform.k) * (e.source.level==1&&e.target.level==1 ? 1.3 : 0.7))
+
     draw(nodes, edges, labelNodes, labelEdges, 
     nodeCircles, linkLines, labelTexts,
     scales.sx, scales.sy, transform);
@@ -111,50 +127,49 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
 
 
   var maxPerplexity = d3.max(nodes, d => d.perplexity);
-  let niter = 5000;
+  let niter = 500;
   const simulation = d3.forceSimulation(nodes);
   
 
   let drag = simulation => {
     return d3.drag()
-    // .on('start', (d)=>{
-    //   if (!d3.event.active){
-    //     simulation.alphaTarget(0.1).restart();
-    //   }
-    //   if(d.type !== 'label'){
-    //     d.fx = d.x;
-    //     d.fy = d.y;
-    //   }else{
-    //     d.fx = d.for.x;
-    //     d.fy = d.for.y;
-    //   }
+    .on('start', (d)=>{
+      if (!d3.event.active){
+        simulation.alphaTarget(0.1).restart();
+      }
+      if(d.type !== 'label'){
+        d.fx = d.x;
+        d.fy = d.y;
+      }else{
+        d.fx = d.for.x;
+        d.fy = d.for.y;
+      }
       
-    // })
-    //   .on('drag', (d)=>{
+    })
+      .on('drag', (d)=>{
 
-    //     if(d.type !== 'label'){
-    //       console.log('not label');
-    //       d.fx = sx.invert(d3.event.sourceEvent.offsetX);
-    //       d.fy = sy.invert(d3.event.sourceEvent.offsetY);
-    //     }else{
-    //       console.log('label');
-
-    //       d.for.fx = sx.invert(d3.event.sourceEvent.offsetX);
-    //       d.for.fy = sy.invert(d3.event.sourceEvent.offsetY);
-    //     }
-    // })
-    //   .on('end', (d)=>{
-    //   if (!d3.event.active){
-    //     simulation.alphaTarget(0);
-    //   }
-    //   if(d.type !== 'label'){
-    //     d.fx = null;
-    //     d.fy = null;
-    //   }else{
-    //     d.for.fx = null;
-    //     d.for.fy = null;
-    //   }
-    // });
+        if(d.type !== 'label'){
+          console.log('not label');
+          d.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
+          d.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
+        }else{
+          console.log('label');
+          d.for.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
+          d.for.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
+        }
+    })
+      .on('end', (d)=>{
+      if (!d3.event.active){
+        simulation.alphaTarget(0);
+      }
+      if(d.type !== 'label'){
+        d.fx = null;
+        d.fy = null;
+      }else{
+        d.for.fx = null;
+        d.for.fy = null;
+      }
+    });
   };
 
 
@@ -163,8 +178,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .data(edges.filter(e=>e.type==='real'))
   .join('line')
   .attr('class', 'link')
-  .attr('stroke-width', e => e.source.level==1 && e.target.level==1 ? 1.0 : 1.0)
-  .attr('stroke', '#eee');
+  .attr('stroke', e => '#eee');//colorscheme[Math.max(e.source.level,e.target.level)-1]);
 
   const nodeCircles = svg
   .selectAll('.node')
@@ -172,32 +186,35 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .join('circle')
   .attr('class', 'node')
   .attr('r', d=>sr(d.level))
-  //.attr('fill', d=>d3.schemePastel1[d.level-1])
-  .attr('fill', d=>d3.schemeAccent[d.level-1])
+  .attr('fill', d=>colorscheme[d.level-1])
   .attr('stroke', '#eee')
   .attr('stroke-width', 0)
   // .call(drag(simulation));
   
   const labelTexts = svg
   .selectAll('.labelText')
-  .data(labelNodes)
+  .data(nodes)
   .join('text')
   .attr('class', 'labelText')
   .style('fill', '#eee')
   //.style('stroke', '#333')
-  //.style('font-weight', 'bold')
+  .style('font-weight', 100)
   .style('font-size', '16px')
   .style('text-anchor', 'middle')
   .style('alignment-baseline', 'middle')
   .style('filter', 'url(#whiteOutlineEffect)')
-  .text(d=>d.text)
+  .text(d=>d.label)
   // .call(drag(simulation));
+
+  let labelTextNodes = labelTexts.nodes();
+  
+
   window.labelTexts = labelTexts;
 
   simulation
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  .force('pre', forcePre())
+  // .force('pre', forcePre())
   // .force('attach-text', d3.forceLink(labelEdges)
   //  .id(d => d.id)
   //  .strength(function(d,i){
@@ -207,6 +224,9 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   // )
   // .force('charge', 
   //   d3.forceManyBody()
+  //   // .theta(0.9)
+  //   .distanceMin(0.05)
+  //   .distanceMax(6)
   //   .strength(d=>-0.1/Math.sqrt(nodes.length))
   // )
   // .force('collide', 
@@ -222,21 +242,25 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   //   .strength(function(d,i){
   //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
   //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
-  //     return 0.15;
+  //     return 0.05;
   //   })
-  //   .distance(e=>e.weight)
+  //   .distance(e=>e.weight/2)
   // )
   // .force('stress', 
   //  forceStress(virtualEdges, 0.1)
-  //  .weight(e=> 1/Math.pow(e.weight, 2) / (e.source.level+e.target.level)*2  )
-  //  .targetDist(e=>e.weight*1)
-  //  .strength(3)
+  //  .weight(e=> 1/Math.pow(e.weight, 2))
+  //  .targetDist(e=>e.weight*1.4)
+  //  .strength(200)
+  // )
+  // .force('compact', 
+  //   forceCompact(nodes)
+  //   .strength(0.0001)
   // )
   .force('label-collide', 
-    forceLabelCollide(labelTexts, scales, simulation)
+    forceLabelCollide(nodes, scales, simulation, 0.01)
     .weight(()=>0.5)
   )
-  .force('post', forcePost(edges, 1))
+  .force('post', forcePost(edges, 20))
   // .force('center', d3.forceCenter(0,0))
   window.simulation = simulation;
   // window.setTimeout(()=>{simulation.stop()}, 10e3);
@@ -255,14 +279,14 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   window.addEventListener('keydown', (event)=>{
     let key = event.key;
     if(key === 'p'){
-      shouldTick = !shouldTick;
-      if(shouldTick){
-        simulation.restart();
-      }else{
+      // shouldTick = !shouldTick;
+      // if(shouldTick){
+      //   simulation.restart();
+      // }else{
         simulation.stop();
-      }
+      // }
     }else if(key === 'r'){
-      simulation.alpha(0.8).restart();
+      simulation.alpha(0.95).restart();
     }
   });
 
@@ -308,10 +332,11 @@ function sa(level, k){
     }
   }
   return alpha;
+  // return 1.0;
 }
 
 
-function getScales(nodes, svg){
+function getScales(nodes, svg, prescaling=2.0){
   let width = +svg.node().clientWidth;
   let height = +svg.node().clientHeight;
 
@@ -321,13 +346,15 @@ function getScales(nodes, svg){
   let ySize = yExtent[1] - yExtent[0];
 
   //scale up
-  let scale = 0.25;
+  let scale = 1/prescaling;
   let xCenter = (xExtent[0] + xExtent[1])/2;
   let yCenter = (yExtent[0] + yExtent[1])/2;
   xExtent[0] = xCenter - xSize/2*scale;
   xExtent[1] = xCenter + xSize/2*scale;
   yExtent[0] = yCenter - ySize/2*scale;
   yExtent[1] = yCenter + ySize/2*scale;
+  xSize = xExtent[1] - xExtent[0];
+  ySize = yExtent[1] - yExtent[0];
 
 
   let xViewport = [50, width-50];
@@ -380,7 +407,7 @@ sx, sy, transform){
   .attr('y1', d => sy(d.source.y))
   .attr('x2', d => sx(d.target.x))
   .attr('y2', d => sy(d.target.y))
-  .attr('stroke', d=>d.crossed?'red':'#aaa')
+  .attr('stroke', e=>e.crossed? 'red' : '#eee')
   .attr('opacity', e=>sa(Math.max(e.source.level, e.target.level), transform.k)  )
   nodeCircles
   .attr('cx', d => sx(d.x))
@@ -389,11 +416,17 @@ sx, sy, transform){
     return sa(d.level, transform.k);
   });
   labelTexts
-  .attr('x', d=>sx(d.for.x))
-  .attr('y', d=>sy(d.for.y))
+  .attr('x', d=>sx(d.x))
+  .attr('y', d=>sy(d.y))
   .attr('opacity', d=>{
-    return sa(d.for.level, transform.k);
+    return sa(d.level, transform.k);
   });
+
+  let labelTextNodes = labelTexts.nodes();
+  nodes.forEach((d,i)=>{
+    d.bbox = labelTextNodes[i].getBoundingClientRect();
+  })
+
   // labelTexts
   // .attr('x', d=>sx(d.x))
   // .attr('y', d=>sy(d.y))

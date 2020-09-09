@@ -1,7 +1,7 @@
 //--------data----------
 d3.json('data/Topics_Layer_2.json').then(data=>{
 //precomputed node positions
-d3.json('data/Topics_Layer_2_nodes-4.json').then(nodes=>{
+d3.json('data/Topics_Layer_2_nodes-6.json').then(nodes=>{
 
   window.data = data;
   preprocess(data, nodes);
@@ -94,13 +94,13 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   let transform = d3.zoomIdentity.scale(scale0);
 
   let zoom = d3.zoom()
+  .scaleExtent([1/scale0, 3.5/scale0])
   .on('zoom', (transform0)=>{
     if(transform0 === undefined){
       transform = d3.event.transform.scale(scale0);
     }else{
       transform = transform0;
     }
-    window.transform = transform;
     
     console.log(transform.k);
     if(sx0 === undefined){
@@ -208,13 +208,10 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
 
   let labelTextNodes = labelTexts.nodes();
   
-
-  window.labelTexts = labelTexts;
-
   simulation
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  // .force('pre', forcePre())
+  .force('pre', forcePre())
   // .force('attach-text', d3.forceLink(labelEdges)
   //  .id(d => d.id)
   //  .strength(function(d,i){
@@ -242,27 +239,28 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   //   .strength(function(d,i){
   //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
   //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
-  //     return 0.05;
+  //     return 0.01;
   //   })
-  //   .distance(e=>e.weight/2)
+  //   .distance(e=>0)
   // )
   // .force('stress', 
-  //  forceStress(virtualEdges, 0.1)
+  //  forceStress(virtualEdges, 0.5)
   //  .weight(e=> 1/Math.pow(e.weight, 2))
   //  .targetDist(e=>e.weight*1.4)
-  //  .strength(200)
+  //  .strength(1)
   // )
   // .force('compact', 
-  //   forceCompact(nodes)
-  //   .strength(0.0001)
+  //   forceCompact()
+  //   .strength(0.002)
   // )
   .force('label-collide', 
     forceLabelCollide(nodes, scales, simulation, 0.01)
-    .weight(()=>0.5)
+    .weight(()=>2.0)
   )
-  .force('post', forcePost(edges, 20))
+  .force('post', forcePost(edges, 30))
+  // .force('dummy', forceDummy())
+
   // .force('center', d3.forceCenter(0,0))
-  window.simulation = simulation;
   // window.setTimeout(()=>{simulation.stop()}, 10e3);
 
 
@@ -291,7 +289,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   });
 
 
-  //off-line training
+  // //off-line training
   simulation.stop();
   // simulation.tick(150);
   zoom.on('zoom')(transform); //draw

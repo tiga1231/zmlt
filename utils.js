@@ -11,7 +11,7 @@ function searchQuadtree(quadtree, xGetter, yGetter, xmin, xmax, ymin, ymax) {
         let x = xGetter(d);
         let y = yGetter(d);
 
-        if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
+        if (x >= xmin && x < xmax && y >= ymin && y < ymax) {
           results.push(d.index);
         }
       } while (node = node.next);
@@ -82,7 +82,7 @@ function interpolate(a, b, t=0.5){
   return a*(1-t) + b*(t);
 }
 
-function countCrossings(edges, nodes){
+function countCrossings(edges, node){
   //count crossings between all [edges] and edges emitted from certain [nodes]
   let count = 0;
   for(let i=0; i<edges.length; i++){
@@ -90,11 +90,10 @@ function countCrossings(edges, nodes){
   }
 
   let edges0;
-  if(nodes == undefined){
+  if(node == undefined){
     edges0 = edges;
   }else{
-    nodes = new Set(nodes.map(d=>d.id));
-    edges0 = edges.filter(e=>nodes.has(e.source.id) || nodes.has(e.target.id));
+    edges0 = edges.filter(e=>node.id === e.source.id || node.id === e.target.id);
   }
   for(let i=0; i<edges0.length; i++){
     for(let j=0; j<edges.length; j++){
@@ -121,8 +120,8 @@ function isCrossed(e0, e1){
   let q0 = e1.source;
   let q1 = e1.target;
   return (
-    signOf(q0, p0, p1)*signOf(q1, p0, p1) < 0
-    && signOf(p0, q0, q1)*signOf(p1, q0, q1) < 0
+    signOf(q0, p0, p1)*signOf(q1, p0, p1) <= 0
+    && signOf(p0, q0, q1)*signOf(p1, q0, q1) <= 0
   );
 }
 

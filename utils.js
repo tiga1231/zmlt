@@ -24,12 +24,11 @@ function searchQuadtree(quadtree, xGetter, yGetter, xmin, xmax, ymin, ymax) {
 
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 function isRectCollide(rect1, rect2){
- 
   return (
-       rect1.x < rect2.x + rect2.width 
-    && rect1.x + rect1.width > rect2.x 
-    && rect1.y < rect2.y + rect2.height 
-    && rect1.y + rect1.height > rect2.y
+       rect1.left <= rect2.right
+    && rect1.right >= rect2.left
+    && rect1.top <= rect2.bottom
+    && rect1.bottom >= rect2.top
   );
 }
 
@@ -40,18 +39,41 @@ function rectCollide(rect1, rect2){
     magnitude: 0,
     dir: {x:0, y:0},
   };
+
   if(isRectCollide(rect1, rect2)){
-    let c1 = [rect1.x+rect1.width/2, rect1.y+rect1.height/2];
-    let c2 = [rect2.x+rect2.width/2, rect2.y+rect2.height/2];
     res.magnitude = 1.0;
-    // res.dir.x = Math.sign(c1[0] - c2[0]) / 2 / 8; 
-    // res.dir.y = Math.sign(c1[1] - c2[1]) / 2;
-    let dw = c1[0] - c2[0];
-    let dh = c1[1] - c2[1];
-    let w = (rect1.width + rect2.width)/2;
-    let h = (rect1.height + rect2.height)/2;
-    res.dir.x = Math.sign(dw) * ( 1 - Math.abs(dw)/w ); 
-    res.dir.y = Math.sign(dh) * ( 1 - Math.abs(dh)/h );
+    let xOverlap = 
+    (rect2.right-rect2.left) 
+    + (rect1.right-rect1.left)
+    - (
+      Math.max(rect1.right, rect2.right) 
+      - Math.min(rect1.left, rect2.left)
+    );
+
+    let yOverlap = (rect2.bottom-rect2.top) + (rect1.bottom-rect1.top)
+    - (
+      Math.max(rect1.bottom, rect2.bottom) 
+      - Math.min(rect1.top, rect2.top)
+    );
+
+    let x1 = (rect1.left + rect1.right)/2;
+    let x2 = (rect2.left + rect2.right)/2;
+    if( x1 < x2){
+      res.dir.x = -1 * xOverlap;
+    }else{
+      res.dir.x = 1 * xOverlap;
+    }
+
+    let y1 = (rect1.top + rect1.bottom)/2;
+    let y2 = (rect2.top + rect2.bottom)/2;
+    if( y1 < y2){
+      res.dir.y = -1 * yOverlap;
+    }else{
+      res.dir.y = 1 * yOverlap;
+    }
+    // console.log([res.dir.x, res.dir.y]);
+
+
   }
   return res;
 }

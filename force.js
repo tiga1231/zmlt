@@ -1,12 +1,12 @@
 function forceCompact(){
-  this.strength = 0.1;
+  let strength = 0.1;
   let force = (alpha)=>{
     for(let n of force.nodes){
       n.norm = Math.sqrt(n.x*n.x + n.y*n.y);
       let dx = n.x / n.norm;
       let dy = n.y / n.norm;
-      n.vx -= force.strength * alpha * dx * Math.pow(n.norm, 1);
-      n.vy -= force.strength * alpha * dy * Math.pow(n.norm, 1);
+      n.vx -= strength * alpha * dx * Math.pow(n.norm, 1);
+      n.vy -= strength * alpha * dy * Math.pow(n.norm, 1);
     }
   };
 
@@ -16,7 +16,7 @@ function forceCompact(){
   };
 
   force.strength = (s)=>{
-    force.strength = s;
+    strength = s;
     return force;
   };
 
@@ -24,10 +24,8 @@ function forceCompact(){
 }
 
 
-function forceLabelCollide(labels, scales, simulation, margin=0.01){
-  this.labels = labels;
+function forceLabelCollide(labels0, scales, simulation, marginLeft, marginTop){
 
-  this.weight = (e)=>1.0;
   // let x = (d)=>{
   //   try{
   //     let bb = d.getBoundingClientRect();
@@ -44,13 +42,11 @@ function forceLabelCollide(labels, scales, simulation, margin=0.01){
   // };
   let x = (d)=>d.x;
   let y = (d)=>d.y;
-
+  let strength = 1;
   let domain = scales.sx.domain();
   let range = scales.sx.range();
   let scalingFactor = Math.abs((range[1]-range[0]) / (domain[1]-domain[0]));
-
-  let levelRange = d3.extent(this.labels, d=>d.level);
-  console.log(levelRange);
+  let levelRange = d3.extent(labels0, d=>d.level);
   let lz = function(l){
     // mapping: level => zoom-factor 
     let z = l;
@@ -59,46 +55,55 @@ function forceLabelCollide(labels, scales, simulation, margin=0.01){
   let forceLabelCollide_ = (alpha)=>{
     if(force.tree === undefined || Math.random()>0.0){
       //train on shown text only
-      labels = this.labels;//.filter(d=>getStyle(d, 'opacity')>0.5);
+      let labels = labels0;//.filter(d=>getStyle(d, 'opacity')>0.5);
       force.tree = d3.quadtree(labels, x, y);
     }
     //assuming nodeLevel == zoomLevel
     for(let level=levelRange[0]; level<=levelRange[1]; level++){
       let zoomFactor = lz(level);
       //only consider labels that is <= certain level
-      labels = this.labels.filter(l=>lz(l.level)<=zoomFactor);
-
+      let labels = labels0.filter(l=>lz(l.level)<=zoomFactor);
       let vx = Array(force.nodes.length).fill(0);
       let vy = Array(force.nodes.length).fill(0);
 
       for(let i=0; i<labels.length; i++){
-        let li = labels[i];
-        let bbi = li.bbox;
-        bbi = {
+        let li = labels0[labels[i].index];
+        let bbi = {
           x: li.x,
           y: li.y,
-          width: 1/(zoomFactor*scalingFactor) * bbi.width,
-          height: 1/(zoomFactor*scalingFactor) * bbi.height,
+          width: 1/(zoomFactor*scalingFactor) * li.bbox.width,
+          height: 1/(zoomFactor*scalingFactor) * li.bbox.height,
         };
+        bbi.left = bbi.x - bbi.width/2 - bbi.width*marginLeft;
+        bbi.right = bbi.x + bbi.width/2 + bbi.width*marginLeft;
+        bbi.top = bbi.y - bbi.height/2 - bbi.height*marginTop;
+        bbi.bottom = bbi.y + bbi.height/2 + bbi.height*marginTop;
 
-        let xmin = li.x - bbi.width*1.5; //screen coord width to data coord
-        let xmax = li.x + bbi.width*1.5;
-        let ymin = li.y - bbi.height*2.5;
-        let ymax = li.y + bbi.height*2.5;
+        let xmin = li.x - bbi.width*15; //screen coord width to data coord
+        let xmax = li.x + bbi.width*15;
+        let ymin = li.y - bbi.height*25;
+        let ymax = li.y + bbi.height*25;
 
         let neighbors = searchQuadtree(force.tree, x, y, xmin, xmax, ymin, ymax);
         // console.log(neighbors.length);
         for(let j of neighbors){
-          let lj = this.labels[j];
+          if(j == labels[i].index) continue;
+          let lj = labels0[j];
           // let j = n.i;
-          let bbj = lj.bbox;
-          bbj = {
+          let bbj = {
             x: lj.x,
             y: lj.y,
-            width: 1/(zoomFactor*scalingFactor) * bbj.width,
-            height: 1/(zoomFactor*scalingFactor) * bbj.height,
+            width: 1/(zoomFactor*scalingFactor) * lj.bbox.width,
+            height: 1/(zoomFactor*scalingFactor) * lj.bbox.height,
           };
-          let force = rectCollide(bbi, bbj, margin);
+
+          bbj.left = bbj.x - bbj.width/2 - bbj.width*marginLeft;
+          bbj.right = bbj.x + bbj.width/2 + bbj.width*marginLeft;
+          bbj.top = bbj.y - bbj.height/2 - bbj.height*marginTop;
+          bbj.bottom = bbj.y + bbj.height/2 + bbj.height*marginTop;
+
+
+          let force = rectCollide(bbi, bbj);
           if(force.magnitude > 0){
             vx[li.index] += force.dir.x * force.magnitude;
             vy[li.index] += force.dir.y * force.magnitude;
@@ -106,10 +111,19 @@ function forceLabelCollide(labels, scales, simulation, margin=0.01){
             vy[lj.index] -= force.dir.y * force.magnitude;
           }
         }
-        ////brute force
-        // for(let j=i+1; j<this.labels.length; j++){
-        //   let lj = this.labels[j];
-        //   let bbj = lj.getBoundingClientRect();
+        // // //brute force
+        // for(let j=i+1; j<labels.length; j++){
+        //   let lj = labels0[labels[j].index];
+        //   let bbj = {
+        //     x: lj.x,
+        //     y: lj.y,
+        //     width: 1/(zoomFactor*scalingFactor) * lj.bbox.width,
+        //     height: 1/(zoomFactor*scalingFactor) * lj.bbox.height,
+        //   };
+        //   bbj.left = bbj.x - bbj.width/2;
+        //   bbj.right = bbj.x + bbj.width/2;
+        //   bbj.top = bbj.y - bbj.height/2;
+        //   bbj.bottom = bbj.y + bbj.height/2;
         //   let force = rectCollide(bbi, bbj);
         //   if(force.magnitude > 0){
         //     vx[i] += force.dir.x * force.magnitude;
@@ -119,11 +133,12 @@ function forceLabelCollide(labels, scales, simulation, margin=0.01){
         //   }
         // }
       }
-      for(let i=0; i<this.labels.length; i++){
-        vx[i] *= this.weight();
-        vy[i] *= this.weight();
-        vx[i] = Math.sign(vx[i]) * Math.min(5, Math.abs(vx[i])); //at most 5 pixel each iteration
-        vy[i] = Math.sign(vy[i]) * Math.min(5, Math.abs(vy[i])); //at most 5 pixel each iteration
+
+      for(let i=0; i<labels.length; i++){
+        vx[i] *= strength;
+        vy[i] *= strength;
+        vx[i] = Math.sign(vx[i]) * Math.min(1, Math.abs(vx[i])); //at most 5 pixel each iteration
+        vy[i] = Math.sign(vy[i]) * Math.min(1, Math.abs(vy[i])); //at most 5 pixel each iteration
         force.nodes[i].vx += scales.sx.invert(vx[i]) - scales.sx.invert(0);
         force.nodes[i].vy += scales.sy.invert(vy[i]) - scales.sy.invert(0);
       }
@@ -131,13 +146,17 @@ function forceLabelCollide(labels, scales, simulation, margin=0.01){
   };
 
   let force = forceLabelCollide_;
+  force.strength = (s)=>{
+    strength = s;
+  };
+
   force.initialize = (nodes)=>{
     force.nodes = nodes;
     return force;
   };
 
-  force.weight = (accessor)=>{
-    this.weight = accessor;
+  force.strength = (s)=>{
+    force.strength = s;
     return force;
   };
 
@@ -234,7 +253,7 @@ function forcePost(edges, radius){
     //   }
     // }
 
-    if(force.tree2 === undefined || Math.random()>0.9){
+    if(force.tree2 === undefined || Math.random()>0){
       updateNeighbors(force.nodes, getX, getX, radius);
     }
 
@@ -293,36 +312,36 @@ function forcePost(edges, radius){
 function forceStress(edges, ratio=0.1){
   
   let sampleSize;
+  let strength = 1;
+  let weight = (e)=>1;
+  let targetDist = (e)=>1;
+
+
   let force = (alpha)=>{
-    if(ratio < 1){
+    if(ratio <= 1){
       sampleSize = Math.ceil(ratio * force.edges.length);
     }else{
       sampleSize = Math.ceil(ratio);
     }
 
-
     let samples = _.sample(force.edges, sampleSize);
     for(let e of samples){
     // for(let e of this.edges){
-      let w = force.weight(e);
-      let targetDist = force.targetDist(e);
+      let w = weight(e);
+      let d = targetDist(e);
       let p0 = [e.source.x, e.source.y];
       let p1 = [e.target.x, e.target.y];
       let currentDist = Math.sqrt(Math.pow(p0[0]-p1[0], 2)+Math.pow(p0[1]-p1[1], 2));
-      let dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], currentDist + 0.001);
-      let coef = (currentDist - targetDist) * w * force.strength * (1/force.nodes.length);
-      coef = Math.sign(coef) * Math.min(Math.abs(coef), currentDist/2 /force.nodes.length);
+      let dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], currentDist);
+      let coef = (currentDist - d) * w * strength * (1/force.nodes.length);
+      coef = Math.sign(coef) * Math.min(Math.abs(coef), currentDist/2/force.nodes.length);
       let [dx, dy] = numeric.mul(coef, dir);
-      
       e.source.vx += dx * alpha;
       e.source.vy += dy * alpha;
       e.target.vx += -dx * alpha;
       e.target.vy += -dy * alpha;
     }
   }
-  force.strength = 0.0001;
-  force.weight = (e)=>1;
-  force.targetDist = (e)=>1;
 
   force.initialize = (nodes)=>{
     force.nodes = nodes;
@@ -331,17 +350,17 @@ function forceStress(edges, ratio=0.1){
   };
 
   force.weight = (accessor)=>{
-    force.weight = accessor;
+    weight = accessor;
     return force;
   };
 
   force.targetDist = (accessor)=>{
-    force.targetDist = accessor;
+    targetDist = accessor;
     return force;
   };
 
   force.strength = (s)=>{
-    force.strength = s;
+    strength = s;
     return force;
   };
 

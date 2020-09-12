@@ -1,11 +1,12 @@
 //--------data----------
-d3.json('data/Topics_Layer_2.json').then(data=>{
+d3.json('data/lastfm-ryn/lastfm_155nodes.json').then(data=>{
 //precomputed node positions
-d3.json('data/Topics_Layer_2_nodes-6.json').then(nodes=>{
+d3.json('data/lastfm-ryn/lastfm_155nodes_nodes-1.json').then(nodes=>{
+  data.nodes = nodes;
 
   window.data = data;
-  preprocess(data, nodes);
-  main(data.nodes, data.edges, data.virtual_edges, data.labelNodes, data.labelEdges);
+  preprocess(data, data.nodes);
+  main(data.nodes, data.edges, data.virtual_edges);
 
 });
 });
@@ -36,8 +37,8 @@ function preprocess(data, nodes){
     e.source = data.nodes[nodeIds.indexOf(e.source)];
     e.target = data.nodes[nodeIds.indexOf(e.target)];
   }
-  data.labelNodes = [];
-  data.labelEdges = [];
+  // data.labelNodes = [];
+  // data.labelEdges = [];
   // for(let i=0; i<data.nodes.length; i++){
   //   let n = data.nodes[i];
   //   let labelId = `label-for-${n.id}`;
@@ -57,7 +58,8 @@ function preprocess(data, nodes){
 
 const colorscheme = d3.schemeAccent;//schemePastel1
 
-function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
+function main(nodes, edges, virtualEdges){
+  let scale0 = 1.0;
 
   let width = window.innerWidth;
   let height = window.innerHeight;
@@ -68,7 +70,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   svg.append('defs').node().innerHTML = whiteOutline();
 
   let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([8,6]);
-  let scales = getScales(nodes, svg);
+  let scales = getScales(nodes, svg, scale0);
 
   let ax = d3.axisBottom(scales.sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
   let ay = d3.axisLeft(scales.sy);//.tickSize(-(sx.range()[1]-sx.range()[0]));
@@ -90,11 +92,10 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   .call(ay);
 
   let sx0, sy0;
-  let scale0 = 2;
   let transform = d3.zoomIdentity.scale(scale0);
 
   let zoom = d3.zoom()
-  .scaleExtent([1/scale0, 3.5/scale0])
+  .scaleExtent([0.5/scale0, 6.0/scale0])
   .on('zoom', (transform0)=>{
     if(transform0 === undefined){
       transform = d3.event.transform.scale(scale0);
@@ -119,7 +120,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
     linkLines
     .attr('stroke-width', e => Math.sqrt(transform.k) * (e.source.level==1&&e.target.level==1 ? 1.3 : 0.7))
 
-    draw(nodes, edges, labelNodes, labelEdges, 
+    draw(nodes, edges, 
     nodeCircles, linkLines, labelTexts,
     scales.sx, scales.sy, transform);
   });
@@ -127,7 +128,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
 
 
   var maxPerplexity = d3.max(nodes, d => d.perplexity);
-  let niter = 500;
+  let niter = 300;
   const simulation = d3.forceSimulation(nodes);
   
 
@@ -149,11 +150,9 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
       .on('drag', (d)=>{
 
         if(d.type !== 'label'){
-          console.log('not label');
           d.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
           d.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
         }else{
-          console.log('label');
           d.for.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
           d.for.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
         }
@@ -207,29 +206,36 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   // .call(drag(simulation));
 
   let labelTextNodes = labelTexts.nodes();
-  
+  let bboxes = labelTextNodes.map(d=>d.getBoundingClientRect());
+  let maxWidth = bboxes.reduce((a,b)=>a.width>b.width?a.width:b.width);
+  let maxHeight = bboxes.reduce((a,b)=>a.height>b.height?a.height:b.height);
+
+  nodes.forEach((d,i)=>{
+    // d.node = labelTextNodes[i];
+    // let bbox = labelTextNodes[i].getBoundingClientRect();
+    d.bbox = {
+      width: maxWidth,
+      height: maxHeight,
+    };
+    // console.log(d.node.innerHTML, d.label);
+    // console.log(bbox.height);
+  });
+
   simulation
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
   .force('pre', forcePre())
-  // .force('attach-text', d3.forceLink(labelEdges)
-  //  .id(d => d.id)
-  //  .strength(function(d,i){
-  //    return 1.3;
-  //  })
-  //  .distance(d=>0)
-  // )
   // .force('charge', 
   //   d3.forceManyBody()
   //   // .theta(0.9)
-  //   .distanceMin(0.05)
-  //   .distanceMax(6)
-  //   .strength(d=>-0.1/Math.sqrt(nodes.length))
+  //   // .distanceMin(0.05)
+  //   // .distanceMax(6)
+  //   .strength(d=>1e-4)
   // )
   // .force('collide', 
   //   d3.forceCollide()
   //   .radius(d=>{
-  //     return 1;
+  //     return 1/(d.level+1);
   //   })
   //   .strength(0.1)
   // )
@@ -239,26 +245,25 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   //   .strength(function(d,i){
   //     // var dd = Math.abs(d.source.perplexity - d.target.perplexity);
   //     // let ap = (d.source.perplexity + d.target.perplexity)/2;
-  //     return 0.01;
+  //     return 1;
   //   })
-  //   .distance(e=>0)
+  //   .distance(e=>e.weight/100)
   // )
   // .force('stress', 
-  //  forceStress(virtualEdges, 0.5)
-  //  .weight(e=> 1/Math.pow(e.weight, 2))
-  //  .targetDist(e=>e.weight*1.4)
+  //  forceStress(virtualEdges, 0.99)
+  //  .weight(e=>1/Math.pow(e.weight, 2))
+  //  .targetDist(e=>e.weight / (e.source.level + e.target.level) * 2)
   //  .strength(1)
   // )
   // .force('compact', 
   //   forceCompact()
-  //   .strength(0.002)
+  //   .strength(0.02)
   // )
   .force('label-collide', 
-    forceLabelCollide(nodes, scales, simulation, 0.01)
-    .weight(()=>2.0)
+    forceLabelCollide(nodes, scales, simulation, 0.1, 0.5)
+    .strength(100.0)
   )
-  .force('post', forcePost(edges, 30))
-  // .force('dummy', forceDummy())
+  .force('post', forcePost(edges, 300))
 
   // .force('center', d3.forceCenter(0,0))
   // window.setTimeout(()=>{simulation.stop()}, 10e3);
@@ -267,7 +272,7 @@ function main(nodes, edges, virtualEdges, labelNodes, labelEdges){
   simulation.on('tick', () => {
     console.log('tick');
     //if(Math.random() > 0.8){
-    draw(nodes, edges, labelNodes, labelEdges, 
+    draw(nodes, edges,
     nodeCircles, linkLines, labelTexts,
     scales.sx, scales.sy, transform);
     //}
@@ -310,6 +315,7 @@ function pos(){
 }
 
 function sa(level, k){
+  //todo: level-to-k coorespondence
   let alpha;
   if(level == 1){
     alpha = 1;
@@ -329,12 +335,12 @@ function sa(level, k){
       alpha = x*x*(3-2*x);
     }
   }
+  return 1.0;
   return alpha;
-  // return 1.0;
 }
 
 
-function getScales(nodes, svg, prescaling=2.0){
+function getScales(nodes, svg, prescaling=1.0){
   let width = +svg.node().clientWidth;
   let height = +svg.node().clientHeight;
 
@@ -379,7 +385,7 @@ function getScales(nodes, svg, prescaling=2.0){
   return {sx, sy};
 }
 
-function draw(nodes, edges, labelNodes, labelEdges, 
+function draw(nodes, edges,
 nodeCircles, linkLines, labelTexts,
 sx, sy, transform){
 
@@ -420,10 +426,13 @@ sx, sy, transform){
     return sa(d.level, transform.k);
   });
 
-  let labelTextNodes = labelTexts.nodes();
-  nodes.forEach((d,i)=>{
-    d.bbox = labelTextNodes[i].getBoundingClientRect();
-  })
+  // let labelTextNodes = labelTexts.nodes();
+  // nodes.forEach((d,i)=>{
+    // d.bbox = labelTextNodes[i].getBoundingClientRect();
+  //   d.bbox.x = d.x - d.bbox.width/2;
+  //   d.bbox.y = d.y - d.bbox.height/2;
+  // });
+
 
   // labelTexts
   // .attr('x', d=>sx(d.x))

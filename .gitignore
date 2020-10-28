@@ -1,1 +1,5 @@
 *.swp
+.ipynb_checkpoints
+
+data/
+mingwei-zmlt-data*.zip

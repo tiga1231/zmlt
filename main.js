@@ -7,22 +7,27 @@
 
 // topics-faryad-500
 // d3.json('data/json/topics_faryad_5000/Graph_500.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_500.json').then(nodes=>{
+// d3.json('data/json/topics_faryad_5000/Graph_500-nodes-1.json').then(nodes=>{
 
 // topics-faryad-800
 // d3.json('data/json/topics_faryad_5000/Graph_800.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_800-nodes-1.json').then(nodes=>{
+// d3.json('data/json/topics_faryad_5000/Graph_800-nodes-2.json').then(nodes=>{
 
 // topics-faryad-5000
 // d3.json('data/json/topics_faryad_5000/Graph_1600.json').then(data=>{
 // d3.json('data/json/topics_faryad_5000/Graph_1600.json').then(nodes=>{
 
 // math-genealogy-67
-d3.json('data/json/math-genealogy/data_names_shortened.json').then(data=>{
-d3.json('data/json/math-genealogy/data_names_shortened-nodes-1.json').then(nodes=>{
+// d3.json('data/json/math-genealogy/data_names_shortened.json').then(data=>{
+// d3.json('data/json/math-genealogy/data_names_shortened-nodes-1.json').then(nodes=>{
 
-  // data.nodes = nodes;
-  
+// math-genealogy-509
+d3.json('./data/json/math-genealogy/math-509.json').then(data=>{
+d3.json('data/json/math-genealogy/math-509-nodes-1.json').then(nodes=>{
+
+
+
+  data.nodes = nodes;
   window.data = data;
   preprocess(data, data.nodes);
   main(data.nodes, data.edges, data.virtual_edges, data.node_center);
@@ -34,13 +39,15 @@ d3.json('data/json/math-genealogy/data_names_shortened-nodes-1.json').then(nodes
 // //--------code----------
 const colorscheme = d3.schemeAccent;//schemePastel1
 const OPACITY_NOT_UPDATE = 0.1;
-const IS_PROGRESSIVE = true;
+const IS_PROGRESSIVE = false;
+const IS_DYNAMIC = false;
 const EDGE_COLOR = '#666';
 //globals
 let shouldTick = true;
 let shouldHideLabel = false;
 let shouldHideAll = false;
 let shouldDraw = true;
+let bg = '#eef7ec';
 
 
 function main(nodes, edges, virtualEdges, nodeCenter){
@@ -61,9 +68,13 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   let svg = d3.select('#main')
   .attr('width', width)
   .attr('height', height)
+  .style('background', bg); 
   svg.append('defs').node().innerHTML = whiteOutline();
 
-  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([12,2]);
+  let sc = d3.scaleLinear()
+  .domain([5,1])
+  .range(['#ece7f2','#2b8cbe']);
+  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([3,1]);
   let scales = getScales(nodes, svg, scale0);
 
   let ax = d3.axisBottom(scales.sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
@@ -135,8 +146,8 @@ function main(nodes, edges, virtualEdges, nodeCenter){
     gy.call(ay);
 
     nodeCircles
-    // .attr('r', d=>sr(d.level)*Math.sqrt(transform.k));
-    .attr('r', d=>sr(d.level));
+    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/4));
+    // .attr('r', d=>sr(d.level));
     linkLines
     .attr('stroke-width', e => sr(e.level)/2 )
     // .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
@@ -216,9 +227,11 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   .join('circle')
   .attr('class', 'node')
   .attr('r', d=>sr(d.level))
-  .attr('fill', d=>colorscheme[(d.level-1) % colorscheme.length])
+  // .attr('fill', d=>colorscheme[(d.level-1) % colorscheme.length])
+  .attr('fill', d=>sc(d.level))
+  // .attr('fill', d=>'#1f78b4')
   .attr('stroke', EDGE_COLOR)
-  .attr('stroke-width', 0)
+  .attr('stroke-width', d=>Math.max(1, sr(d.level)/4))
   .call(drag(simulation));
   
   const labelTexts = svg
@@ -226,9 +239,12 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   .data(nodes)
   .join('text')
   .attr('class', 'labelText')
-  .style('fill', d=>d3.color(colorscheme[(d.level-1) % colorscheme.length]).brighter())
+  // .style('fill', d=>d3.color(colorscheme[(d.level-1) % colorscheme.length]).brighter())
+  .attr('fill', d=>'#eee')
+  // .attr('fill', d=>d3.color(sc(d.level)).brighter(2))
   .style('font-weight', 100)
-  .style('font-size', '16px')
+  // .style('font-size', d=>`${16-d.level}px`)
+  .style('font-size', d=>'16px')
   .style('text-anchor', 'middle')
   .style('alignment-baseline', 'middle')
   .style('filter', 'url(#whiteOutlineEffect)')
@@ -262,13 +278,13 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
   // .force('pre', forcePre())
-  .force('central', 
-   d3.forceRadial(0, nodeCenter[0], nodeCenter[1])
-   .strength(0.01)
-  )
+  // .force('central', 
+  //  d3.forceRadial(0, nodeCenter[0], nodeCenter[1])
+  //  .strength(0.01)
+  // )
   // .force('charge', 
   //  d3.forceManyBody()
-  //  .strength(d=>-10)
+  //  .strength(d=>-1)
   // )
   // .force('collide', 
   //  d3.forceCollide()
@@ -298,7 +314,7 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   .force('ideal-edge-length', 
     forceStress(nodes, edges, enabledNodes)
     // .strength(e=>50/Math.pow(e.weight, 1))
-    .strength(e=>0.5 / e.weight * minEdgeWeight )
+    .strength(e=>1 / e.weight * minEdgeWeight )
     .distance(e=>e.weight)
   )
   // .force('node-edge-repulsion', 
@@ -313,12 +329,12 @@ function main(nodes, edges, virtualEdges, nodeCenter){
     forceEllipse({
       nodes: nodes, 
       scales: scales,
-      strength: 1,
-      b: 1,
+      strength: 4,
+      b: 2.5,
       c: 1.0,
     })
   )
-  .force('post', forcePost(edges, 1e9, enabledNodes));
+  .force('post', forcePost(edges, 1e9, enabledNodes, 0.8));
 
 
 
@@ -344,13 +360,12 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   });
 
 
-  let bg = '#eee';
   let intervalId = undefined;
   let addNode = ()=>{
     let start = progress;
     progress += 1;
     if(progress <= nodes.length){
-      initNodePosition(nodes.slice(start, progress), enabledNodes, nodes, edges);
+      initNodePosition(nodes.slice(start, progress), enabledNodes, nodes, edges, data.id2index, !IS_DYNAMIC);
       // enabledNodes.add(nodes[progress].id);
     }else{
       simulation.alpha(0.99).restart();
@@ -363,7 +378,7 @@ function main(nodes, edges, virtualEdges, nodeCenter){
     simulation.alpha(0.99).restart();
     console.log(`${progress} / ${nodes.length}`);
 
-    labelOverlap(labelTextNodes, 1.0);
+    // labelOverlap(labelTextNodes, 1.0);
     draw(
       nodes, edges, 
       nodeCircles, linkLines, labelTexts,
@@ -409,11 +424,11 @@ function main(nodes, edges, virtualEdges, nodeCenter){
     }else if(key == 'd'){//show [D]ebug message
       debugMsg();
     }else if(key == 'b'){//background
-      bg = (bg != '#eee') ? '#eee' : '#555';
+      bg = (bg != '#eef7ec') ? '#eef7ec' : '#333';
       svg.style('background', bg); 
     }else if(key == 's'){
       if(intervalId === undefined){
-        intervalId = setInterval(addNode, 1000);
+        intervalId = setInterval(addNode, 2000);
       }else{
         console.log('stop')
         clearInterval(intervalId);
@@ -439,16 +454,26 @@ function preprocess(data, nodes){
     data.nodes = nodes;
   }
 
-  let prescale_pos = 1;
-  let prescale_weight = 1;
-  data.nodes.forEach(d=>{
-    if(d.x === undefined){
-      d.x = Math.random()*1000;
-      d.y = Math.random()*1000;
-    }
-    d.x *= prescale_pos;
-    d.y *= prescale_pos;
 
+  let prescale_pos = 2;
+  let prescale_weight = 1;
+  data.id2index = {};
+  data.nodes.forEach((d,i)=>{
+
+    if(d.x === undefined){
+      d.x = Math.random()*100;
+      d.y = Math.random()*100;
+      d.x *= prescale_pos;
+      d.y *= prescale_pos;
+    }else{
+      d.x *= prescale_pos;
+      d.y *= prescale_pos;
+      d.xInit = d.x;
+      d.yInit = d.y;
+    }
+
+    d.index = i;
+    data.id2index[d.id] = d.index;
     d.weight = prescale_weight / d.level;
     d.label = d.label.slice(0,16);
     d.norm = Math.sqrt(d.x*d.x + d.y*d.y);
@@ -458,18 +483,17 @@ function preprocess(data, nodes){
 
  
   //preprocess edges
-  let nodeIds = data.nodes.map(d=>d.id);
-
+  // let nodeIds = data.nodes.map(d=>d.id);
   for(let e of data.edges){
-    e.source = data.nodes[nodeIds.indexOf(e.source)];
-    e.target = data.nodes[nodeIds.indexOf(e.target)];
+    e.source = data.nodes[data.id2index[e.source]];
+    e.target = data.nodes[data.id2index[e.target]];
     e.weight *= prescale_weight;
   }
 
-  data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 6);
+  // data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 16);
   for(let e of data.virtual_edges){
-    e.source = data.nodes[nodeIds.indexOf(e.source)];
-    e.target = data.nodes[nodeIds.indexOf(e.target)];
+    e.source = data.nodes[data.id2index[e.source]];
+    e.target = data.nodes[data.id2index[e.target]];
     e.weight *= prescale_weight;
   }
 }

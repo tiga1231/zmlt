@@ -83,7 +83,7 @@ function labelOverlap(labelNodes, heightFactor=0.6){
 }
 
 
-function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, ){
+function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index, useInitital=true){
   for(let node of newNodes){
     // let edge = allEdges.filter(e=>
     //   (currentNodes0.size == 0 || currentNodes0.has(e.source.id)) && e.target.id === node.id
@@ -92,8 +92,6 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, ){
     // );
     // let other = edge[0].source.id !== node.id ? edge[0].source : edge[0].target;
 
-    
-    
     let edges = allEdges.filter(e=>{
       return (
         currentNodes0.has(e.source.id) && currentNodes0.has(e.target.id)
@@ -104,13 +102,30 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, ){
 
     let other;
     if(currentNodes0.size == 0){
-      other = {x: Math.random(), y: Math.random()};
+      if(useInitital){
+        other = {
+          x: node.x, 
+          y: node.y,
+          xInit: node.x, 
+          yInit: node.y,
+        };
+      }else{
+        other = {x: Math.random(), y: Math.random()};
+      }
     }else{
-      other = node.neighbors.filter(d=>currentNodes0.has(d))[0];
-      other = allNodes.filter(d=>d.id == other)[0];
+      // other = node.neighbors.filter(d=>currentNodes0.has(d))[0];
+      // other = allNodes.filter(d=>d.id == other)[0];
+      other = allNodes[id2index[node.parent]];
     }
-    node.x = (Math.random()-0.5)*1 + other.x;
-    node.y = (Math.random()-0.5)*1 + other.y;
+
+    if(useInitital && node.xInit !== undefined){
+      node.x = other.x + (node.xInit - other.xInit);
+      node.y = other.y + (node.yInit - other.yInit);
+    }else{
+      
+      node.x = (Math.random()-0.5)*1 + other.x;
+      node.y = (Math.random()-0.5)*1 + other.y;
+    }
     let count = 0;
     while(countCrossings(edges, node) > 0 && count <= 100){
       node.x = (Math.random()-0.5)*1/count + other.x;

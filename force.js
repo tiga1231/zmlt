@@ -124,7 +124,6 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       x: 2*x / (a*a),
       y: 2*y / (b*b),
     };
-    dir.x = 0;
     let norm = Math.sqrt(dir.x*dir.x + dir.y*dir.y);
     dir.x /= norm;
     dir.y /= norm;
@@ -153,13 +152,13 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       return 0;
     }else{
       let dist2 = Math.sqrt(r*r - proj*proj);
-      let s = 20/Math.sqrt(0.0001+dist2/a);
+      let s = 20/Math.sqrt(0.1+dist2/a);
       return s;
     }
   };
 
   let force = (alpha)=>{
-    let beta = Math.pow((1-alpha), 7) * Math.pow(alpha, 3) * 450;
+    let beta = alpha;//Math.pow((1-alpha), 7) * Math.pow(alpha, 3) * 450;
 
 
     for(let j=0; j<edges.length; j++){
@@ -452,7 +451,7 @@ function forcePre(decay=0.4){
 
 
 
-function forcePost(edges, radius, enabledNodes){
+function forcePost(edges, radius, enabledNodes, damping=0.2){
   let getX = (d)=>d.x;
   let getY = (d)=>d.y;
   let updateNeighbors = (nodes, getX, getY, r)=>{
@@ -488,8 +487,8 @@ function forcePost(edges, radius, enabledNodes){
         for(let i=sampleSize*iter; i<sampleSize*(iter+1); i++){
           let n = nodes[i];
           if(n.vx0 !== 0 || n.vy0 !== 0){
-            n.x = n.x0 + n.vx0 * t;
-            n.y = n.y0 + n.vy0 * t;
+            n.x = damping * n.x0 + (1-damping) * (n.x0 + n.vx0 * t);
+            n.y = damping * n.y0 + (1-damping) * (n.y0 + n.vy0 * t);
           }
         }
 
@@ -606,7 +605,7 @@ function forceStress(nodes, edges, enabledNodes){
     // for(let e of edges){
     // 
     //stochastic
-    for(let i=0; i<nodes.length/3; i++){
+    for(let i=0; i<nodes.length; i++){
       let e = edges[randint(0,edges.length)];
 
       if(enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id)){

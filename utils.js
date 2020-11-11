@@ -1,5 +1,37 @@
+//// export JSON
+function exportJson(obj, fn='result.json'){
+  let objStr = JSON.stringify(obj, null, 2);
+  let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(objStr);
+  var anchor = document.getElementById('download-json');
+  anchor.setAttribute('href', dataStr);
+  anchor.setAttribute('download', fn);
+  anchor.click();
+}
+
 function randint(min, max){
   return Math.floor(Math.random()*(max-min) + min);
+}
+
+function rotate(p, cos, sin, center={x:0, y:0}){
+  let res = {
+    x: p.x, 
+    y: p.y
+  };
+  [res.x, res.y] = [res.x-center.x, res.y-center.y];
+  [res.x, res.y] = [res.x*cos + res.y*(-sin), res.x*sin + res.y*cos];
+  [res.x, res.y] = [res.x+center.x, res.y+center.y];
+  return res;
+}
+
+
+function translate(p, tx, ty){
+  let res = {
+    x: p.x, 
+    y: p.y
+  };
+  res.x += tx;
+  res.y += ty;
+  return res;
 }
 
 
@@ -85,6 +117,7 @@ function labelOverlap(labelNodes, heightFactor=0.6){
 
 function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index, useInitital=true){
   for(let node of newNodes){
+    node.update = true;
     // let edge = allEdges.filter(e=>
     //   (currentNodes0.size == 0 || currentNodes0.has(e.source.id)) && e.target.id === node.id
     //   ||
@@ -100,9 +133,9 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
       );
     });
 
-    let other;
-    if(currentNodes0.size == 0){
-      if(useInitital){
+    let other = {x: Math.random(), y: Math.random()};
+    if(useInitital){
+      if(node.parent === undefined || node.parent === null){
         other = {
           x: node.x, 
           y: node.y,
@@ -110,24 +143,21 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
           yInit: node.y,
         };
       }else{
-        other = {x: Math.random(), y: Math.random()};
+        // other = node.neighbors.filter(d=>currentNodes0.has(d))[0];
+        // other = allNodes.filter(d=>d.id == other)[0];
+        other = allNodes[id2index[node.parent]];
       }
-    }else{
-      // other = node.neighbors.filter(d=>currentNodes0.has(d))[0];
-      // other = allNodes.filter(d=>d.id == other)[0];
-      other = allNodes[id2index[node.parent]];
     }
 
     if(useInitital && node.xInit !== undefined){
       node.x = other.x + (node.xInit - other.xInit);
       node.y = other.y + (node.yInit - other.yInit);
     }else{
-      
       node.x = (Math.random()-0.5)*1 + other.x;
       node.y = (Math.random()-0.5)*1 + other.y;
     }
     let count = 0;
-    while(countCrossings(edges, node) > 0 && count <= 100){
+    while(countCrossings(edges, node)>0){
       node.x = (Math.random()-0.5)*1/count + other.x;
       node.y = (Math.random()-0.5)*1/count + other.y;
       count+=1;
@@ -221,7 +251,8 @@ function idealEdgeLengthPreservation2(links, ideal_lengths){
     let y1 = links[i].source.y;
     let x2 = links[i].target.x;
     let y2 = links[i].target.y;
-    let dist = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+    let [dx, dy] = [(x1-x2), (y1-y2)];
+    let dist = Math.sqrt(dx*dx + dy*dy);
     let diff = Math.abs(ideal_lengths[i] - dist);
     let relativeDifference = diff / ideal_lengths[i];
     sumOfSquares += Math.pow(relativeDifference, 2);
@@ -386,8 +417,17 @@ function interpolate(a, b, t=0.5){
 }
 
 
+// function countCrossings(edges, node){
+//   //count crossings between all [edges] and edges emitted from certain [node]
+//   let segments = edges.map(e=>[[e.source.x,e.source.y],[e.target.x, e.target.y]]);
+//   console.log(segments);
+//   let inter = findIntersections(segments);
+//   return inter.length;
+// }
+
+
 function countCrossings(edges, node){
-  //count crossings between all [edges] and edges emitted from certain [nodes]
+  //count crossings between all [edges] and edges emitted from certain [node]
   let count = 0;
   for(let i=0; i<edges.length; i++){
     edges[i].crossed = false;
@@ -417,6 +457,7 @@ function countCrossings(edges, node){
   }
   return count;
 }
+
 
 function isCrossed(e0, e1){
   let p0 = e0.source;

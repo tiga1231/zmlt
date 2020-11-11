@@ -1,3 +1,25 @@
+// //--------code----------
+const colorscheme = d3.schemeAccent;//schemePastel1
+const OPACITY_NOT_UPDATE = 0.1;
+const IS_PROGRESSIVE = true;
+const IS_DYNAMIC = false;
+const EDGE_COLOR = '#666';
+const HIDE_OVERLAP = false;
+//globals
+let shouldTick = true;
+let shouldHideLabel = false;
+let shouldHideAll = false;
+let shouldDraw = true;
+let bg = '#eef7ec';
+let runtime = [];
+let nodes;
+let progress = 1;
+// let progress = 9e9;
+
+let enabledNodes;
+window.enabledNodes = enabledNodes;
+
+
 //--------data----------
 // d3.json('data/json/lastfm-iqbal/lastfm_8.json').then(data=>{
 
@@ -5,65 +27,65 @@
 // d3.json('data/json/lastfm-ryn/lastfm_155nodes.json').then(data=>{
 // d3.json('data/json/lastfm-ryn/lastfm_155nodes_nodes-4.json').then(nodes=>{
 
-// topics-faryad-500
-// d3.json('data/json/topics_faryad_5000/Graph_500.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_500-nodes-1.json').then(nodes=>{
 
-// topics-faryad-800
-// d3.json('data/json/topics_faryad_5000/Graph_800.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_800-nodes-2.json').then(nodes=>{
-
-// topics-faryad-5000
-// d3.json('data/json/topics_faryad_5000/Graph_1600.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_1600.json').then(nodes=>{
-
-// math-genealogy-67
-// d3.json('data/json/math-genealogy/data_names_shortened.json').then(data=>{
-// d3.json('data/json/math-genealogy/data_names_shortened-nodes-1.json').then(nodes=>{
+// //topics-800
+// d3.json('data/json/topics-800/topics-800.json').then(data=>{
+// d3.json('data/json/topics-800/topics-800.json').then(nodes=>{
 
 // math-genealogy-509
-d3.json('./data/json/math-genealogy/math-509.json').then(data=>{
-d3.json('data/json/math-genealogy/math-509-nodes-1.json').then(nodes=>{
+// d3.json('./data/json/math-genealogy/math-509.json').then(data=>{
+// d3.json('data/json/math-genealogy/math-509-nodes-1.json').then(nodes=>{
+
+// math-euler-293
+// d3.json('./data/json/math-genealogy/euler-293.json').then(data=>{
+// d3.json('./data/json/math-genealogy/euler-293.json').then(nodes=>{
+
+//eval: topics-800
+// d3.json('data/json/topics-800/topics-800.json').then(data=>{
+// d3.json('data/eval/topics-800/topics-800.json').then(nodes=>{
+
+//eval: covid-800
+// d3.json('data/json/covid-487/covid-487.json').then(data=>{
+// d3.json('data/json/covid-487/covid-487.json').then(nodes=>{
 
 
 
-  data.nodes = nodes;
+// topics-faryad-5000
+d3.json('data/json/topics_faryad_5000/Graph_500.json').then(data=>{
+// d3.json('data/json/topics_faryad_5000/Graph_5000.json').then(nodes=>{
   window.data = data;
-  preprocess(data, data.nodes);
-  main(data.nodes, data.edges, data.virtual_edges, data.node_center);
+  if(nodes !== undefined){
+    progress = data.node_id.length;
+  }
+  
+  if(IS_PROGRESSIVE){
+    // enabledNodes = new Set();
+    enabledNodes = new Set(data.node_id.slice(0,progress));
+  }else{
+    enabledNodes = new Set(data.nodeIds);
+  }
 
+  if(nodes === undefined){
+    preprocess(data, undefined);
+  }else{
+    preprocess(data, nodes);
+  }
+
+  main(data.nodes, data.edges, data.virtual_edges, data.node_center, data.id2index);
+
+// });
 });
-});
 
 
-// //--------code----------
-const colorscheme = d3.schemeAccent;//schemePastel1
-const OPACITY_NOT_UPDATE = 0.1;
-const IS_PROGRESSIVE = false;
-const IS_DYNAMIC = false;
-const EDGE_COLOR = '#666';
-//globals
-let shouldTick = true;
-let shouldHideLabel = false;
-let shouldHideAll = false;
-let shouldDraw = true;
-let bg = '#eef7ec';
 
 
-function main(nodes, edges, virtualEdges, nodeCenter){
+function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   let scale0 = 1;
+  let maxLevel = d3.max(nodes, d=>d.level);
+
   let width = window.innerWidth;
   let height = window.innerHeight;
 
-  let enabledNodes;
-  if(IS_PROGRESSIVE){
-    enabledNodes = new Set();
-  }else{
-    enabledNodes = new Set(nodes.map(d=>d.id));
-  }
-  window.enabledNodes = enabledNodes;
-
-  
 
   let svg = d3.select('#main')
   .attr('width', width)
@@ -140,10 +162,15 @@ function main(nodes, edges, virtualEdges, nodeCenter){
     }
     scales.sx = transform.rescaleX(sx0);
     scales.sy = transform.rescaleY(sy0);
+
+   
+
     ax.scale(scales.sx);
     ay.scale(scales.sy);
     gx.call(ax);
     gy.call(ay);
+    
+
 
     nodeCircles
     .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/4));
@@ -152,14 +179,16 @@ function main(nodes, edges, virtualEdges, nodeCenter){
     .attr('stroke-width', e => sr(e.level)/2 )
     // .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
 
+    
+
+
     draw(nodes, edges, 
     nodeCircles, linkLines, labelTexts,
     scales.sx, scales.sy, transform);
   })
   .on('end', ()=>{
+
     debugMsg();
-
-
     labelOverlap(labelTextNodes, 1.0);
     draw(nodes, edges, 
     nodeCircles, linkLines, labelTexts,
@@ -248,6 +277,7 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   .style('text-anchor', 'middle')
   .style('alignment-baseline', 'middle')
   .style('filter', 'url(#whiteOutlineEffect)')
+  .style('display', shouldHideLabel?'none':'')
   .text(d=>d.label)
   .call(drag(simulation));
 
@@ -259,18 +289,12 @@ function main(nodes, edges, virtualEdges, nodeCenter){
 
   nodes.forEach((d,i)=>{
     let bbox = labelTextNodes[i].getBoundingClientRect();
-    d.bbox = {
-      //width: maxWidth,
-      //height: maxHeight,
-      width: bbox.width,
-      height: bbox.height,
-    };
+    updateBbox(d, bbox, scales);
   });
 
   let maxEdgeWeight = d3.max(edges, e=>e.weight);
   let minEdgeWeight = d3.min(edges, e=>e.weight);
   console.log('maxEdgeWeight', maxEdgeWeight);
-  let progress = 0;
   
 
   // def force
@@ -280,16 +304,16 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   // .force('pre', forcePre())
   // .force('central', 
   //  d3.forceRadial(0, nodeCenter[0], nodeCenter[1])
-  //  .strength(0.01)
+  //  .strength(0.001)
   // )
   // .force('charge', 
   //  d3.forceManyBody()
-  //  .strength(d=>-1)
+  //  .strength(d=>-250 * (maxLevel - d.level + 1))
   // )
   // .force('collide', 
   //  d3.forceCollide()
   //  .radius(d=>{
-  //    return 80;
+  //    return 50;
   //  })
   //  .strength(0.1)
   // )
@@ -311,30 +335,31 @@ function main(nodes, edges, virtualEdges, nodeCenter){
   // )
   // 
   
-  .force('ideal-edge-length', 
-    forceStress(nodes, edges, enabledNodes)
-    // .strength(e=>50/Math.pow(e.weight, 1))
-    .strength(e=>1 / e.weight * minEdgeWeight )
-    .distance(e=>e.weight)
-  )
+  // .force('ideal-edge-length', 
+  //   forceStress(nodes, edges, enabledNodes, id2index)
+  //   // .strength(e=>50/Math.pow(e.weight, 1))
+  //   .strength(e=>1 / e.weight * minEdgeWeight )
+  //   .distance(e=>e.weight)
+  // )
+  // .force('stress', 
+  //   forceStress(nodes, edges.concat(virtualEdges), enabledNodes, id2index)
+  //   // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+  //   .strength(e=>2 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
+  //   .distance(e=>e.weight )
+  // )
   // .force('node-edge-repulsion', 
   //   forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
   // )
-  .force('stress', 
-    forceStress(nodes, virtualEdges, enabledNodes)
-    .strength(e=>2 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-    .distance(e=>e.weight)
-  )
   .force('label-collide', 
     forceEllipse({
       nodes: nodes, 
       scales: scales,
-      strength: 4,
-      b: 2.5,
+      strength: 30,
+      b: 2.0,
       c: 1.0,
     })
   )
-  .force('post', forcePost(edges, 1e9, enabledNodes, 0.8));
+  // .force('post', forcePost(edges, 5000, enabledNodes, id2index, 0.8));
 
 
 
@@ -372,9 +397,9 @@ function main(nodes, edges, virtualEdges, nodeCenter){
       // alert('All nodes enabled');
       return;
     }
-    nodes.forEach((d,i)=>{
-      d.update = enabledNodes.has(d.id);
-    });
+    // nodes.forEach((d,i)=>{
+    //   d.update = enabledNodes.has(d.id);
+    // });
     simulation.alpha(0.99).restart();
     console.log(`${progress} / ${nodes.length}`);
 
@@ -411,7 +436,7 @@ function main(nodes, edges, virtualEdges, nodeCenter){
 
     }else if(key === 'h'){//[h]ide all
       shouldHideAll = !shouldHideAll;
-      // shouldDraw = !shouldDraw;
+      shouldDraw = !shouldDraw;
       d3.selectAll('.labelText')
       .style('display', (shouldHideAll||shouldHideLabel)?'none':'');
       d3.selectAll('.node')
@@ -420,23 +445,54 @@ function main(nodes, edges, virtualEdges, nodeCenter){
       .style('display', shouldHideAll?'none':'');
 
     }else if(key === 'a'){//[A]dd a node
+      if(enabledNodes.size == 0){
+        runtime.push({
+          count: enabledNodes.size,
+          time: performance.now(),
+        });
+      }
       addNode();
-    }else if(key == 'd'){//show [D]ebug message
+    }else if(key === 'd'){//show [D]ebug message
       debugMsg();
-    }else if(key == 'b'){//background
+    }else if(key === 'b'){//background
       bg = (bg != '#eef7ec') ? '#eef7ec' : '#333';
       svg.style('background', bg); 
-    }else if(key == 's'){
+    }else if(key === 's'){
+      if(enabledNodes.size == 0){
+        runtime.push({
+          count: enabledNodes.size,
+          time: performance.now(),
+        });
+      }
       if(intervalId === undefined){
-        intervalId = setInterval(addNode, 2000);
+        intervalId = setInterval(()=>{
+          addNode();
+          if(enabledNodes.size === nodes.length){
+            console.log('paused adding');
+            clearInterval(intervalId);
+            intervalId = undefined;
+            setTimeout(()=>{
+              simulation.stop();
+              runtime.push({
+                count: enabledNodes.size,
+                time: performance.now(),
+              });
+              exportJson(pos(),`topics-${enabledNodes.size}.json`);
+              //need restart manually
+            }, 15000);
+          }
+        }, 150);
       }else{
-        console.log('stop')
+        console.log('stop');
         clearInterval(intervalId);
         intervalId = undefined;
       }
-      
-    }else{
-
+    }else if(key === '/'){//log
+      runtime.push({
+        count: enabledNodes.size,
+        time: performance.now(),
+      });
+      exportJson(pos(),`topics-${enabledNodes.size}.json`);
     }
   });
   // //off-line training
@@ -450,16 +506,50 @@ function main(nodes, edges, virtualEdges, nodeCenter){
 
 // //--------functions----------
 function preprocess(data, nodes){
+  
+  
+
   if(nodes !== undefined){
     data.nodes = nodes;
+  }else{
+    data.nodes = [];
+    for(let i=0; i<data.node_id.length; i++){
+      data.nodes[i] = {};
+      for(let k in data){
+        if(k.slice(0,5) === 'node_'){
+          data.nodes[i][k.slice(5)] = data[k][i];
+        }
+      }
+    }
+  }
+
+  data.edges = [];
+  for(let i=0; i<data.edge_source.length; i++){
+    data.edges[i] = {};
+    for(let k in data){
+      if(k.slice(0,5) === 'edge_'){
+        data.edges[i][k.slice(5)] = data[k][i];
+      }
+    }
+  }
+
+  data.virtual_edges = [];
+  for(let i=0; i<data.virtual_edge_source.length; i++){
+    data.virtual_edges[i] = {};
+    for(let k in data){
+      if(k.slice(0,13) === 'virtual_edge_'){
+        data.virtual_edges[i][k.slice(13)] = data[k][i];
+      }
+    }
   }
 
 
-  let prescale_pos = 2;
+
+  let prescale_pos = 1;
   let prescale_weight = 1;
+
   data.id2index = {};
   data.nodes.forEach((d,i)=>{
-
     if(d.x === undefined){
       d.x = Math.random()*100;
       d.y = Math.random()*100;
@@ -471,13 +561,12 @@ function preprocess(data, nodes){
       d.xInit = d.x;
       d.yInit = d.y;
     }
-
     d.index = i;
     data.id2index[d.id] = d.index;
     d.weight = prescale_weight / d.level;
     d.label = d.label.slice(0,16);
     d.norm = Math.sqrt(d.x*d.x + d.y*d.y);
-    d.update = !IS_PROGRESSIVE;
+    d.update = IS_PROGRESSIVE ? enabledNodes.has(d.id) : true;
   });
   data.node_center = math.mean(data.nodes.map(d=>[d.x, d.y]), 0);
 
@@ -490,7 +579,7 @@ function preprocess(data, nodes){
     e.weight *= prescale_weight;
   }
 
-  // data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 16);
+  // data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 5);
   for(let e of data.virtual_edges){
     e.source = data.nodes[data.id2index[e.source]];
     e.target = data.nodes[data.id2index[e.target]];
@@ -500,8 +589,16 @@ function preprocess(data, nodes){
 
 
 function pos(){
-  let nodes = data.nodes.map(d=>d);
-  return JSON.stringify(nodes, null, 2);
+  let nodes = data.nodes.map(d=>({
+    id: d.id,
+    x:d.x, 
+    y:d.y, 
+    label:d.label,
+    level: d.level,
+    parent: d.parent,
+  }));
+  // return JSON.stringify(nodes, null, 2);
+  return nodes;
 }
 
 
@@ -577,7 +674,7 @@ function getScales(nodes, svg, prescaling=1.0){
 function draw(nodes, edges,
 nodeCircles, linkLines, labelTexts,
 sx, sy, transform){
-  if(!shouldDraw) {
+  if(!shouldDraw || shouldHideAll) {
     return;
   }
   for(let i=0; i<edges.length; i++){
@@ -626,8 +723,11 @@ sx, sy, transform){
   // .transition()
   // .duration(300)
   .attr('opacity', (d,i)=>{
-    // return labelTextNodes[i].show && d.update ? 1.0: 0.0;
-    return d.update ? 1.0:0;
+    if(HIDE_OVERLAP){
+      return labelTextNodes[i].show && d.update ? 1.0: 0.0;
+    }else{
+      return d.update ? 1.0:0;
+    }
   })
 
   // let labelTextNodes = labelTexts.nodes();
@@ -641,4 +741,22 @@ sx, sy, transform){
   // labelTexts
   // .attr('x', d=>sx(d.x))
   // .attr('y', d=>sy(d.y))
+}
+
+
+
+
+function updateBbox(d, bbox, scales){
+  let marginLeft = bbox.width * 0.0;
+  let marginTop = bbox.height * 0.0;
+  let x = scales.sx(d.x);
+  let y = scales.sy(d.y);
+  d.bbox = {
+    width: bbox.width,
+    height: bbox.height,
+    left: x - bbox.width/2 - marginLeft,
+    top: y - bbox.height/2 - marginTop,
+    right: x + bbox.width/2 + marginLeft,
+    bottom: y + bbox.height/2 + marginTop,
+  };
 }

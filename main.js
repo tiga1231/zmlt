@@ -183,7 +183,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
 
 
     draw(nodes, edges, 
-    nodeCircles, linkLines, labelTexts,
+    nodeCircles, linkLines, labelTexts, labelBoxes,
     scales.sx, scales.sy, transform);
   })
   .on('end', ()=>{
@@ -191,7 +191,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
     debugMsg();
     labelOverlap(labelTextNodes, 1.0);
     draw(nodes, edges, 
-    nodeCircles, linkLines, labelTexts,
+    nodeCircles, linkLines, labelTexts, labelBoxes,
     scales.sx, scales.sy, transform);
 
   });
@@ -263,6 +263,16 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   .attr('stroke-width', d=>Math.max(1, sr(d.level)/4))
   .call(drag(simulation));
   
+  const labelBoxes = svg
+  .selectAll('.labelBox')
+  .data(nodes)
+  .join('rect')
+  .attr('class', 'labelBox')
+  .attr('fill', '#aaf')
+  .attr('stroke', '#333')
+  .attr('stroke-width', 1)
+  .attr('opacity', 0.1);
+
   const labelTexts = svg
   .selectAll('.labelText')
   .data(nodes)
@@ -280,6 +290,9 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   .style('display', shouldHideLabel?'none':'')
   .text(d=>d.label)
   .call(drag(simulation));
+
+  
+
 
   let labelTextNodes = labelTexts.nodes();
   window.labelTextNodes = labelTextNodes;
@@ -301,15 +314,15 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   simulation
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  // .force('pre', forcePre())
-  // .force('central', 
-  //  d3.forceRadial(0, nodeCenter[0], nodeCenter[1])
-  //  .strength(0.001)
-  // )
-  // .force('charge', 
-  //  d3.forceManyBody()
-  //  .strength(d=>-250 * (maxLevel - d.level + 1))
-  // )
+  .force('pre', forcePre(scales))
+  .force('central', 
+   d3.forceRadial(0, nodeCenter[0], nodeCenter[1])
+   .strength(0.001)
+  )
+  .force('charge', 
+   d3.forceManyBody()
+   .strength(d=>-250 * (maxLevel - d.level + 1))
+  )
   // .force('collide', 
   //  d3.forceCollide()
   //  .radius(d=>{
@@ -335,31 +348,31 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   // )
   // 
   
-  // .force('ideal-edge-length', 
-  //   forceStress(nodes, edges, enabledNodes, id2index)
-  //   // .strength(e=>50/Math.pow(e.weight, 1))
-  //   .strength(e=>1 / e.weight * minEdgeWeight )
-  //   .distance(e=>e.weight)
-  // )
-  // .force('stress', 
-  //   forceStress(nodes, edges.concat(virtualEdges), enabledNodes, id2index)
-  //   // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-  //   .strength(e=>2 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
-  //   .distance(e=>e.weight )
-  // )
-  // .force('node-edge-repulsion', 
-  //   forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
-  // )
+  .force('ideal-edge-length', 
+    forceStress(nodes, edges, enabledNodes, id2index)
+    // .strength(e=>50/Math.pow(e.weight, 1))
+    .strength(e=>0.1 / e.weight * minEdgeWeight )
+    .distance(e=>e.weight)
+  )
+  .force('stress', 
+    forceStress(nodes, edges.concat(virtualEdges), enabledNodes, id2index)
+    // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+    .strength(e=>0.1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
+    .distance(e=>e.weight )
+  )
+  .force('node-edge-repulsion', 
+    forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
+  )
   .force('label-collide', 
     forceEllipse({
       nodes: nodes, 
       scales: scales,
-      strength: 30,
+      strength: 3,
       b: 2.0,
       c: 1.0,
     })
   )
-  // .force('post', forcePost(edges, 5000, enabledNodes, id2index, 0.8));
+  .force('post', forcePost(edges, 5000, enabledNodes, id2index, 0.2));
 
 
 
@@ -378,7 +391,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
     }
     draw(
       nodes, edges,
-      nodeCircles, linkLines, labelTexts,
+      nodeCircles, linkLines, labelTexts, labelBoxes,
       scales.sx, scales.sy, transform
     );
     tickCount += 1;
@@ -406,7 +419,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
     // labelOverlap(labelTextNodes, 1.0);
     draw(
       nodes, edges, 
-      nodeCircles, linkLines, labelTexts,
+      nodeCircles, linkLines, labelTexts, labelBoxes,
       scales.sx, scales.sy, transform
     );
   };
@@ -432,7 +445,8 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
       shouldHideLabel = !shouldHideLabel;
       d3.selectAll('.labelText')
       .style('display', shouldHideLabel?'none':'');
-
+      d3.selectAll('.labelBox')
+      .style('display', shouldHideLabel?'none':'');
 
     }else if(key === 'h'){//[h]ide all
       shouldHideAll = !shouldHideAll;
@@ -443,7 +457,13 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
       .style('display', shouldHideAll?'none':'');
       d3.selectAll('.link')
       .style('display', shouldHideAll?'none':'');
-
+      d3.selectAll('.labelBox')
+      .style('display', shouldHideAll?'none':'');
+      if(!shouldHideAll){
+        draw(nodes, edges, 
+        nodeCircles, linkLines, labelTexts,labelBoxes,
+        scales.sx, scales.sy, transform);
+      }
     }else if(key === 'a'){//[A]dd a node
       if(enabledNodes.size == 0){
         runtime.push({
@@ -672,11 +692,12 @@ function getScales(nodes, svg, prescaling=1.0){
 
 // def draw
 function draw(nodes, edges,
-nodeCircles, linkLines, labelTexts,
+nodeCircles, linkLines, labelTexts, labelBoxes,
 sx, sy, transform){
   if(!shouldDraw || shouldHideAll) {
     return;
   }
+
   for(let i=0; i<edges.length; i++){
     edges[i].crossed = false;
   }
@@ -728,7 +749,19 @@ sx, sy, transform){
     }else{
       return d.update ? 1.0:0;
     }
-  })
+  });
+
+  for(let n of nodes){
+    updateBbox(n, n.bbox, {sx,sy});
+  }
+  labelBoxes
+  .attr('x', d=>d.bbox.left)
+  .attr('y', d=>d.bbox.top)
+  .attr('width', d=>d.bbox.right-d.bbox.left)
+  .attr('height', d=>d.bbox.bottom-d.bbox.top)
+  .attr('opacity', d=>{
+    return d.update ? 0.2:0.0;
+  });
 
   // let labelTextNodes = labelTexts.nodes();
   // nodes.forEach((d,i)=>{
@@ -747,8 +780,8 @@ sx, sy, transform){
 
 
 function updateBbox(d, bbox, scales){
-  let marginLeft = bbox.width * 0.0;
-  let marginTop = bbox.height * 0.0;
+  let marginLeft = bbox.width * 0;
+  let marginTop = bbox.height * 0;
   let x = scales.sx(d.x);
   let y = scales.sy(d.y);
   d.bbox = {

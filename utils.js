@@ -68,7 +68,7 @@ function colorLabel(labelNodes, color='orange'){
 }
 
 
-function labelOverlap(labelNodes, heightFactor=0.6){
+function labelOverlap(labelNodes){
   let count = 0;
   let overlapMatrix = [];
   for(let i=0; i<labelNodes.length; i++){
@@ -77,12 +77,7 @@ function labelOverlap(labelNodes, heightFactor=0.6){
     l1.show = true;
   }
 
-  let bboxes = labelNodes.map(l=>{
-    let bbox = l.getBoundingClientRect();
-    bbox.y += bbox.height * heightFactor/2;
-    bbox.height *= heightFactor;
-    return bbox;
-  });
+  let bboxes = labelNodes.map(l=>l.getBoundingClientRect());
 
   labelNodes.forEach(d=>d.overlap = new Set());
   for(let i=0; i<labelNodes.length; i++){

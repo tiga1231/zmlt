@@ -22,7 +22,7 @@ function forceEllipse(kwargs){
   let force = (alpha)=>{
     let tree = d3.quadtree(nodes, (d)=>scales.sx(d.x), (d)=>scales.sy(d.y));
     let n = -Math.log(alpha);
-    let beta = alpha > 0.5 ? (1-alpha) * 15/Math.sqrt(n+10) : 7.5/Math.sqrt(n+10);
+    let beta = alpha > 0.5 ? (1-alpha) * 15/Math.sqrt(n+5) : 7.5/Math.sqrt(n+5);
 
 
     for(let i=0; i<nodes.length; i++){
@@ -30,7 +30,7 @@ function forceEllipse(kwargs){
       let ni = n.ellipse;
       ni.x = scales.sx(n.x);
       ni.y = scales.sy(n.y);
-      updateBbox(n, n.bbox, scales);
+      
     }
 
     for(let i=0; i<nodes.length; i++){
@@ -64,7 +64,7 @@ function forceEllipse(kwargs){
         let collide = isRectCollide(nodes[i].bbox, nodes[j].bbox);
         let dir = forceDir(nj.x-ni.x, nj.y-ni.y, ni.a, ni.b);
         // let magnitude = inside||collide ? strength/(Math.pow(dij,2)+0.1) : 0.05 * strength / dij;
-        let magnitude = collide ? strength/(Math.pow(dij,2)+10) : 0.01*strength/(Math.pow(dij,2)+10);
+        let magnitude = collide ? strength/(Math.pow(dij,2)+1) : 0.01*strength/(Math.pow(dij,2)+10);
         magnitude *= beta;
 
         let vx = magnitude * dir.x;
@@ -426,7 +426,7 @@ function forceDummy(){
 }
 
 
-function forcePre(decay=0.4){
+function forcePre(scales, decay){
   let force = (alpha)=>{
     for(let n of force.nodes){
       // n.vx = n.vx0 !== undefined ? n.vx0*(1-decay) : n.vx;
@@ -435,6 +435,7 @@ function forcePre(decay=0.4){
       n.vy = 0;
       // n.fx = null;
       // n.fy = null;
+      updateBbox(n, n.bbox, scales);
     }
   };
 

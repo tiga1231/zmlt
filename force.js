@@ -146,15 +146,30 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     // let beta = Math.pow((1-alpha), 7) * Math.pow(alpha, 3) * 450;
     // let beta = alpha > 0.5 ? (1-alpha) * 15/Math.sqrt(n+10) : 7.5/Math.sqrt(n+10);
 
+    let tree = d3.quadtree(nodes, d=>d.x, d=>d.y);
 
     for(let j=0; j<edges.length; j++){
       let e = edges[j];
       let e0 = e.source;
       let e1 = e.target;
 
+      
+
       if(!enabledNodes.has(e0.id) || !enabledNodes.has(e1.id)){
         continue;
       }
+
+      let xmin = Math.min(e.source.x, e.target.x) - 1000;
+      let xmax = Math.max(e.source.x, e.target.x) + 1000;
+      let ymin = Math.min(e.source.y, e.target.y) - 1000;
+      let ymax = Math.max(e.source.y, e.target.y) + 1000;
+      e.neighbors = new Set(
+        searchQuadtree(tree,  
+          d=>d.x, d=>d.y, 
+          xmin, xmax, ymin, ymax
+        )
+      );
+
 
       //rotational and translational params
       let center = {
@@ -179,8 +194,17 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       f0 = rotate(f0, cos, -sin);
       f1 = rotate(f1, cos, -sin);
 
-      for(let i=0; i<nodes.length; i++){
+
+
+      // for(let i=0; i<nodes.length; i++){
+      //   let n = nodes[i];
+
+      for(let i of e.neighbors){
+        i = id2index[i];
         let n = nodes[i];
+
+
+
         // if(!enabledNodes.has(n.id)){
         if(!n.update){
           continue;
@@ -615,7 +639,6 @@ function forceStress(nodes, edges, enabledNodes, id2index){
   let force = (alpha)=>{
     alpha = schedule(alpha);
     for(let e of edges){
-    // 
     //stochastic
     // for(let i=0; i<nodes.length; i++){
     //   let e = edges[randint(0,edges.length)];

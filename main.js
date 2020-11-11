@@ -13,12 +13,11 @@ let shouldDraw = true;
 let bg = '#eef7ec';
 let runtime = [];
 let nodes;
-let progress = 1;
-// let progress = 9e9;
+let progress = 1e9;
 
 let enabledNodes;
-window.enabledNodes = enabledNodes;
-
+// window.enabledNodes = enabledNodes;
+let worker = new Worker('simulation.js');
 
 //--------data----------
 // d3.json('data/json/lastfm-iqbal/lastfm_8.json').then(data=>{
@@ -51,12 +50,12 @@ window.enabledNodes = enabledNodes;
 
 
 // topics-faryad-5000
-d3.json('data/json/topics_faryad_5000/Graph_500.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_5000.json').then(nodes=>{
+d3.json('data/json/topics_faryad_5000/Graph_5000.json').then(data=>{
+// d3.json('data/json/topics_faryad_5000/Graph_5000-nodes-2.json').then(nodes=>{
   window.data = data;
-  if(nodes !== undefined){
-    progress = data.node_id.length;
-  }
+  // if(nodes !== undefined){
+  //   progress = data.node_id.length;
+  // }
   
   if(IS_PROGRESSIVE){
     // enabledNodes = new Set();
@@ -64,14 +63,52 @@ d3.json('data/json/topics_faryad_5000/Graph_500.json').then(data=>{
   }else{
     enabledNodes = new Set(data.nodeIds);
   }
-
   if(nodes === undefined){
     preprocess(data, undefined);
   }else{
     preprocess(data, nodes);
   }
+  window.nodes = data.nodes;
+  window.edges = data.edges;
+  let dataObj = init(data.nodes, data.edges, data.virtual_edges, data.node_center, data.id2index);
+  
+  
 
-  main(data.nodes, data.edges, data.virtual_edges, data.node_center, data.id2index);
+  let simData = dataObj.simData;
+  let drawData = dataObj.drawData;
+  worker.postMessage(simData);
+  worker.onmessage = function(event) {
+    let data = event.data;
+    let type = data.type;
+    if(type === 'tick'){
+      console.log(`${(data.progress * 100).toFixed(2)}%`);
+
+      window.nodes = data.nodes;
+      window.edges = data.edges;
+      window.simulation = data.simulation;
+      window.enabledNodes = data.enabledNodes;
+      draw(
+        data.nodes, data.edges, 
+        drawData.nodeCircles, drawData.linkLines, 
+        drawData.labelTexts, drawData.labelBoxes,
+        drawData.scales.sx, drawData.scales.sy, 
+        drawData.transform
+      );
+
+    }else if(type === 'end'){
+      window.nodes = data.nodes;
+      window.edges = data.edges;
+      window.simulation = data.simulation;
+      window.enabledNodes = data.enabledNodes;
+      draw(
+        data.nodes, data.edges, 
+        drawData.nodeCircles, drawData.linkLines, 
+        drawData.labelTexts, drawData.labelBoxes,
+        drawData.scales.sx, drawData.scales.sy, 
+        drawData.transform
+      );
+    }
+  };
 
 // });
 });
@@ -79,7 +116,7 @@ d3.json('data/json/topics_faryad_5000/Graph_500.json').then(data=>{
 
 
 
-function main(nodes, edges, virtualEdges, nodeCenter, id2index){
+function init(nodes, edges, virtualEdges, nodeCenter, id2index){
   let scale0 = 1;
   let maxLevel = d3.max(nodes, d=>d.level);
 
@@ -122,8 +159,8 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   let transform = d3.zoomIdentity.scale(scale0);
 
   function debugMsg(){
-    let edgesTmp = edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
-    let nodesTmp = nodes.filter(d=>enabledNodes.has(d.id));
+    let edgesTmp = window.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
+    let nodesTmp = window.nodes.filter(d=>enabledNodes.has(d.id));
     let labelTextNodesTmp = labelTexts.filter(d=>enabledNodes.has(d.id)).nodes();
     console.log(
       'zoom:', 
@@ -151,11 +188,14 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   let zoom = d3.zoom()
   // .scaleExtent([0.5/scale0, 6.0/scale0])
   .on('zoom', (transform0)=>{
+
+
     if(transform0 === undefined){
       transform = d3.event.transform.scale(scale0);
     }else{
       transform = transform0;
     }
+    console.log('zoom', transform.k);
     if(sx0 === undefined){
       sx0 = scales.sx;
       sy0 = scales.sy;
@@ -163,34 +203,44 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
     scales.sx = transform.rescaleX(sx0);
     scales.sy = transform.rescaleY(sy0);
 
-   
+    worker.postMessage({
+      type: 'zoom',
+      xDomain: scales.sx.domain(),
+      yDomain: scales.sy.domain(),
+      xRange: scales.sx.range(),
+      yRange: scales.sy.range(),
+    });
 
     ax.scale(scales.sx);
     ay.scale(scales.sy);
     gx.call(ax);
     gy.call(ay);
     
-
-
     nodeCircles
-    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/4));
+    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
     // .attr('r', d=>sr(d.level));
     linkLines
     .attr('stroke-width', e => sr(e.level)/2 )
-    // .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
+    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
 
-    
-
-
-    draw(nodes, edges, 
+    draw(window.nodes, window.edges, 
     nodeCircles, linkLines, labelTexts, labelBoxes,
     scales.sx, scales.sy, transform);
+
   })
   .on('end', ()=>{
 
     debugMsg();
     labelOverlap(labelTextNodes, 1.0);
-    draw(nodes, edges, 
+
+    nodeCircles
+    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
+    // .attr('r', d=>sr(d.level));
+    linkLines
+    .attr('stroke-width', e => sr(e.level)/2 )
+    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
+
+    draw(window.nodes, window.edges, 
     nodeCircles, linkLines, labelTexts, labelBoxes,
     scales.sx, scales.sy, transform);
 
@@ -200,7 +250,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
 
   var maxPerplexity = d3.max(nodes, d => d.perplexity);
   let niter = 500;
-  const simulation = d3.forceSimulation(nodes);
+  // let simulation = d3.forceSimulation(nodes);
   
 
   let drag = simulation => {
@@ -218,17 +268,17 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
       }
       
     })
-      .on('drag', (d)=>{
+    .on('drag', (d)=>{
 
-        if(d.type !== 'label'){
-          d.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
-          d.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
-        }else{
-          d.for.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
-          d.for.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
-        }
+      if(d.type !== 'label'){
+        d.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
+        d.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
+      }else{
+        d.for.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
+        d.for.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
+      }
     })
-      .on('end', (d)=>{
+    .on('end', (d)=>{
       if (!d3.event.active){
         simulation.alpha(0.3).alphaTarget(0);
       }
@@ -261,7 +311,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   // .attr('fill', d=>'#1f78b4')
   .attr('stroke', EDGE_COLOR)
   .attr('stroke-width', d=>Math.max(1, sr(d.level)/4))
-  .call(drag(simulation));
+  // .call(drag(simulation));
   
   const labelBoxes = svg
   .selectAll('.labelBox')
@@ -289,10 +339,7 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
   .style('filter', 'url(#whiteOutlineEffect)')
   .style('display', shouldHideLabel?'none':'')
   .text(d=>d.label)
-  .call(drag(simulation));
-
-  
-
+  // .call(drag(simulation));
 
   let labelTextNodes = labelTexts.nodes();
   window.labelTextNodes = labelTextNodes;
@@ -304,136 +351,20 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
     let bbox = labelTextNodes[i].getBoundingClientRect();
     updateBbox(d, bbox, scales);
   });
-
-  let maxEdgeWeight = d3.max(edges, e=>e.weight);
-  let minEdgeWeight = d3.min(edges, e=>e.weight);
-  console.log('maxEdgeWeight', maxEdgeWeight);
-  
-
-  // def force
-  simulation
-  .velocityDecay(0.4)
-  .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  .force('pre', forcePre(scales))
-  .force('central', 
-   d3.forceRadial(0, nodeCenter[0], nodeCenter[1])
-   .strength(0.001)
-  )
-  .force('charge', 
-   d3.forceManyBody()
-   .strength(d=>-250 * (maxLevel - d.level + 1))
-  )
-  // .force('collide', 
-  //  d3.forceCollide()
-  //  .radius(d=>{
-  //    return 50;
-  //  })
-  //  .strength(0.1)
-  // )
-  // .force('compact',
-  //   d3.forceLink(edges)
-  //   .distance(e=>-5)
-  //   .strength(e=>1e-2)
-  // )
-  // .force('link-virtual',
-  //   d3.forceLink(virtualEdges)
-  //   .distance(e=>e.weight)
-  //   .strength(e=>1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
-  //   // .strength(e=>0.02 / e.hops )
-  // )
-  // .force('link-real',
-  //   d3.forceLink(edges)
-  //   .distance(e=>e.weight)
-  //   .strength(e=>1)
-  // )
-  // 
-  
-  .force('ideal-edge-length', 
-    forceStress(nodes, edges, enabledNodes, id2index)
-    // .strength(e=>50/Math.pow(e.weight, 1))
-    .strength(e=>0.1 / e.weight * minEdgeWeight )
-    .distance(e=>e.weight)
-  )
-  .force('stress', 
-    forceStress(nodes, edges.concat(virtualEdges), enabledNodes, id2index)
-    // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-    .strength(e=>0.1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
-    .distance(e=>e.weight )
-  )
-  .force('node-edge-repulsion', 
-    forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
-  )
-  .force('label-collide', 
-    forceEllipse({
-      nodes: nodes, 
-      scales: scales,
-      strength: 3,
-      b: 2.0,
-      c: 1.0,
-    })
-  )
-  .force('post', forcePost(edges, 5000, enabledNodes, id2index, 0.2));
+  zoom.on('zoom')(transform); //draw
 
 
-
-
-
-
-  let t0 = 0;
-  let tickCount = 0;
-  simulation.on('tick', () => {
-    let t = performance.now();
-    let fps = 1000 / (t-t0);
-    //console.log(`${fps.toFixed(2)} fps`);
-    t0 = t;
-    if(tickCount % 10 == 0){
-      console.log(tickCount);
-    }
-    draw(
-      nodes, edges,
-      nodeCircles, linkLines, labelTexts, labelBoxes,
-      scales.sx, scales.sy, transform
-    );
-    tickCount += 1;
-  });
-
-
-  let intervalId = undefined;
-  let addNode = ()=>{
-    let start = progress;
-    progress += 1;
-    if(progress <= nodes.length){
-      initNodePosition(nodes.slice(start, progress), enabledNodes, nodes, edges, data.id2index, !IS_DYNAMIC);
-      // enabledNodes.add(nodes[progress].id);
-    }else{
-      simulation.alpha(0.99).restart();
-      // alert('All nodes enabled');
-      return;
-    }
-    // nodes.forEach((d,i)=>{
-    //   d.update = enabledNodes.has(d.id);
-    // });
-    simulation.alpha(0.99).restart();
-    console.log(`${progress} / ${nodes.length}`);
-
-    // labelOverlap(labelTextNodes, 1.0);
-    draw(
-      nodes, edges, 
-      nodeCircles, linkLines, labelTexts, labelBoxes,
-      scales.sx, scales.sy, transform
-    );
-  };
   window.addEventListener('keydown', (event)=>{
     let key = event.key;
+    console.log(key);
     if(key === 'p'){//[P]ause
-      // shouldTick = !shouldTick;
-      // if(shouldTick){
-      //   simulation.restart();
-      // }else{
-        simulation.stop();
-      // }
+       worker.postMessage({
+        type: 'stop'
+      });
     }else if(key === 'r'){//[R]eset
-      simulation.alpha(0.85).restart();
+      worker.postMessage({
+        type: 'restart'
+      });
     }else if(key === 'c'){//show [C]ollision
       colorLabel(labelTextNodes, 'white');
       labelOverlap(labelTextNodes);
@@ -460,53 +391,23 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
       d3.selectAll('.labelBox')
       .style('display', shouldHideAll?'none':'');
       if(!shouldHideAll){
-        draw(nodes, edges, 
+        draw(window.nodes, window.edges, 
         nodeCircles, linkLines, labelTexts,labelBoxes,
         scales.sx, scales.sy, transform);
       }
     }else if(key === 'a'){//[A]dd a node
-      if(enabledNodes.size == 0){
-        runtime.push({
-          count: enabledNodes.size,
-          time: performance.now(),
-        });
-      }
-      addNode();
+      worker.postMessage({
+        type: 'add-node',
+      });
     }else if(key === 'd'){//show [D]ebug message
       debugMsg();
     }else if(key === 'b'){//background
       bg = (bg != '#eef7ec') ? '#eef7ec' : '#333';
       svg.style('background', bg); 
     }else if(key === 's'){
-      if(enabledNodes.size == 0){
-        runtime.push({
-          count: enabledNodes.size,
-          time: performance.now(),
-        });
-      }
-      if(intervalId === undefined){
-        intervalId = setInterval(()=>{
-          addNode();
-          if(enabledNodes.size === nodes.length){
-            console.log('paused adding');
-            clearInterval(intervalId);
-            intervalId = undefined;
-            setTimeout(()=>{
-              simulation.stop();
-              runtime.push({
-                count: enabledNodes.size,
-                time: performance.now(),
-              });
-              exportJson(pos(),`topics-${enabledNodes.size}.json`);
-              //need restart manually
-            }, 15000);
-          }
-        }, 150);
-      }else{
-        console.log('stop');
-        clearInterval(intervalId);
-        intervalId = undefined;
-      }
+      worker.postMessage({
+        type: 'auto-add-nodes'
+      });
     }else if(key === '/'){//log
       runtime.push({
         count: enabledNodes.size,
@@ -515,11 +416,29 @@ function main(nodes, edges, virtualEdges, nodeCenter, id2index){
       exportJson(pos(),`topics-${enabledNodes.size}.json`);
     }
   });
-  // //off-line training
-  simulation.stop();
-  // simulation.tick(150);
-  zoom.on('zoom')(transform); //draw
-  
+  let simData = {
+    nodes, 
+    edges, 
+    virtualEdges, 
+    enabledNodes, 
+    id2index,
+    xDomain: scales.sx.domain(),
+    xRange: scales.sy.range(),
+    yDomain: scales.sy.domain(),
+    yRange: scales.sy.range(),
+    progress: progress,
+    idealZoomScale: 5,
+  };
+  let drawData = {
+    nodeCircles,
+    linkLines,
+    labelTexts,
+    labelBoxes,
+    scales,
+    transform
+  }
+
+  return {simData, drawData};
 }
 
 
@@ -609,7 +528,7 @@ function preprocess(data, nodes){
 
 
 function pos(){
-  let nodes = data.nodes.map(d=>({
+  let nodes = window.nodes.map(d=>({
     id: d.id,
     x:d.x, 
     y:d.y, 
@@ -697,7 +616,6 @@ sx, sy, transform){
   if(!shouldDraw || shouldHideAll) {
     return;
   }
-
   for(let i=0; i<edges.length; i++){
     edges[i].crossed = false;
   }
@@ -722,6 +640,7 @@ sx, sy, transform){
     }
   }   
   linkLines
+  .data(edges)
   .attr('x1', d => sx(d.source.x))
   .attr('y1', d => sy(d.source.y))
   .attr('x2', d => sx(d.target.x))
@@ -732,13 +651,17 @@ sx, sy, transform){
     // return sa(Math.max(e.source.level, e.target.level), transform.k)
   })
   nodeCircles
-  .attr('cx', d => sx(d.x))
+  .data(nodes)
+  .attr('cx', (d,i) => {
+    return sx(d.x);
+  })
   .attr('cy', d => sy(d.y))
   .attr('opacity', d=>{
     return d.update ? 1.0:OPACITY_NOT_UPDATE;
     // return sa(d.level, transform.k);
   });
   labelTexts
+  .data(nodes)
   .attr('x', d=>sx(d.x))
   .attr('y', d=>sy(d.y))
   // .transition()
@@ -755,6 +678,7 @@ sx, sy, transform){
     updateBbox(n, n.bbox, {sx,sy});
   }
   labelBoxes
+  .data(nodes)
   .attr('x', d=>d.bbox.left)
   .attr('y', d=>d.bbox.top)
   .attr('width', d=>d.bbox.right-d.bbox.left)

@@ -13,10 +13,11 @@ let shouldDraw = true;
 let bg = '#eef7ec';
 let runtime = [];
 let nodes;
-let progress = 1e9;
+let progress = 1;
 
-let enabledNodes;
-// window.enabledNodes = enabledNodes;
+
+window.enabledNodes;
+
 let worker = new Worker('simulation.js');
 
 //--------data----------
@@ -50,8 +51,14 @@ let worker = new Worker('simulation.js');
 
 
 // topics-faryad-5000
-d3.json('data/json/topics_faryad_5000/Graph_5000.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_5000-nodes-2.json').then(nodes=>{
+// d3.json('data/json/topics_faryad_5000/Graph_2000.json').then(data=>{
+// d3.json('data/json/topics_faryad_5000/Graph_500-nodes-5.json').then(nodes=>{
+
+
+
+d3.json('data/json/topics-5000-low-degree/topics-5.json').then(data=>{
+// d3.json('data/json/topics-5000-low-degree/Graph_500-nodes-5.json').then(nodes=>{
+
   window.data = data;
   // if(nodes !== undefined){
   //   progress = data.node_id.length;
@@ -59,9 +66,9 @@ d3.json('data/json/topics_faryad_5000/Graph_5000.json').then(data=>{
   
   if(IS_PROGRESSIVE){
     // enabledNodes = new Set();
-    enabledNodes = new Set(data.node_id.slice(0,progress));
+    window.enabledNodes = new Set(data.node_id.slice(0,progress));
   }else{
-    enabledNodes = new Set(data.nodeIds);
+    window.enabledNodes = new Set(data.nodeIds);
   }
   if(nodes === undefined){
     preprocess(data, undefined);
@@ -159,9 +166,9 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
   let transform = d3.zoomIdentity.scale(scale0);
 
   function debugMsg(){
-    let edgesTmp = window.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
-    let nodesTmp = window.nodes.filter(d=>enabledNodes.has(d.id));
-    let labelTextNodesTmp = labelTexts.filter(d=>enabledNodes.has(d.id)).nodes();
+    let edgesTmp = window.edges.filter(e=>window.enabledNodes.has(e.source.id) && window.enabledNodes.has(e.target.id));
+    let nodesTmp = window.nodes.filter(d=>window.enabledNodes.has(d.id));
+    let labelTextNodesTmp = labelTexts.filter(d=>window.enabledNodes.has(d.id)).nodes();
     console.log(
       'zoom:', 
       parseFloat(transform.k.toFixed(2)),
@@ -410,17 +417,17 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
       });
     }else if(key === '/'){//log
       runtime.push({
-        count: enabledNodes.size,
+        count: window.enabledNodes.size,
         time: performance.now(),
       });
-      exportJson(pos(),`topics-${enabledNodes.size}.json`);
+      exportJson(pos(),`topics-${window.enabledNodes.size}.json`);
     }
   });
   let simData = {
     nodes, 
     edges, 
     virtualEdges, 
-    enabledNodes, 
+    enabledNodes: window.enabledNodes, 
     id2index,
     xDomain: scales.sx.domain(),
     xRange: scales.sy.range(),
@@ -460,6 +467,12 @@ function preprocess(data, nodes){
         }
       }
     }
+  }
+  let cx = d3.mean(data.nodes, d=>d.x);
+  let cy = d3.mean(data.nodes, d=>d.y);
+  for(let n of data.nodes){
+    n.x -= cx;
+    n.y -= cy;
   }
 
   data.edges = [];
@@ -505,7 +518,7 @@ function preprocess(data, nodes){
     d.weight = prescale_weight / d.level;
     d.label = d.label.slice(0,16);
     d.norm = Math.sqrt(d.x*d.x + d.y*d.y);
-    d.update = IS_PROGRESSIVE ? enabledNodes.has(d.id) : true;
+    d.update = IS_PROGRESSIVE ? window.enabledNodes.has(d.id) : true;
   });
   data.node_center = math.mean(data.nodes.map(d=>[d.x, d.y]), 0);
 
@@ -518,7 +531,7 @@ function preprocess(data, nodes){
     e.weight *= prescale_weight;
   }
 
-  // data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 5);
+  data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 5);
   for(let e of data.virtual_edges){
     e.source = data.nodes[data.id2index[e.source]];
     e.target = data.nodes[data.id2index[e.target]];

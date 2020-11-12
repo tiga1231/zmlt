@@ -52,7 +52,7 @@ function evaluate(){
     'Number of Label Overlap:', labelOverlap(window.labelTextNodes)
   );
   console.log(
-    'Ideal Edge Length Preservation:', 
+    'Ideal Edge Length Preservation (Mingwei):', 
     idealEdgeLengthPreservation2(window.data.edges, window.data.edges.map(e=>e.weight))
   );
   console.log(
@@ -153,7 +153,6 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
     }
     let count = 0;
     while(countCrossings(edges, node)>0){
-      console.log('initNodePosition...');
       node.x = (Math.random()-0.5)*1/count + other.x;
       node.y = (Math.random()-0.5)*1/count + other.y;
       count+=1;

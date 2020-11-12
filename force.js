@@ -1,3 +1,18 @@
+function forceScaleY(nodes, k){
+  let force = ()=>{
+    for(let n of nodes){
+      n.y *= k;
+      // n.vy *= k;
+    }
+  };
+
+  force.initialize = (newNodes)=>{
+    nodes = newNodes;
+  };
+  return force;
+}
+
+
 function forceEllipse(kwargs){
   let nodes = kwargs.nodes;
   let strength = kwargs.strength;
@@ -128,15 +143,17 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     // let c = Math.sqrt(a*a-b*b);
     // let p = {x: n.x/a, y: n.y/b};
     // let r = p.x*p.x + p.y*p.y;
-    let y2 = n.y*n.y;
-    let d = Math.sqrt(Math.pow(n.x-c,2)+y2) + Math.sqrt(Math.pow(n.x+c,2)+y2);
-    let a2 = 2*a;
-    if(d > a2){
+    // let y2 = n.y*n.y;
+    // let d = Math.sqrt(Math.pow(n.x-c,2)+y2) + Math.sqrt(Math.pow(n.x+c,2)+y2);
+    // let a2 = 2*a;
+    let ay = Math.abs(n.y);
+    // if(d > a2){
+    if(ay > a){
       return 0;
     }else{
-      let c2 = c*2;
-      // return c2/(d-c2+10);
-      return 10*c2/(y2+c2);
+      // let c2 = c*2;
+      // return 10*c2/(y2+c2/2);
+      return 100*c/(Math.abs(n.y)+c/100);
     }
   };
 
@@ -158,17 +175,6 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       if(!enabledNodes.has(e0.id) || !enabledNodes.has(e1.id)){
         continue;
       }
-
-      let xmin = Math.min(e.source.x, e.target.x) - 1000;
-      let xmax = Math.max(e.source.x, e.target.x) + 1000;
-      let ymin = Math.min(e.source.y, e.target.y) - 1000;
-      let ymax = Math.max(e.source.y, e.target.y) + 1000;
-      e.neighbors = new Set(
-        searchQuadtree(tree,  
-          d=>d.x, d=>d.y, 
-          xmin, xmax, ymin, ymax
-        )
-      );
 
 
       //rotational and translational params
@@ -195,14 +201,24 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       f1 = rotate(f1, cos, -sin);
 
 
+      let xmin = Math.min(e0.x, e1.x) - r;
+      let xmax = Math.max(e0.x, e1.x) + r;
+      let ymin = Math.min(e0.y, e1.y) - r;
+      let ymax = Math.max(e0.y, e1.y) + r;
+      e.neighbors = new Set(
+        searchQuadtree(tree,  
+          d=>d.x, d=>d.y, 
+          xmin, xmax, ymin, ymax
+        )
+      );
+
 
       // for(let i=0; i<nodes.length; i++){
       //   let n = nodes[i];
 
       for(let i of e.neighbors){
-        i = id2index[i];
+      //   i = id2index[i];
         let n = nodes[i];
-
 
 
         // if(!enabledNodes.has(n.id)){
@@ -514,13 +530,13 @@ function forcePost(edges, radius, enabledNodes, id2index, damping=0.2){
           let n = nodes[i];
           n.vx1 = n.vx0;
           n.vy1 = n.vy0;
-          for (let m of n.neighbors){
-            if(enabledNodes.has(m)){
-              m = force.nodes[id2index[m]];
-              n.vx1 += m.vx0 * 0.1;
-              n.vy1 += m.vx0 * 0.1;
-            }
-          }
+          // for (let m of n.neighbors){
+          //   if(enabledNodes.has(m)){
+          //     m = force.nodes[id2index[m]];
+          //     n.vx1 += m.vx0 * 0.1;
+          //     n.vy1 += m.vx0 * 0.1;
+          //   }
+          // }
           if(n.vx1 !== 0 || n.vy1 !== 0){
             n.x = damping * n.x0 + (1-damping) * (n.x0 + n.vx1 * t);
             n.y = damping * n.y0 + (1-damping) * (n.y0 + n.vy1 * t);
@@ -638,10 +654,11 @@ function forceStress(nodes, edges, enabledNodes, id2index){
 
   let force = (alpha)=>{
     alpha = schedule(alpha);
-    for(let e of edges){
+    // for(let e of edges){
+    // 
     //stochastic
-    // for(let i=0; i<nodes.length; i++){
-    //   let e = edges[randint(0,edges.length)];
+    for(let i=0; i<nodes.length; i++){
+      let e = edges[randint(0,edges.length)];
 
       // if(enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id)){
       if(nodes[id2index[e.source.id]].update && nodes[id2index[e.target.id]].update){

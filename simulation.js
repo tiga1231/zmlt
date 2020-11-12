@@ -23,7 +23,7 @@ let progress;
 let maxEdgeWeight;
 let minEdgeWeight;
 let intervalId;
-
+let iter = 0;
 
 
 
@@ -51,10 +51,10 @@ onmessage = function(event) {
   console.log(type);
   if(type === 'restart'){
     simulation.alpha(0.85);
-    train(niter, 10);
+    train(niter);
   }else if(type === 'add-node'){  
     addNode(self.progress);
-    train(5);
+    train(10);
   }else if(type === 'stop'){  
     simulation.stop();
   }else if(type === 'zoom'){  
@@ -63,9 +63,7 @@ onmessage = function(event) {
   }else if(type === 'auto-add-nodes'){
     while(enabledNodes.size < nodes.length){
       addNode();
-      if(enabledNodes.size % 2 == 0){
-        train(1);
-      }
+      train(1);
     }
     train(10);
 
@@ -91,6 +89,8 @@ onmessage = function(event) {
     // }
   }
   else{
+    let aspectRatio = 3;
+    let idealZoomScale = 20;
     //default init event
     niter = 500;
     nodes = dataObj.nodes;
@@ -108,54 +108,62 @@ onmessage = function(event) {
 
     self.progress = progress;
     // def force
-    simulation = d3
-    .forceSimulation(nodes)
-    // .velocityDecay(0.4)
-    // .alphaDecay(1 - Math.pow(0.001, 1 / niter))
+    simulation = d3.forceSimulation(nodes)
+    .velocityDecay(0.4)
+    .alphaDecay(1 - Math.pow(0.001, 1 / niter))
     .force('pre', forcePre(scales))
     .force('central', 
      d3.forceRadial(0, 0, 0)
-     .strength(0.001)
+     .strength(0.005)
     )
     .force('charge', 
      d3.forceManyBody()
-     .strength(d=>-250 * (10 - d.level + 1))
+     .strength(d=>-(9-d.level)*500)
     )
+
+
+    .force('pre-collide', forceScaleY(nodes, aspectRatio))
     .force('collide', 
-     d3.forceCollide()
-     .radius(d=>{
-       return scales.sx.invert(122.6875) - scales.sx.invert(0);
-     })
-     .strength(0.1)
+      d3.forceCollide()
+      .radius(d=>scales.sx.invert(d.bbox.width/idealZoomScale) - scales.sx.invert(0))
+      .strength(0.05)
     )
-    .force('link-virtual',
-      d3.forceLink(virtualEdges)
-      .distance(e=>e.weight)
-      .strength(e=>1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
-      // .strength(e=>0.02 / e.hops )
-    )
+    .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+    
+
     .force('link-real',
       d3.forceLink(edges)
       .distance(e=>e.weight)
       .strength(e=>1)
     )
+    // .force('link-virtual',
+    //   d3.forceLink(virtualEdges)
+    //   .distance(e=>Math.pow(e.weight, 0.5+1/e.hops))
+    //   .strength(e=>0.01 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+    //   // .strength(e=>0.02 / e.hops )
+    // )
+    
     // 
+
 
     // .force('ideal-edge-length', 
     //   forceStress(nodes, edges, enabledNodes, id2index)
     //   // .strength(e=>50/Math.pow(e.weight, 1))
     //   .strength(e=>0.1 / e.weight * minEdgeWeight )
-    //   .distance(e=>e.weight)
+    //   .distance(e=>Math.pow(e.weight, 0.5))
     // )
-    // .force('stress', 
-    //   forceStress(nodes, virtualEdges, enabledNodes, id2index)
-    //   // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-    //   .strength(e=>0.1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
-    //   .distance(e=>e.weight )
-    // )
-    // // .force('node-edge-repulsion', 
-    // //   forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
-    // // )
+    .force('stress', 
+      forceStress(nodes, virtualEdges, enabledNodes, id2index)
+      .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+      // .strength(e=>0.1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
+      // .distance(e=>e.weight)
+      .distance(e=>Math.pow(e.weight, 0.7+1/e.hops))
+    )
+    // 
+    // 
+    .force('node-edge-repulsion', 
+      forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
+    )
     // .force('label-collide', 
     //   forceEllipse({
     //     nodes: nodes, 
@@ -167,6 +175,29 @@ onmessage = function(event) {
     // )
     .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
     .stop();
+
+
+    simulation.on('tick', (arg)=>{
+      iter += 1;
+      if(iter % 10 == 0){
+        postMessage({
+          type: 'tick', 
+          progress: iter / niter,
+          nodes, 
+          edges,
+          enabledNodes,
+        });
+      }
+    })
+    .on('end', ()=>{
+      postMessage({
+        type: 'end',
+        progress: iter / niter,
+        nodes, 
+        edges,
+        enabledNodes,
+      });
+    })
 
     // train(1);
   }
@@ -197,27 +228,30 @@ function updateBbox(d, bbox, scales){
   
 
 
-function train(niter, tick=1e9){
+function train(niter){
+  iter = 0;
+
   simulation
   .velocityDecay(0.4)
   .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  for (var i = 0; i<niter; i+=1) {
-    simulation.tick(10);
-    if(i % tick == 0){
-      postMessage({
-        type: 'tick', 
-        progress: (i+1) / niter,
-        nodes, 
-        edges,
-        enabledNodes,
-      });
-    }
-  }
-  postMessage({
-    type: "end",
-    progress: (i+1) / niter,
-    nodes, 
-    edges,
-    enabledNodes,
-  });
+  .restart();
+  // for (var i = 0; i<niter; i+=1) {
+  //   simulation.tick(10);
+  //   if(i % tick == 0){
+  //     postMessage({
+  //       type: 'tick', 
+  //       progress: (i+1) / niter,
+  //       nodes, 
+  //       edges,
+  //       enabledNodes,
+  //     });
+  //   }
+  // }
+  // postMessage({
+  //   type: "end",
+  //   progress: (i+1) / niter,
+  //   nodes, 
+  //   edges,
+  //   enabledNodes,
+  // });
 }

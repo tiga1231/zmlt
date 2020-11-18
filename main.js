@@ -56,8 +56,9 @@ let worker = new Worker('simulation.js');
 
 
 
-d3.json('data/json/topics-5000-low-degree/topics-5.json').then(data=>{
-// d3.json('data/json/topics-5000-low-degree/Graph_500-nodes-5.json').then(nodes=>{
+// d3.json('data/json/topics-5000-low-degree/topics-3.json').then(data=>{
+d3.json('data/json/topics-5000-low-degree/topics-8-sfdp.json').then(data=>{
+d3.json('data/json/topics-5000-low-degree/topics-8-sfdp-nodes-12.json').then(nodes=>{
 
   window.data = data;
   // if(nodes !== undefined){
@@ -77,10 +78,7 @@ d3.json('data/json/topics-5000-low-degree/topics-5.json').then(data=>{
   }
   window.nodes = data.nodes;
   window.edges = data.edges;
-  let dataObj = init(data.nodes, data.edges, data.virtual_edges, data.node_center, data.id2index);
-  
-  
-
+  let dataObj = init(data);
   let simData = dataObj.simData;
   let drawData = dataObj.drawData;
   worker.postMessage(simData);
@@ -117,13 +115,18 @@ d3.json('data/json/topics-5000-low-degree/topics-5.json').then(data=>{
     }
   };
 
-// });
+});
 });
 
 
 
 
-function init(nodes, edges, virtualEdges, nodeCenter, id2index){
+function init(data){
+  let nodes = data.nodes; 
+  let edges = data.edges;
+  let virtualEdges = data.virtual_edges;
+  let id2index = data.id2index;
+
   let scale0 = 1;
   let maxLevel = d3.max(nodes, d=>d.level);
 
@@ -140,7 +143,7 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
   let sc = d3.scaleLinear()
   .domain([5,1])
   .range(['#ece7f2','#2b8cbe']);
-  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([3,1]);
+  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([1,0.5]);
   let scales = getScales(nodes, svg, scale0);
 
   let ax = d3.axisBottom(scales.sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
@@ -224,11 +227,11 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
     gy.call(ay);
     
     nodeCircles
-    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
+    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/4));
     // .attr('r', d=>sr(d.level));
     linkLines
     .attr('stroke-width', e => sr(e.level)/2 )
-    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
+    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/4 )
 
     draw(window.nodes, window.edges, 
     nodeCircles, linkLines, labelTexts, labelBoxes,
@@ -245,7 +248,7 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
     // .attr('r', d=>sr(d.level));
     linkLines
     .attr('stroke-width', e => sr(e.level)/2 )
-    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/2 )
+    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/4 )
 
     draw(window.nodes, window.edges, 
     nodeCircles, linkLines, labelTexts, labelBoxes,
@@ -340,7 +343,7 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
   // .attr('fill', d=>d3.color(sc(d.level)).brighter(2))
   .style('font-weight', 100)
   // .style('font-size', d=>`${16-d.level}px`)
-  .style('font-size', d=>'16px')
+  .style('font-size', d=>'14px')
   .style('text-anchor', 'middle')
   .style('alignment-baseline', 'middle')
   .style('filter', 'url(#whiteOutlineEffect)')
@@ -434,7 +437,7 @@ function init(nodes, edges, virtualEdges, nodeCenter, id2index){
     yDomain: scales.sy.domain(),
     yRange: scales.sy.range(),
     progress: progress,
-    idealZoomScale: 5,
+    // edgeIncidence: data.edgeIncidence,
   };
   let drawData = {
     nodeCircles,
@@ -485,6 +488,7 @@ function preprocess(data, nodes){
     }
   }
 
+
   data.virtual_edges = [];
   for(let i=0; i<data.virtual_edge_source.length; i++){
     data.virtual_edges[i] = {};
@@ -531,7 +535,23 @@ function preprocess(data, nodes){
     e.weight *= prescale_weight;
   }
 
-  data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 5);
+  // data.edgeIncidence = new Set();
+  // for(let i=0; i<data.edges.length; i++){
+  //   let e0 = data.edges[i];
+  //   for(let j=i+1; j<data.edges.length; j++){
+  //     let e1 = data.edges[j];
+  //     let isIncident = e0.source.id === e1.source.id 
+  //       || e0.source.id === e1.target.id 
+  //       || e0.target.id === e1.source.id 
+  //       || e0.target.id === e1.target.id;
+  //     if(isIncident){
+  //       data.edgeIncidence.add(`${e0.source.id}-${e0.target.id}-${e1.source.id}-${e1.target.id}`);
+  //       data.edgeIncidence.add(`${e1.source.id}-${e1.target.id}-${e0.source.id}-${e0.target.id}`);
+  //     }
+  //   }
+  // }
+
+  // data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 10);
   for(let e of data.virtual_edges){
     e.source = data.nodes[data.id2index[e.source]];
     e.target = data.nodes[data.id2index[e.target]];

@@ -5,6 +5,7 @@
 // importScripts("https://d3js.org/d3-force.v1.min.js");
 
 importScripts("lib/d3.v5.js");
+importScripts("lib/bentley-ottman.js");
 importScripts("force.js");
 importScripts("utils.js");
 importScripts("lib/numeric-1.2.6.js");
@@ -50,7 +51,7 @@ onmessage = function(event) {
   let type = event.data.type;
   console.log(type);
   if(type === 'restart'){
-    simulation.alpha(0.85);
+    simulation.alpha(0.99);
     train(niter);
   }else if(type === 'add-node'){  
     addNode(self.progress);
@@ -89,15 +90,19 @@ onmessage = function(event) {
     // }
   }
   else{
-    let aspectRatio = 3;
-    let idealZoomScale = 20;
     //default init event
-    niter = 500;
+    //
+    const nodesInScreen = 25;
+    let idealZoomScale = 1.5 * Math.sqrt(dataObj.nodes.length / nodesInScreen);
+    console.log('target non-overlap scale', idealZoomScale);
+    let aspectRatio = 3;
+    console.log(dataObj);
     nodes = dataObj.nodes;
     edges = dataObj.edges;
     enabledNodes = dataObj.enabledNodes;
     id2index =  dataObj.id2index;
-    virtualEdges =  dataObj.virtualEdges;
+    virtualEdges = dataObj.virtualEdges;
+
     scales =  {
       sx: d3.scaleLinear().domain(dataObj.xDomain).range(dataObj.xRange),
       sy: d3.scaleLinear().domain(dataObj.yDomain).range(dataObj.yRange),
@@ -106,30 +111,16 @@ onmessage = function(event) {
     maxEdgeWeight = d3.max(edges, e=>e.weight);
     minEdgeWeight = d3.min(edges, e=>e.weight);
 
+    let maxLevel = d3.max(nodes, d=>d.level);
+
     self.progress = progress;
     // def force
     simulation = d3.forceSimulation(nodes)
     .velocityDecay(0.4)
     .alphaDecay(1 - Math.pow(0.001, 1 / niter))
     .force('pre', forcePre(scales))
-    .force('central', 
-     d3.forceRadial(0, 0, 0)
-     .strength(0.005)
-    )
-    .force('charge', 
-     d3.forceManyBody()
-     .strength(d=>-(9-d.level)*500)
-    )
 
 
-    .force('pre-collide', forceScaleY(nodes, aspectRatio))
-    .force('collide', 
-      d3.forceCollide()
-      .radius(d=>scales.sx.invert(d.bbox.width/idealZoomScale) - scales.sx.invert(0))
-      .strength(0.05)
-    )
-    .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
-    
 
     .force('link-real',
       d3.forceLink(edges)
@@ -142,10 +133,6 @@ onmessage = function(event) {
     //   .strength(e=>0.01 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
     //   // .strength(e=>0.02 / e.hops )
     // )
-    
-    // 
-
-
     // .force('ideal-edge-length', 
     //   forceStress(nodes, edges, enabledNodes, id2index)
     //   // .strength(e=>50/Math.pow(e.weight, 1))
@@ -159,27 +146,48 @@ onmessage = function(event) {
       // .distance(e=>e.weight)
       .distance(e=>Math.pow(e.weight, 0.7+1/e.hops))
     )
-    // 
-    // 
+
+
+    //other aesthetics
+    .force('central', 
+     d3.forceRadial(0, 0, 0)
+     .strength(0.005)
+    )
+    .force('charge', 
+     d3.forceManyBody()
+     .strength(d=> -4*(200+50*(maxLevel-d.level)) )
+    )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
     )
-    // .force('label-collide', 
-    //   forceEllipse({
-    //     nodes: nodes, 
-    //     scales: scales,
-    //     strength: 3,
-    //     b: 2.0,
-    //     c: 1.0,
-    //   })
-    // )
+    
+
+    //label removal
+    .force('pre-collide', forceScaleY(nodes, aspectRatio))
+    .force('collide', 
+      d3.forceCollide()
+      .radius(d=>scales.sx.invert(d.bbox.width/idealZoomScale) - scales.sx.invert(0))
+      .strength(0.05)
+      .iterations(1)
+    )
+    .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+    // // .force('label-collide', 
+    // //   forceEllipse({
+    // //     nodes: nodes, 
+    // //     scales: scales,
+    // //     strength: 3,
+    // //     b: 2.0,
+    // //     c: 1.0,
+    // //   })
+    // // )
+    
+    
     .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
     .stop();
 
-
     simulation.on('tick', (arg)=>{
       iter += 1;
-      if(iter % 10 == 0){
+      if(iter % 5 == 0){
         postMessage({
           type: 'tick', 
           progress: iter / niter,

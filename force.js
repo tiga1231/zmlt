@@ -153,7 +153,7 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     }else{
       // let c2 = c*2;
       // return 10*c2/(y2+c2/2);
-      return 100*c/(Math.abs(n.y)+c/100);
+      return 10*c/(Math.abs(n.y)+1);
     }
   };
 
@@ -493,21 +493,42 @@ function forcePre(scales, decay){
 function forcePost(edges, radius, enabledNodes, id2index, damping=0.2){
   let getX = (d)=>d.x;
   let getY = (d)=>d.y;
-  let updateNeighbors = (nodes, getX, getY, r)=>{
-    let tree = d3.quadtree(nodes, getX, getX);
-    for(let n of nodes){
-      n.neighbors = new Set(
-        searchQuadtree(tree, getX, getY, n.x-r, n.x+r, n.y-r, n.y+r)
-      );
-    }
-  };
+  // let updateNeighbors = (nodes, getX, getY, r)=>{
+  //   let tree = d3.quadtree(nodes, getX, getX);
+  //   for(let n of nodes){
+  //     n.neighbors = new Set(
+  //       searchQuadtree(tree, getX, getY, n.x-r, n.x+r, n.y-r, n.y+r)
+  //     );
+  //   }
+  // };
+  // 
+  // let updateSides = (nodes, getX, getY)=>{
+  //   nodes = nodes.slice();
+  //   let n = nodes.length;
+  //   let xSorted = nodes.sort((a,b)=>getX(a)-getX(b)).map(d=>d.index);
+  //   let ySorted = nodes.sort((a,b)=>getY(a)-getY(b)).map(d=>d.index);
+  //   for(let i=0; i<n; i++){
+  //     let node = nodes[xSorted[i]];
+  //     node.left = new Set(xSorted.slice(0,i));
+  //     node.right = new Set(xSorted.slice(i));
+  //     node.down = new Set(ySorted.slice(0,i));
+  //     node.up = new Set(ySorted.slice(i));
+  //   }
+  // };
+
 
   let forcePost_ = (alpha)=>{
-    let nodes = force.nodes.filter(d=>d.update);
-    let edges = force.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
+    let nodes, edges;
 
-    let sampleSize = 1;
-    let niter = Math.ceil(nodes.length / sampleSize);
+    if(enabledNodes.size < force.nodes.length){
+      nodes = force.nodes.filter(d=>d.update);
+      edges = force.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
+    }else{
+      nodes = force.nodes;
+      edges = force.edges
+    }
+    // updateSides(nodes, getX, getY);
+    // markCrossings(edges);
 
     for(let n of nodes){
       n.x0 = n.x;
@@ -518,53 +539,31 @@ function forcePost(edges, radius, enabledNodes, id2index, damping=0.2){
       n.vy = 0;
     }
 
-
-
-    for(let iter=0; iter<niter; iter++){
-      // look ahead
+    for(let n of nodes){
       let steps = 12;
       let t = 1.0;
-      let crossings;
+      let edges1 = edges.filter(e=>n.id === e.source.id || n.id === e.target.id);
       while(steps>0){
-        for(let i=sampleSize*iter; i<sampleSize*(iter+1); i++){
-          let n = nodes[i];
-          n.vx1 = n.vx0;
-          n.vy1 = n.vy0;
-          // for (let m of n.neighbors){
-          //   if(enabledNodes.has(m)){
-          //     m = force.nodes[id2index[m]];
-          //     n.vx1 += m.vx0 * 0.1;
-          //     n.vy1 += m.vx0 * 0.1;
-          //   }
-          // }
-          if(n.vx1 !== 0 || n.vy1 !== 0){
-            n.x = damping * n.x0 + (1-damping) * (n.x0 + n.vx1 * t);
-            n.y = damping * n.y0 + (1-damping) * (n.y0 + n.vy1 * t);
-          }
-
+        if(n.vx0 !== 0 || n.vy0 !== 0){
+          n.x = damping * n.x0 + (1-damping) * (n.x0 + n.vx0 * t);
+          n.y = damping * n.y0 + (1-damping) * (n.y0 + n.vy0 * t);
         }
-
-        crossings = 0;
-        for(let i=sampleSize*iter; i<sampleSize*(iter+1); i++){
-          crossings += countCrossings(edges, nodes[i]);
-        }
-
+        let crossings = countCrossings(edges, edges1);
         if(crossings == 0){
           break;
         }else{
           t *= 0.8;
         }
+        // if(n.crossed){
+        //   t *= 0.8;
+        // }else{
+        //   break;
+        // }
         steps -= 1;
       }
-      // console.log(crossings);
-
       if(steps == 0){
-        // console.log('reseting nodes in', samples);
-        for(let i=sampleSize*iter; i<sampleSize*(iter+1); i++){
-          let n = nodes[i];
-          n.x = n.x0;
-          n.y = n.y0;
-        }
+        n.x = n.x0;
+        n.y = n.y0;
       }
     }
 

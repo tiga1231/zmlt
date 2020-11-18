@@ -144,22 +144,30 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
       }
     }
 
-    if(useInitital && node.xInit !== undefined){
-      node.x = other.x + (node.xInit - other.xInit);
-      node.y = other.y + (node.yInit - other.yInit);
-    }else{
-      node.x = (Math.random()-0.5)*1 + other.x;
-      node.y = (Math.random()-0.5)*1 + other.y;
-    }
-    let count = 0;
-    while(countCrossings(edges, node)>0){
-      node.x = (Math.random()-0.5)*1/count + other.x;
-      node.y = (Math.random()-0.5)*1/count + other.y;
-      count+=1;
-    }
-    // if(count == 100){
-    //   alert(node.x, node.y);
+    let count = 1;
+    // if(useInitital && node.xInit !== undefined){
+    //   node.x = other.x + (node.xInit - other.xInit);
+    //   node.y = other.y + (node.yInit - other.yInit);
+    // }else{
+    //   node.x = (Math.random()-0.5)*1 + other.x;
+    //   node.y = (Math.random()-0.5)*1 + other.y;
     // }
+    let edges1 = allEdges.filter(e=>node.id === e.source.id || node.id === e.target.id);
+    do {
+      if(useInitital && node.xInit !== undefined){
+        let r = 1/count;
+        node.x = other.x + (node.xInit - other.xInit)*r;
+        node.y = other.y + (node.yInit - other.yInit)*r;
+        if(count > 1){
+          node.x += (Math.random()-0.5);
+          node.y += (Math.random()-0.5);
+        }
+      }else{
+        node.x = other.x + (Math.random()-0.5);
+        node.y = other.y + (Math.random()-0.5);
+      }
+      count+=1;
+    } while(countCrossings(edges, edges1)>0);
     currentNodes0.add(node.id);
   }
   return currentNodes0;
@@ -223,7 +231,8 @@ function initOneNode(node, boundaryNodes, boundaryEdges, currentNodes, currentEd
     //   node.y = (Math.random()-0.5)*1 + boundaryNodes[0].y;
     // }
 
-    while(countCrossings(allEdges, node) > 0){
+    let edges1 = allEdges.filter(e=>node.id === e.source.id || node.id === e.target.id);
+    while(countCrossings(allEdges, edges1) > 0){
       node.x = (Math.random()-0.5)*10 + boundaryNodes[0].x;
       node.y = (Math.random()-0.5)*10 + boundaryNodes[0].y;
     }
@@ -421,50 +430,158 @@ function interpolate(a, b, t=0.5){
 //   return inter.length;
 // }
 
+function edge2segment(edges){
+  return edges.map(e=>[[e.source.x, e.source.y],[e.target.x, e.target.y]]);
+  // let segs = {};
+  // edges.forEach((e,i)=>{
+  //   segs[i] = [[e.source.x, e.source.y],[e.target.x, e.target.y]];
+  // });
+  return segs;
+}
 
-function countCrossings(edges, node){
-  //count crossings between all [edges] and edges emitted from certain [node]
+
+function markCrossings(edges){
+  for(let e of edges){
+    e.crossed = false;
+    e.source.crossed = false;
+    e.target.crossed = false;
+  }
+  let segs = edge2segment(edges);
+  let inter = findIntersections(segs);
+  for(let i=0; i<inter.length; i++){
+    if( Array.isArray(inter[i].segmentID) ){
+      let [e0,e1] = [+inter[i].segmentID[0], +inter[i].segmentID[1]];
+
+      edges[e0].crossed = true;
+      edges[e0].source.crossed = true;
+      edges[e0].target.crossed = true;
+
+      edges[e1].crossed = true;
+      edges[e1].source.crossed = true;
+      edges[e1].target.crossed = true;
+    }else{
+      console.log(inter[i]);
+      let e0 = +inter[i].segmentID;
+      edges[e0].crossed = true;
+      edges[e0].source.crossed = true;
+      edges[e0].target.crossed = true;
+    }
+  }
+}
+
+
+
+// function countCrossings(edges, node){
+//   //count crossings between all [edges] and edges emitted from certain [node]
+//   let count = 0;
+//   for(let i=0; i<edges.length; i++){
+//     edges[i].crossed = false;
+//   }
+//   let edges0;
+//   if(node == undefined){
+//     edges0 = edges;
+//   }else{
+//     edges0 = edges.filter(e=>node.id === e.source.id || node.id === e.target.id);
+//   }
+//   let edges1 = edges;
+
+//   for(let i=0; i<edges0.length; i++){
+//     let e0 = edges0[i];
+//     for(let j=0; j<edges1.length; j++){
+//       let e1 = edges1[j];
+//       let isIncident = e0.source.id === e1.source.id 
+//         || e0.source.id === e1.target.id 
+//         || e0.target.id === e1.source.id 
+//         || e0.target.id === e1.target.id;
+//       count += !isIncident && isCrossed(e0,e1);
+//     }
+//   }
+//   return count;
+// }
+
+// edges0 = edges.filter(e=>node.id === e.source.id || node.id === e.target.id);
+
+function countCrossings(edges0, edges1){
+  //count crossings between all [edges0] and [edges1]
   let count = 0;
-  for(let i=0; i<edges.length; i++){
-    edges[i].crossed = false;
-  }
-
-  let edges0;
-  if(node == undefined){
-    edges0 = edges;
-  }else{
-    edges0 = edges.filter(e=>node.id === e.source.id || node.id === e.target.id);
-  }
   for(let i=0; i<edges0.length; i++){
-    for(let j=0; j<edges.length; j++){
-      let e0 = edges0[i];
-      let e1 = edges[j];
-      let isIncident = e0.source.id == e1.source.id 
-      || e0.source.id == e1.target.id 
-      || e0.target.id == e1.source.id 
-      || e0.target.id == e1.target.id;
-      
-      if(!isIncident && isCrossed(e0,e1)){
-        count += 1;
-      }else{
+    edges0[i].crossed = false;
+  }
+  if(edges1 === undefined){
+    edges1 = edges0;
+  }else{
+    for(let i=0; i<edges1.length; i++){
+      edges1[i].crossed = false;
+    }
+  }
+  
 
-      }
+  for(let i=0; i<edges0.length; i++){
+    let e0 = edges0[i];
+    for(let j=0; j<edges1.length; j++){
+      let e1 = edges1[j];
+      let isIncident = e0.source.id === e1.source.id 
+        || e0.source.id === e1.target.id 
+        || e0.target.id === e1.source.id 
+        || e0.target.id === e1.target.id;
+      
+      count += !isIncident && isCrossed(e0,e1);
     }
   }
   return count;
 }
 
 
+
+
+
+// function isCrossed(e0, e1){
+//   let p0 = e0.source;
+//   let p1 = e0.target;
+//   let q0 = e1.source;
+//   let q1 = e1.target;
+//   return (
+//     signOf(q0, p0, p1)*signOf(q1, p0, p1) <= 0
+//     && signOf(p0, q0, q1)*signOf(p1, q0, q1) <= 0
+//   );
+// }
 function isCrossed(e0, e1){
-  let p0 = e0.source;
-  let p1 = e0.target;
-  let q0 = e1.source;
-  let q1 = e1.target;
-  return (
-    signOf(q0, p0, p1)*signOf(q1, p0, p1) <= 0
-    && signOf(p0, q0, q1)*signOf(p1, q0, q1) <= 0
-  );
+  //ref: graphic gems 3, "FASTER LINE SEGMENT INTERSECTION", pg.199
+  let p1 = e0.source;
+  let p2 = e0.target;
+  let p3 = e1.source;
+  let p4 = e1.target;
+
+  let a = {x: p2.x-p1.x, y: p2.y-p1.y};
+  let b = {x: p3.x-p4.x, y: p3.y-p4.y};
+  let c = {x: p1.x-p3.x, y: p1.y-p3.y};
+
+  let denom = a.y*b.x - a.x*b.y;
+  let numer = b.y*c.x - b.x*c.y;
+  if(denom > 0){
+    if (numer <= 0 || numer >= denom){
+      return false;
+    }
+  }else{
+    if (numer >= 0 || numer <= denom){
+      return false;
+    }
+  }
+
+  let numer2 = a.x*c.y - a.y*c.x;
+  if(denom > 0){
+    if (numer2 <= 0 || numer2 >= denom){
+      return false;
+    }
+  }else{
+    if (numer2 >= 0 || numer2 <= denom){
+      return false;
+    }
+  }
+
+  return true;
 }
+
 
 function signOf(p, l0, l1){
   let a = (l0.y - l1.y);

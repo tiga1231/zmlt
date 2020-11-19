@@ -3,7 +3,8 @@ const colorscheme = d3.schemeAccent;//schemePastel1
 const OPACITY_NOT_UPDATE = 0.1;
 const IS_PROGRESSIVE = true;
 const IS_DYNAMIC = false;
-const EDGE_COLOR = '#666';
+const EDGE_COLOR = '#aaa';
+// const EDGE_COLOR = d3.rgb(249,180,35);
 const HIDE_OVERLAP = false;
 //globals
 let shouldTick = true;
@@ -55,10 +56,10 @@ let worker = new Worker('simulation.js');
 // d3.json('data/json/topics_faryad_5000/Graph_500-nodes-5.json').then(nodes=>{
 
 
-
-// d3.json('data/json/topics-5000-low-degree/topics-3.json').then(data=>{
-d3.json('data/json/topics-5000-low-degree/topics-8-sfdp.json').then(data=>{
-d3.json('data/json/topics-5000-low-degree/topics-8-sfdp-nodes-12.json').then(nodes=>{
+let fn = 'topics-8-sfdp.json';
+// d3.json(`data/json/topics-5000-low-degree/topics-3.json`).then(data=>{
+d3.json(`data/json/topics-5000-low-degree/${fn}`).then(data=>{
+d3.json(`data/json/topics-5000-low-degree/topics-8-sfdp-nodes-14.json`).then(nodes=>{
 
   window.data = data;
   // if(nodes !== undefined){
@@ -141,9 +142,11 @@ function init(data){
   svg.append('defs').node().innerHTML = whiteOutline();
 
   let sc = d3.scaleLinear()
-  .domain([5,1])
-  .range(['#ece7f2','#2b8cbe']);
-  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([1,0.5]);
+  .domain([maxLevel,1])
+  // .range(['#ece7f2','#2b8cbe']);
+  .range(['#a6bddb','#023858']);
+  let sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([2,1]);
+  let ss = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([4,1]);
   let scales = getScales(nodes, svg, scale0);
 
   let ax = d3.axisBottom(scales.sx);//.tickSize(-(sy.range()[1]-sy.range()[0]));
@@ -171,7 +174,8 @@ function init(data){
   function debugMsg(){
     let edgesTmp = window.edges.filter(e=>window.enabledNodes.has(e.source.id) && window.enabledNodes.has(e.target.id));
     let nodesTmp = window.nodes.filter(d=>window.enabledNodes.has(d.id));
-    let labelTextNodesTmp = labelTexts.filter(d=>window.enabledNodes.has(d.id)).nodes();
+    // let labelTextNodesTmp = labelTexts.filter(d=>window.enabledNodes.has(d.id)).nodes();
+    let labelTextNodesTmp = labelTexts.filter(d=>d.update).nodes();
     console.log(
       'zoom:', 
       parseFloat(transform.k.toFixed(2)),
@@ -192,6 +196,32 @@ function init(data){
       parseFloat(areaCoverage(labelTextNodesTmp).toFixed(6)),
       '\n',
     );
+  }
+
+  function evalMsg(){
+    for(let level=1; level <= maxLevel; level++){
+      let edgesTmp = window.edges.filter(e=>e.source.level <= level && e.target.level <= level);
+      let nodesTmp = window.nodes.filter(d=>d.level <= level);
+      let labelTextNodesTmp = labelTexts.nodes();
+      console.log(
+        'level:',
+        level,
+        '\n',
+        'edge length:', 
+        parseFloat(
+          bestIdealEdgeLengthPreservation2(edgesTmp, edgesTmp.map(e=>e.weight))
+          .toFixed(4)
+        ),
+        '\n',
+        'label area:', 
+        parseFloat(
+          bestAreaCoverage(labelTextNodesTmp)
+          .toFixed(6)
+        ),
+        '\n',
+      );
+    }
+    
   }
 
 
@@ -227,11 +257,10 @@ function init(data){
     gy.call(ay);
     
     nodeCircles
-    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/4));
+    .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
     // .attr('r', d=>sr(d.level));
     linkLines
-    .attr('stroke-width', e => sr(e.level)/2 )
-    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/4 )
+    .attr('stroke-width', e => Math.sqrt(transform.k) * ss(e.level)/2 )
 
     draw(window.nodes, window.edges, 
     nodeCircles, linkLines, labelTexts, labelBoxes,
@@ -247,8 +276,7 @@ function init(data){
     .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
     // .attr('r', d=>sr(d.level));
     linkLines
-    .attr('stroke-width', e => sr(e.level)/2 )
-    .attr('stroke-width', e => Math.sqrt(transform.k) * sr(e.level)/4 )
+    .attr('stroke-width', e => Math.sqrt(transform.k) * ss(e.level)/2 )
 
     draw(window.nodes, window.edges, 
     nodeCircles, linkLines, labelTexts, labelBoxes,
@@ -320,33 +348,32 @@ function init(data){
   .attr('fill', d=>sc(d.level))
   // .attr('fill', d=>'#1f78b4')
   .attr('stroke', EDGE_COLOR)
-  .attr('stroke-width', d=>Math.max(1, sr(d.level)/4))
+  .attr('stroke-width', d=>0)
   // .call(drag(simulation));
   
   const labelBoxes = svg
   .selectAll('.labelBox')
   .data(nodes)
   .join('rect')
-  .attr('class', 'labelBox')
-  .attr('fill', '#aaf')
-  .attr('stroke', '#333')
-  .attr('stroke-width', 1)
-  .attr('opacity', 0.1);
+  .attr('class', 'labelBox');
+  // .style('fill', '#aaf')
+  // .attr('stroke', '#333')
+  // .attr('stroke-width', 1)
+  // .attr('opacity', 0.1);
 
   const labelTexts = svg
   .selectAll('.labelText')
   .data(nodes)
   .join('text')
   .attr('class', 'labelText')
-  // .style('fill', d=>d3.color(colorscheme[(d.level-1) % colorscheme.length]).brighter())
-  .attr('fill', d=>'#eee')
-  // .attr('fill', d=>d3.color(sc(d.level)).brighter(2))
-  .style('font-weight', 100)
-  // .style('font-size', d=>`${16-d.level}px`)
-  .style('font-size', d=>'14px')
-  .style('text-anchor', 'middle')
-  .style('alignment-baseline', 'middle')
-  .style('filter', 'url(#whiteOutlineEffect)')
+  // .style('fill', d=>d3.color(colorscheme[(d.level-1) % colorscheme.length]))
+  // .attr('fill', d=>d3.rgb(57,60,66))
+  .attr('fill', d=>d3.color(sc(d.level)))
+  .style('font-size', d=>`${20-d.level}px`)
+  // .style('font-weight', 100)
+  // .style('text-anchor', 'middle')
+  // .style('alignment-baseline', 'middle')
+  // .style('filter', 'url(#whiteOutlineEffect)')
   .style('display', shouldHideLabel?'none':'')
   .text(d=>d.label)
   // .call(drag(simulation));
@@ -419,10 +446,6 @@ function init(data){
         type: 'auto-add-nodes'
       });
     }else if(key === '/'){//log
-      runtime.push({
-        count: window.enabledNodes.size,
-        time: performance.now(),
-      });
       exportJson(pos(),`topics-${window.enabledNodes.size}.json`);
     }
   });
@@ -716,8 +739,8 @@ sx, sy, transform){
   .attr('y', d=>d.bbox.top)
   .attr('width', d=>d.bbox.right-d.bbox.left)
   .attr('height', d=>d.bbox.bottom-d.bbox.top)
-  .attr('opacity', d=>{
-    return d.update ? 0.2:0.0;
+  .style('opacity', d=>{
+    return d.update ? 0.0:0.0;
   });
 
   // let labelTextNodes = labelTexts.nodes();

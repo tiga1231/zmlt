@@ -126,15 +126,17 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
   }
 
   function forceDir(x, y, a2, b2){
-    let dir = {
-      x: x / a2,
-      y: y / b2,
-    };
+    // let dir = {
+    //   x: x / a2,
+    //   y: y / b2,
+    // };
     // let norm = Math.sqrt(dir.x*dir.x + dir.y*dir.y);
-    let norm = Math.abs(dir.x) + Math.abs(dir.y);
-    dir.x /= norm;
-    dir.y /= norm;
-    dir.x = 0;
+    // // let norm = Math.abs(dir.x) + Math.abs(dir.y);
+    // dir.x /= norm;
+    // dir.y /= norm;
+    // dir.x = 0;
+    // console.log(dir.y);
+    let dir = {x: 0, y: Math.sign(y)};
     return dir;
   }
   
@@ -153,7 +155,7 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     }else{
       // let c2 = c*2;
       // return 10*c2/(y2+c2/2);
-      return 10*c/(Math.abs(n.y)+1);
+      return 2*c/(ay+1);
     }
   };
 
@@ -169,8 +171,6 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       let e = edges[j];
       let e0 = e.source;
       let e1 = e.target;
-
-      
 
       if(!enabledNodes.has(e0.id) || !enabledNodes.has(e1.id)){
         continue;
@@ -237,20 +237,16 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
             let bk = beta * k;
             let bkx = bk * dir.x;
             let bky = bk * dir.y;
-            let s = 1;// 1 / Math.sqrt(n.level);
 
-            n.vx += bkx * s;
-            n.vy += bky * s;
+            n.vx += bkx;
+            n.vy += bky;
 
             let sbkx = 0.5*bkx;
             let sbky = 0.5*bky;
-            let ls = 2;//Math.sqrt(e.source.level);
-            let lt = 2;//Math.sqrt(e.target.level);
-
-            e0.vx -= sbkx * ls;
-            e0.vy -= sbky * ls;
-            e1.vx -= sbkx * lt;
-            e1.vy -= sbky * lt;
+            e0.vx -= sbkx;
+            e0.vy -= sbky;
+            e1.vx -= sbkx;
+            e1.vy -= sbky;
           }
 
         }

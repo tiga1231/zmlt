@@ -55,7 +55,7 @@ onmessage = function(event) {
     train(niter);
   }else if(type === 'add-node'){  
     addNode(self.progress);
-    train(10);
+    train(1);
   }else if(type === 'stop'){  
     simulation.stop();
   }else if(type === 'zoom'){  
@@ -92,11 +92,13 @@ onmessage = function(event) {
   else{
     //default init event
     //
-    const nodesInScreen = 25;
-    let idealZoomScale = 1.5 * Math.sqrt(dataObj.nodes.length / nodesInScreen);
-    console.log('target non-overlap scale', idealZoomScale);
+    // const nodesInScreen = 35;
+    // const idealScaleFor = [1, 5, 10, 10, 14, 15, 16, 17, 21];
+    const idealZoomScale = 30;
+
+    let initZoomScale = 2;//Math.sqrt(dataObj.nodes.length / nodesInScreen);
+    console.log('target non-overlap scale', initZoomScale);
     let aspectRatio = 3;
-    console.log(dataObj);
     nodes = dataObj.nodes;
     edges = dataObj.edges;
     enabledNodes = dataObj.enabledNodes;
@@ -125,37 +127,49 @@ onmessage = function(event) {
     .force('link-real',
       d3.forceLink(edges)
       .distance(e=>e.weight)
-      .strength(e=>1)
+      .strength(e=>2)
     )
-    // .force('link-virtual',
-    //   d3.forceLink(virtualEdges)
-    //   .distance(e=>Math.pow(e.weight, 0.5+1/e.hops))
-    //   .strength(e=>0.01 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-    //   // .strength(e=>0.02 / e.hops )
-    // )
-    // .force('ideal-edge-length', 
-    //   forceStress(nodes, edges, enabledNodes, id2index)
-    //   // .strength(e=>50/Math.pow(e.weight, 1))
-    //   .strength(e=>0.1 / e.weight * minEdgeWeight )
-    //   .distance(e=>Math.pow(e.weight, 0.5))
-    // )
+    // // .force('link-virtual',
+    // //   d3.forceLink(virtualEdges)
+    // //   .distance(e=>Math.pow(e.weight, 0.5+1/e.hops))
+    // //   .strength(e=>0.01 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+    // //   // .strength(e=>0.02 / e.hops )
+    // // )
+    // // .force('ideal-edge-length', 
+    // //   forceStress(nodes, edges, enabledNodes, id2index)
+    // //   // .strength(e=>50/Math.pow(e.weight, 1))
+    // //   .strength(e=>0.1 / e.weight * minEdgeWeight )
+    // //   .distance(e=>Math.pow(e.weight, 0.5))
+    // // )
     .force('stress', 
       forceStress(nodes, virtualEdges, enabledNodes, id2index)
+      // .strength(e=>1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
+      // .strength(e=>0.1)
       .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-      // .strength(e=>0.1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
       // .distance(e=>e.weight)
-      .distance(e=>Math.pow(e.weight, 0.7+1/e.hops))
+      // .distance(e=>Math.pow(e.weight, 0.7+1/e.hops))
+      // .distance(e=>Math.pow(e.weight, Math.min(1, 0.8+1/e.hops)))
+      .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
+      // .distance(e=>e.weight/(Math.PI/2))
+      // .distance(e=>{
+      //   let r = 45000 / Math.PI;
+      //   let a = e.weight / 45000 * Math.PI / 2;
+      //   let l = 2 * r * Math.sin(a);
+      //   return l;
+      // })
+      // 
     )
 
 
-    //other aesthetics
-    .force('central', 
-     d3.forceRadial(0, 0, 0)
-     .strength(0.005)
-    )
+
+    // // //other aesthetics
+    // .force('central', 
+    //  d3.forceRadial(0, 0, 0)
+    //  .strength(0.005)
+    // )
     .force('charge', 
      d3.forceManyBody()
-     .strength(d=> -4*(200+50*(maxLevel-d.level)) )
+     .strength(d=> -1*(200+50*(maxLevel-d.level)) )
     )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
@@ -163,26 +177,27 @@ onmessage = function(event) {
     
 
     //label removal
-    .force('pre-collide', forceScaleY(nodes, aspectRatio))
-    .force('collide', 
-      d3.forceCollide()
-      .radius(d=>scales.sx.invert(d.bbox.width/idealZoomScale) - scales.sx.invert(0))
-      .strength(0.05)
-      .iterations(1)
-    )
-    .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
-    // // .force('label-collide', 
-    // //   forceEllipse({
-    // //     nodes: nodes, 
-    // //     scales: scales,
-    // //     strength: 3,
-    // //     b: 2.0,
-    // //     c: 1.0,
-    // //   })
-    // // )
+    // .force('pre-collide', forceScaleY(nodes, aspectRatio))
+    // .force('collide', 
+    //   d3.forceCollide()
+    //   .radius(d=>scales.sx.invert( (d.bbox.width+8) / idealZoomScale ) - scales.sx.invert(0))
+    //   .strength(0.05)
+    //   .iterations(2)
+    // )
+    // .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+
+    // // // .force('label-collide', 
+    // // //   forceEllipse({
+    // // //     nodes: nodes, 
+    // // //     scales: scales,
+    // // //     strength: 3,
+    // // //     b: 2.0,
+    // // //     c: 1.0,
+    // // //   })
+    // // // )
     
-    
-    .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
+
+    // .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
     .stop();
 
     simulation.on('tick', (arg)=>{

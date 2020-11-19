@@ -37,23 +37,20 @@ function translate(p, tx, ty){
 
 function evaluate(){
   
+  
   console.log(
-    'Ideal Edge Length Preservation:', 
-    idealEdgeLengthPreservation(window.data.edges, window.data.edges.map(e=>e.weight))
-  );
-  console.log(
-    'Area Coverage :', 
-    areaCoverage(window.labelTextNodes)
+    'Label Overlap:', labelOverlap(window.labelTextNodes)
   );
   console.log(
     '---------',
   );
-  console.log(
-    'Number of Label Overlap:', labelOverlap(window.labelTextNodes)
-  );
+
   console.log(
     'Ideal Edge Length Preservation (Mingwei):', 
     idealEdgeLengthPreservation2(window.data.edges, window.data.edges.map(e=>e.weight))
+  );
+  console.log(
+    'Area:', areaCoverage(window.labelTextNodes)
   );
   console.log(
     '==========',
@@ -70,9 +67,9 @@ function colorLabel(labelNodes, color='orange'){
 
 function labelOverlap(labelNodes){
   let count = 0;
-  let overlapMatrix = [];
+  // let overlapMatrix = [];
   for(let i=0; i<labelNodes.length; i++){
-    overlapMatrix.push([]);
+    // overlapMatrix.push([]);
     let l1 = labelNodes[i];
     l1.show = true;
   }
@@ -81,7 +78,7 @@ function labelOverlap(labelNodes){
 
   labelNodes.forEach(d=>d.overlap = new Set());
   for(let i=0; i<labelNodes.length; i++){
-    overlapMatrix[i][i] = 0;
+    // overlapMatrix[i][i] = 0;
     let l1 = labelNodes[i];
     let bbox1 = bboxes[i];
     
@@ -90,21 +87,20 @@ function labelOverlap(labelNodes){
       let bbox2 = bboxes[j];
       let overlap = isRectCollide(bbox1, bbox2);
       if(overlap){
-        overlapMatrix[i][j] = 1;
-        overlapMatrix[j][i] = 1;
-        l2.overlap.add(i);
-        l1.overlap.add(j);
+        // overlapMatrix[i][j] = 1;
+        // overlapMatrix[j][i] = 1;
+        // l2.overlap.add(i);
+        // l1.overlap.add(j);
         // l1.show = false;
         l2.show = false;
         count += 1;
       }else{
-        overlapMatrix[i][j] = 0;
-        overlapMatrix[i][j] = 0;
+        // overlapMatrix[i][j] = 0;
+        // overlapMatrix[i][j] = 0;
       }
     }
   }
-  window.overlapMatrix = overlapMatrix;
-  //TODO greedy
+  // window.overlapMatrix = overlapMatrix;
 
   return count;
 }
@@ -118,56 +114,60 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
     //   ||
     //   (currentNodes0.size == 0 || currentNodes0.has(e.target.id)) && e.source.id === node.id
     // );
-    // let other = edge[0].source.id !== node.id ? edge[0].source : edge[0].target;
+    // let parent = edge[0].source.id !== node.id ? edge[0].source : edge[0].target;
 
-    let edges = allEdges.filter(e=>{
+    let currentEdges = allEdges.filter(e=>{
       return (
         currentNodes0.has(e.source.id) && currentNodes0.has(e.target.id)
-        || currentNodes0.has(e.source.id) && node.id === e.target.id
-        || currentNodes0.has(e.target.id) && node.id === e.source.id
       );
     });
 
-    let other = {x: Math.random(), y: Math.random()};
+    let parent = {x: Math.random(), y: Math.random()};
     if(useInitital){
       if(node.parent === undefined || node.parent === null){
-        other = {
+        parent = {
           x: node.x, 
           y: node.y,
           xInit: node.x, 
           yInit: node.y,
         };
       }else{
-        // other = node.neighbors.filter(d=>currentNodes0.has(d))[0];
-        // other = allNodes.filter(d=>d.id == other)[0];
-        other = allNodes[id2index[node.parent]];
+        // parent = node.neighbors.filter(d=>currentNodes0.has(d))[0];
+        // parent = allNodes.filter(d=>d.id == parent)[0];
+        parent = allNodes[id2index[node.parent]];
       }
     }
 
     let count = 1;
     // if(useInitital && node.xInit !== undefined){
-    //   node.x = other.x + (node.xInit - other.xInit);
-    //   node.y = other.y + (node.yInit - other.yInit);
+    //   node.x = parent.x + (node.xInit - parent.xInit);
+    //   node.y = parent.y + (node.yInit - parent.yInit);
     // }else{
-    //   node.x = (Math.random()-0.5)*1 + other.x;
-    //   node.y = (Math.random()-0.5)*1 + other.y;
+    //   node.x = (Math.random()-0.5)*1 + parent.x;
+    //   node.y = (Math.random()-0.5)*1 + parent.y;
     // }
-    let edges1 = allEdges.filter(e=>node.id === e.source.id || node.id === e.target.id);
+    let edges1 = allEdges.filter(e=>(
+      currentNodes0.has(e.source.id) && node.id === e.target.id
+      || currentNodes0.has(e.target.id) && node.id === e.source.id
+    ));
     do {
+      let r = 1/count;
       if(useInitital && node.xInit !== undefined){
-        let r = 1/count;
-        node.x = other.x + (node.xInit - other.xInit)*r;
-        node.y = other.y + (node.yInit - other.yInit)*r;
+        node.x = parent.x + (node.xInit - parent.xInit)*r;
+        node.y = parent.y + (node.yInit - parent.yInit)*r;
         if(count > 1){
-          node.x += (Math.random()-0.5);
+          node.x += (Math.random()-0.5); 
           node.y += (Math.random()-0.5);
+        }else if(count > 10){
+          node.x = parent.x + (Math.random()-0.5); 
+          node.y = parent.y + (Math.random()-0.5); 
         }
       }else{
-        node.x = other.x + (Math.random()-0.5);
-        node.y = other.y + (Math.random()-0.5);
+        node.x = parent.x + (Math.random()-0.5); 
+        node.y = parent.y + (Math.random()-0.5); 
       }
       count+=1;
-    } while(countCrossings(edges, edges1)>0);
+    } while(countCrossings(currentEdges, edges1)>0);
     currentNodes0.add(node.id);
   }
   return currentNodes0;
@@ -267,24 +267,35 @@ function idealEdgeLengthPreservation2(links, ideal_lengths){
 }
 
 
-function idealEdgeLengthPreservation(links, ideal_lengths){ 
-  let total_difference = 0;
-  let total_distance = 0;
-  for (let i = 0; i < links.length; ++i) {
-    let x1 = links[i].source.x;
-    let y1 = links[i].source.y;
-    let x2 = links[i].target.x;
-    let y2 = links[i].target.y;
-    let dist = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-    let diff = Math.abs(ideal_lengths[i] - dist);
-    total_difference += diff;
-    total_distance += dist;
-  }
-  // console.log(total_difference, total_distance);
-  let average_difference = total_difference/links.length;
-  let average_distance = total_distance/links.length;
-  return 1-(average_difference/average_distance);
+function bestIdealEdgeLengthPreservation(edges, lengths){
+  let s = 1; //find best scaling factor
+  //compute IdealEdgeLengthPreservation
 }
+
+function bestAreaCoverage(labelDoms){
+  //binary search non-overlap scale
+  //compute area usage
+
+}
+
+// function idealEdgeLengthPreservation(links, ideal_lengths){ 
+//   let total_difference = 0;
+//   let total_distance = 0;
+//   for (let i = 0; i < links.length; ++i) {
+//     let x1 = links[i].source.x;
+//     let y1 = links[i].source.y;
+//     let x2 = links[i].target.x;
+//     let y2 = links[i].target.y;
+//     let dist = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+//     let diff = Math.abs(ideal_lengths[i] - dist);
+//     total_difference += diff;
+//     total_distance += dist;
+//   }
+//   // console.log(total_difference, total_distance);
+//   let average_difference = total_difference/links.length;
+//   let average_distance = total_distance/links.length;
+//   return 1-(average_difference/average_distance);
+// }
 
 
 function areaCoverage(labelDoms){
@@ -601,8 +612,8 @@ function signOf(p, l0, l1){
 function whiteOutline(){
   return `
   <filter id="whiteOutlineEffect" width="200%" height="200%" x="-50%" y="-50%">
-    <feMorphology in="SourceAlpha" result="MORPH" operator="dilate" radius="1.5" />
-    <feColorMatrix in="MORPH" result="WHITENED" type="matrix" values="0 0 0 0.03 0, 0 0 0 0.03 0, 0 0 0 0.03 0, 0 0 0 1 0" />
+    <feMorphology in="SourceAlpha" result="MORPH" operator="dilate" radius="1" />
+    <feColorMatrix in="MORPH" result="WHITENED" type="matrix" values="0 0 0 0.9 0, 0 0 0 0.9 0, 0 0 0 0.9 0, 0 0 0 1 0" />
     <feMerge>
       <feMergeNode in="WHITENED" />
       <feMergeNode in="SourceGraphic" />

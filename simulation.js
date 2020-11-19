@@ -177,14 +177,14 @@ onmessage = function(event) {
     
 
     //label removal
-    // .force('pre-collide', forceScaleY(nodes, aspectRatio))
-    // .force('collide', 
-    //   d3.forceCollide()
-    //   .radius(d=>scales.sx.invert( (d.bbox.width+8) / idealZoomScale ) - scales.sx.invert(0))
-    //   .strength(0.05)
-    //   .iterations(2)
-    // )
-    // .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+    .force('pre-collide', forceScaleY(nodes, aspectRatio))
+    .force('collide', 
+      d3.forceCollide()
+      .radius(d=>scales.sx.invert( (d.bbox.width+8) / idealZoomScale ) - scales.sx.invert(0))
+      .strength(0.05)
+      .iterations(2)
+    )
+    .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
 
     // // // .force('label-collide', 
     // // //   forceEllipse({
@@ -197,7 +197,7 @@ onmessage = function(event) {
     // // // )
     
 
-    // .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
+    .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
     .stop();
 
     simulation.on('tick', (arg)=>{

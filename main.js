@@ -14,7 +14,7 @@ let shouldDraw = true;
 let bg = '#eef7ec';
 let runtime = [];
 let nodes;
-let progress = 1;
+let progress = 1e9;
 
 
 window.enabledNodes;
@@ -59,7 +59,7 @@ let worker = new Worker('simulation.js');
 let fn = 'topics-8-sfdp.json';
 // d3.json(`data/json/topics-5000-low-degree/topics-3.json`).then(data=>{
 d3.json(`data/json/topics-5000-low-degree/${fn}`).then(data=>{
-d3.json(`data/json/topics-5000-low-degree/topics-8-sfdp-nodes-14.json`).then(nodes=>{
+d3.json(`data/json/topics-5000-low-degree/topics-8-sfdp-nodes-16.json`).then(nodes=>{
 
   window.data = data;
   // if(nodes !== undefined){
@@ -209,7 +209,7 @@ function init(data){
         '\n',
         'edge length:', 
         parseFloat(
-          bestIdealEdgeLengthPreservation2(edgesTmp, edgesTmp.map(e=>e.weight))
+          bestIdealEdgeLengthPreservation(edgesTmp, edgesTmp.map(e=>e.weight))
           .toFixed(4)
         ),
         '\n',

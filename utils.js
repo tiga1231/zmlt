@@ -139,6 +139,7 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
     }
 
     let count = 1;
+    let r = 1;
     // if(useInitital && node.xInit !== undefined){
     //   node.x = parent.x + (node.xInit - parent.xInit);
     //   node.y = parent.y + (node.yInit - parent.yInit);
@@ -151,17 +152,24 @@ function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index,
       || currentNodes0.has(e.target.id) && node.id === e.source.id
     ));
     do {
-      let r = 1/count;
+      // r = 1/count;
+      r *= 0.8;
       if(useInitital && node.xInit !== undefined){
-        node.x = parent.x + (node.xInit - parent.xInit)*r;
-        node.y = parent.y + (node.yInit - parent.yInit)*r;
-        if(count > 1){
-          node.x += (Math.random()-0.5); 
-          node.y += (Math.random()-0.5);
-        }else if(count > 10){
-          node.x = parent.x + (Math.random()-0.5); 
-          node.y = parent.y + (Math.random()-0.5); 
-        }
+        let dx = Math.max(0.001,r)*(node.xInit - parent.xInit);
+        let dy = Math.max(0.001,r)*(node.yInit - parent.yInit);
+        let theta = Math.PI*2*(1-r)*(Math.random()-0.5);
+        let cos = Math.cos(theta);
+        let sin = Math.sin(theta);
+        [dx, dy] = [cos*dx+sin*dy, -sin*dx+cos*dy];
+        node.x = parent.x + dx;
+        node.y = parent.y + dy;
+        // if(count > 1){
+        //   node.x += (Math.random()-0.5); 
+        //   node.y += (Math.random()-0.5);
+        // }else if(count > 10){
+        //   node.x = parent.x + (Math.random()-0.5); 
+        //   node.y = parent.y + (Math.random()-0.5); 
+        // }
       }else{
         node.x = parent.x + (Math.random()-0.5); 
         node.y = parent.y + (Math.random()-0.5); 
@@ -249,7 +257,7 @@ function initOneNode(node, boundaryNodes, boundaryEdges, currentNodes, currentEd
 }
 
 
-function idealEdgeLengthPreservation2(links, ideal_lengths){ 
+function idealEdgeLengthPreservation2(links, ideal_lengths, scale=1){ 
   let sumOfSquares = 0;
   for (let i = 0; i < links.length; i++) {
     let x1 = links[i].source.x;
@@ -258,6 +266,7 @@ function idealEdgeLengthPreservation2(links, ideal_lengths){
     let y2 = links[i].target.y;
     let [dx, dy] = [(x1-x2), (y1-y2)];
     let dist = Math.sqrt(dx*dx + dy*dy);
+    dist *= scale;
     let diff = Math.abs(ideal_lengths[i] - dist);
     let relativeDifference = diff / ideal_lengths[i];
     sumOfSquares += Math.pow(relativeDifference, 2);
@@ -267,15 +276,62 @@ function idealEdgeLengthPreservation2(links, ideal_lengths){
 }
 
 
-function bestIdealEdgeLengthPreservation(edges, lengths){
+function bestIdealEdgeLengthPreservation(links, lengths){
   let s = 1; //find best scaling factor
-  //compute IdealEdgeLengthPreservation
+  let num = 0; // = np.sum([ideal_edge_length[k]**2/actual_edge_length[k] for k in g.edges])
+  let den = 0; // np.sum([ideal_edge_length[k] for k in g.edges])
+  for (let i = 0; i < links.length; i++) {
+    let x1 = links[i].source.x;
+    let y1 = links[i].source.y;
+    let x2 = links[i].target.x;
+    let y2 = links[i].target.y;
+    let [dx, dy] = [(x1-x2), (y1-y2)];
+    let al = Math.sqrt(dx*dx + dy*dy); //actual length
+    let il = lengths[i]; //ideal length
+    num += (il*il) / al;
+    den += il;
+  }
+  s = num / den;
+  return idealEdgeLengthPreservation2(links, lengths, s);
 }
 
-function bestAreaCoverage(labelDoms){
-  //binary search non-overlap scale
-  //compute area usage
+function areaUtilization(bboxes){
+  //binary search minimal non-overlap scale
+  //then compute area usage
+  bboxes.forEach((b,i)=>b.index=i);
+  let sx = (d)=>(d.x+d.x+d.width)/2;
+  let sy = (d)=>(d.y+d.y+d.height)/2;
+  let tree = d3.quadtree(bboxes, sx, sy);
 
+  const min0 = 1;
+  const max0 = 1000;
+  let lowerbound = min0;
+  let upperbound = min0;
+  for(let i=0; i<bboxes.length; i++){
+    let bi = bboxes[i];
+    let x = sx(bi);
+    let y = sy(bi);
+    let r = bi.width * 0.5;
+    let neighbors = searchQuadtree(tree, sx, sy, x-r, x+r, y-r, y+r);
+    for(let j of neighbors){
+      if(i!==j){
+        let bj = bboxes[j];
+        let min = min0;
+        let max = max0;
+        for(let k=0; k<15; k++){
+          let tmp = (min+max)/2;
+          if(isRectCollide2(bi, bj, tmp)){
+            [min,max] = [tmp, max];
+          }else{
+            [min,max] = [min, tmp];
+          }
+        }
+        lowerbound = Math.max(min, lowerbound);
+        upperbound = Math.max(max, upperbound);
+      }
+    }
+  }
+  return [upperbound, areaCoverage(bboxes, upperbound)];
 }
 
 // function idealEdgeLengthPreservation(links, ideal_lengths){ 
@@ -298,15 +354,21 @@ function bestAreaCoverage(labelDoms){
 // }
 
 
-function areaCoverage(labelDoms){
+function areaCoverage(labelDoms, scale=1){
   let labelArea = 0;
   let xmin = +Infinity,
       xmax = -Infinity,
       ymin = +Infinity,
       ymax = -Infinity;
-  for(let d of labelDoms){
-    let bbox = d.getBoundingClientRect();
-    labelArea += bbox.width * bbox.height;
+  let s2 = scale*scale;
+
+  if(labelDoms[0].width === undefined){ //if an array of domNodes()
+    labelDoms = labelDoms.map(d=>d.getBoundingClientRect());
+  }else{// an array of bboxes
+    //do nothing
+  }
+  for(let bbox of labelDoms){
+    labelArea += bbox.width * bbox.height / s2;
     if(bbox.x < xmin){
       xmin = bbox.x;
     }
@@ -349,6 +411,33 @@ function searchQuadtree(quadtree, xGetter, yGetter, xmin, xmax, ymin, ymax) {
   return results;
 }
 
+
+function isRectCollide2(rect1, rect2, scale=1){
+  let x1 = (rect1.x+rect1.x+rect1.width)/2;
+  let y1 = (rect1.y+rect1.y+rect1.height)/2;
+  let rw1 = rect1.width /2 /scale;
+  let rh1 = rect1.height /2 /scale;
+  let rect1_left = x1 - rw1;
+  let rect1_right = x1 + rw1;
+  let rect1_top = y1 - rh1;
+  let rect1_bottom = y1 + rh1;
+
+  let x2 = (rect2.x+rect2.x+rect2.width)/2;
+  let y2 = (rect2.y+rect2.y+rect2.height)/2;
+  let rw2 = rect2.width /2 /scale;
+  let rh2 = rect2.height /2 /scale;
+  let rect2_left = x2 - rw2;
+  let rect2_right = x2 + rw2;
+  let rect2_top = y2 - rh2;
+  let rect2_bottom = y2 + rh2;
+
+  return (
+       rect1_left <= rect2_right
+    && rect1_right >= rect2_left
+    && rect1_top <= rect2_bottom
+    && rect1_bottom >= rect2_top
+  );
+}
 
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 function isRectCollide(rect1, rect2){

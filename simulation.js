@@ -54,7 +54,7 @@ onmessage = function(event) {
     simulation.alpha(0.99);
     train(niter);
   }else if(type === 'add-node'){  
-    addNode(self.progress);
+    addNode();
     train(1);
   }else if(type === 'stop'){  
     simulation.stop();
@@ -91,13 +91,10 @@ onmessage = function(event) {
   }
   else{
     //default init event
-    //
-    // const nodesInScreen = 35;
-    // const idealScaleFor = [1, 5, 10, 10, 14, 15, 16, 17, 21];
-    const idealZoomScale = 30;
+    // const idealZoomScale = 25; //for 5000-node topics
+    const idealZoomScale = 10; //for 2588-node lastfm
 
-    let initZoomScale = 2;//Math.sqrt(dataObj.nodes.length / nodesInScreen);
-    console.log('target non-overlap scale', initZoomScale);
+    console.log('target non-overlap scale', idealZoomScale);
     let aspectRatio = 3;
     nodes = dataObj.nodes;
     edges = dataObj.edges;
@@ -143,7 +140,7 @@ onmessage = function(event) {
     // // )
     .force('stress', 
       forceStress(nodes, virtualEdges, enabledNodes, id2index)
-      // .strength(e=>1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
+      // .strength(e=>10 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
       // .strength(e=>0.1)
       .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
       // .distance(e=>e.weight)
@@ -163,20 +160,20 @@ onmessage = function(event) {
 
 
     // // //other aesthetics
-    // .force('central', 
-    //  d3.forceRadial(0, 0, 0)
-    //  .strength(0.005)
-    // )
+    .force('central', 
+     d3.forceRadial(0, 0, 0)
+     .strength(0.005)
+    )
     .force('charge', 
      d3.forceManyBody()
-     .strength(d=> -1*(200+50*(maxLevel-d.level)) )
+     .strength(d=> -6*(d.weight+100))
     )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
     )
     
 
-    //label removal
+    // //label overlap removal
     .force('pre-collide', forceScaleY(nodes, aspectRatio))
     .force('collide', 
       d3.forceCollide()
@@ -195,7 +192,6 @@ onmessage = function(event) {
     // // //     c: 1.0,
     // // //   })
     // // // )
-    
 
     .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
     .stop();
@@ -251,13 +247,26 @@ function updateBbox(d, bbox, scales){
   
 
 
-function train(niter){
+function train(niter, wait=false){
   iter = 0;
 
   simulation
   .velocityDecay(0.4)
-  .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  .restart();
+  .alphaDecay(1 - Math.pow(0.001, 1 / niter));
+
+  if(!wait){
+    simulation.restart();
+  }else{
+    simulation.tick(niter);
+    postMessage({
+      type: 'tick', 
+      progress: niter / niter,
+      nodes, 
+      edges,
+      enabledNodes,
+    });
+  }
+  
   // for (var i = 0; i<niter; i+=1) {
   //   simulation.tick(10);
   //   if(i % tick == 0){

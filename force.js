@@ -2,7 +2,7 @@ function forceScaleY(nodes, k){
   let force = ()=>{
     for(let n of nodes){
       n.y *= k;
-      // n.vy *= k;
+      n.vy *= 1/k;
     }
   };
 
@@ -148,9 +148,10 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     // let y2 = n.y*n.y;
     // let d = Math.sqrt(Math.pow(n.x-c,2)+y2) + Math.sqrt(Math.pow(n.x+c,2)+y2);
     // let a2 = 2*a;
+    let ax = Math.abs(n.x);
     let ay = Math.abs(n.y);
     // if(d > a2){
-    if(ay > a){
+    if(ay > a || ax > a){
       return 0;
     }else{
       // let c2 = c*2;

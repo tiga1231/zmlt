@@ -93,8 +93,19 @@ onmessage = function(event) {
     //default init event
     // const idealZoomScale = 25; //for 5000-node topics
     const idealZoomScale = 10; //for 2588-node lastfm
-
     console.log('target non-overlap scale', idealZoomScale);
+    const idealZoomScales = [1,2,3,4,5,6,7,8]; //for 2588-node lastfm
+    const origin = scales.sx.invert(0);
+    const sr = d3.range(8).map((_,i)=>{
+      return d=>{
+        if (d.level <= i+1){
+          return scales.sx.invert( (d.bbox.width+8) / idealZoomScales[i] ) - origin;
+        }else{
+          return 0;
+        }
+      };
+    });
+
     let aspectRatio = 3;
     nodes = dataObj.nodes;
     edges = dataObj.edges;
@@ -181,6 +192,12 @@ onmessage = function(event) {
       .strength(0.05)
       .iterations(2)
     )
+    // .force('collide', 
+    //   d3.forceCollide()
+    //   .radius(sr[sr.length])
+    //   .strength(0.05)
+    //   .iterations(2)
+    // )
     .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
 
     // // // .force('label-collide', 

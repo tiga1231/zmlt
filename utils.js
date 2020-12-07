@@ -276,6 +276,25 @@ function idealEdgeLengthPreservation2(links, ideal_lengths, scale=1){
 }
 
 
+function bestScalingForEdgeLengthPreservation(links, lengths){
+  let s = 1; //find best scaling factor
+  let num = 0; // = np.sum([ideal_edge_length[k]**2/actual_edge_length[k] for k in g.edges])
+  let den = 0; // np.sum([ideal_edge_length[k] for k in g.edges])
+  for (let i = 0; i < links.length; i++) {
+    let x1 = links[i].source.x;
+    let y1 = links[i].source.y;
+    let x2 = links[i].target.x;
+    let y2 = links[i].target.y;
+    let [dx, dy] = [(x1-x2), (y1-y2)];
+    let al = Math.sqrt(dx*dx + dy*dy); //actual length
+    let il = lengths[i]; //ideal length
+    num += (il*il) / al;
+    den += il;
+  }
+  s = num / den;
+  return s;
+}
+
 function bestIdealEdgeLengthPreservation(links, lengths){
   let s = 1; //find best scaling factor
   let num = 0; // = np.sum([ideal_edge_length[k]**2/actual_edge_length[k] for k in g.edges])

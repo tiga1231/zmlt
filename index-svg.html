@@ -1,0 +1,54 @@
+<html>
+<head>
+<script src='lib/d3.v5.js'></script>
+<script src="lib/d3-quadtree.v2.js"></script>
+<!-- <script src="lib/d3-ellipse-force.js"></script>  -->
+
+<!-- <script src="https://d3js.org/d3-quadtree.v1.js"></script> -->
+
+
+<script src='lib/underscore-min.js'></script>
+<script src='lib/numeric-1.2.6.js'></script>
+<script src='lib/math.js'></script>
+<script src='lib/bentley-ottman.js'></script>
+
+<script src='utils.js'></script>
+<script src='force.js'></script>
+
+
+<style>
+body{
+  margin: 0;
+}
+svg text{
+  -webkit-user-select: none;
+   -moz-user-select: none;
+    -ms-user-select: none;
+        user-select: none;
+  
+}
+svg{
+  background: #eee;
+}
+
+.labelText{
+  font-weight: 100;
+  font-size: 14px;
+  text-anchor: middle;
+  alignment-baseline: middle;
+  filter: url(#whiteOutlineEffect);
+}
+.labelBox{
+  fill: #aaf;
+  stroke: #333;
+  stroke-width: 1;
+}
+</style>
+</head>
+
+<body>
+<svg id='main'></svg>
+<script src='index.js'></script>
+<a id='download-json'></a>
+</body>
+</html>

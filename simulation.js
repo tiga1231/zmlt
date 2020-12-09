@@ -135,20 +135,21 @@ onmessage = function(event) {
     .force('stress', 
       forceStress(nodes, virtualEdges, enabledNodes, id2index)
       // .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
-      // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-      .distance(e=>e.weight)
+      // .strength(e=>1 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+      // .distance(e=>e.weight)
       // .strength(e=>1 / Math.pow(e.weight, 1.4) * Math.pow(minEdgeWeight, 1.4) )//lastfm
-      .strength(e=>1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
+      .distance(e=>e.weight)
+      .strength(e=>1 / Math.pow(e.weight, 2.0) * Math.pow(minEdgeWeight, 2.0) )
     )
 
     // // // //other aesthetics
-    .force('central', 
-     d3.forceRadial(0, 0, 0)
-     .strength(0.005)
-    )
+    // .force('central', 
+    //  d3.forceRadial(0, 0, 0)
+    //  .strength(0.005)
+    // )
     .force('charge', 
      d3.forceManyBody()
-     .strength(d=> -1*(d.weight+200))
+     .strength(d=> -1*(d.weight+50))
     )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
@@ -175,27 +176,27 @@ onmessage = function(event) {
     // //   let [l,c] = lc;
     // //   level2scale[l] = 1.5*Math.sqrt(c / idealCount);
     // // }
-    // // 
-    let level2scale = {//lastfm
-      1:3,
-      2:7,
-      4:8,
-      8:10,
-    };
-    // let level2scale = {//topics refined
-    //   1:1,
-    //   2:2,
-    //   3:6,
+    let level2scale = {}; //crossing free init layout 
+    // let level2scale = {//lastfm
+    //   1:3,
+    //   2:7,
+    //   4:8,
     //   8:10,
-    //   18:14,
     // };
+    level2scale = {//topics refined
+      1:2.5,
+      2:3,
+      9:6,
+      12:12,
+      18:16,
+    };
     console.log(level2scale);
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     for (let l in level2scale){
       l = parseFloat(l);
       let s = level2scale[l];
-      let aspectRatio = 3;
+      let aspectRatio = 4;
       simulation
       .force('pre-collide', forceScaleY(nodes, aspectRatio))
       .force(`collide-${l}`, 
@@ -203,15 +204,16 @@ onmessage = function(event) {
         .radius(d=>{
           if(d.level <= l){
             let r = d.bbox.width/2 / s + margin;
-            r = scales.sx.invert(r/dpr) - origin;
+            r = scales.sx.invert(r) - origin;
             return r;
           }else{
-            return 0;
+            return 0.1;
           }
         })
-        .strength(0.5/(maxLevel+1-l))
         // .strength(0.03)
-        .iterations(1)
+        // .strength(0.5/(maxLevel+1-l))//lastfm
+        .strength(0.02 + 0.06/(maxLevel+1-l))//topics
+        .iterations(2)
       )
       .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
     }   

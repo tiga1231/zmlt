@@ -25,7 +25,7 @@ let shouldLabel = true;
 let shouldMarkOverlap = false;
 
 let forceLabel = false;
-let forceLabelLevel = 1e9;
+let forceLabelLevel = -1;
 
 
 
@@ -82,24 +82,32 @@ window.enabledNodes;
 
 
 
-d3.json(`data/json/lastfm/Graph_8-min.json`).then(data=>{
-d3.json(`data/json/lastfm/Graph_8-nodes-12.json`).then(nodes=>{
+// d3.json(`data/json/lastfm/Graph_8-min.json`).then(data=>{
+// d3.json(`data/json/lastfm/Graph_8-nodes-12.json`).then(nodes=>{
 
+//demo topics
+let fn = 'data/json/TopicsLayersData-0/Graph_5000-min.json';
+let fn2 = 'data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json';//for demo, no training
+d3.json(fn).then(data=>{
+d3.json(fn2).then(nodes=>{
 
-// let fn = 'TopicsLayersData-0/Graph_5000';
+//train topics
+// let fn = 'TopicsLayersData-0/Graph_5000-radial'; //no longer works
 // let version = 3;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
-// let fn = 'lastfm/Graph_8';
-// let version = 12; //layout version
+
+
+//paper graph 1
+// let fn = 'TopicsLayersData-0/Graph_5000'; //no longer works
+// let version = 3;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
-
-
-// let fn = 'TopicsLayersData-0/Graph_5000';
-// let version = 3; //layout version
+//paper graph 2
+// let fn = 'lastfm/Graph_8';
+// let version = 12; //layout version
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
@@ -318,9 +326,9 @@ function initScales(nodes, w, h){
   // .range(['#ece7f2','#2b8cbe']);
   .range(['#a6bddb','#023858']);
 
-  scales.sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([2,1]);
+  scales.sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([1.5,0.25]);
   scales.ss = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([4,1]);
-  scales.sl = d3.scaleLinear().domain([1,maxLevel]).range([16, 12]); //label font size;
+  scales.sl = d3.scaleLinear().domain([1,maxLevel]).range([14, 12]); //label font size;
   return scales;
 }
 
@@ -427,6 +435,17 @@ function initZoom(canvas){
     // labelOverlap(labelTextNodes, 1.0);
   });
   d3.select(canvas).call(zoom);
+
+  d3.select('#resetButton')
+  .on('click', ()=>{
+    d3.select(canvas)
+    .transition()
+    .duration(700)
+    .ease(d3.easeCubicInOut)
+    .call(zoom.transform, d3.zoomIdentity);
+  });
+      
+
 }
 
 
@@ -494,17 +513,12 @@ function initKeyboard(canvas){
       shouldMarkOverlap = !shouldMarkOverlap;
       if(shouldMarkOverlap){
         updateBbox(canvas.data.nodes, canvas);
-        markOverlap(canvas.data.nodes.filter(d=>d.level <= forceLabelLevel).map(d=>d.bbox));
+        markOverlap(canvas.data.nodes.filter(d=>d.shouldShowLabel).map(d=>d.bbox));
       }
       canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
     }else if(key === 'l'){//hide [l]abel
       shouldLabel = !shouldLabel;
       canvas.context.clearRect(0,0, canvas.width, canvas.height);
-      if(shouldDraw){
-        canvas.draw(shouldLabel, forceLabel);
-      }
-    }else if(key === 'L'){//hide [l]abel
-      forceLabel = !forceLabel;
       if(shouldDraw){
         canvas.draw(shouldLabel, forceLabel);
       }
@@ -535,7 +549,19 @@ function initKeyboard(canvas){
       canvas.levelScalePairs = getNonOverlapLevels(canvas);
       // evalMsg(nodes, edges, labelTexts);
     }else if(digits.has(key)){
-      forceLabelLevel = parseInt(key);
+      if(forceLabelLevel == parseInt(key)){
+        forceLabel = !forceLabel;
+      }else{
+        forceLabel = true;
+      }
+      if(!forceLabel){
+        forceLabelLevel = -1;
+      }else{
+        forceLabelLevel = parseInt(key);
+      }
+      console.log(forceLabel, forceLabelLevel);
+      markLabel(canvas.data.nodes, canvas);
+      canvas.draw(shouldLabel, forceLabel);
     }
   });
 }
@@ -654,6 +680,15 @@ function evalMsg(nodes, edges, labelTexts, counts=undefined){
 // //--------functions----------
 function preprocess(data, nodes){
 
+  data.nodes = [];
+  for(let i=0; i<data.node_id.length; i++){
+    data.nodes[i] = {};
+    for(let k in data){
+      if(k.slice(0,5) === 'node_'){
+        data.nodes[i][k.slice(5)] = data[k][i];
+      }
+    }
+  }
   if(nodes !== undefined){
     if(nodes[0].nodeCount === undefined){
       nodes.forEach((d,i)=>{
@@ -665,19 +700,10 @@ function preprocess(data, nodes){
         d.weight = data.node_weight[i];
       });
     }
-
+    data.nodes0 = data.nodes;
     data.nodes = nodes;
-  }else{
-    data.nodes = [];
-    for(let i=0; i<data.node_id.length; i++){
-      data.nodes[i] = {};
-      for(let k in data){
-        if(k.slice(0,5) === 'node_'){
-          data.nodes[i][k.slice(5)] = data[k][i];
-        }
-      }
-    }
   }
+
   let cx = d3.mean(data.nodes, d=>d.x);
   let cy = d3.mean(data.nodes, d=>d.y);
   for(let n of data.nodes){
@@ -696,15 +722,19 @@ function preprocess(data, nodes){
   }
 
 
-  data.virtual_edges = [];
-  for(let i=0; i<data.virtual_edge_source.length; i++){
-    data.virtual_edges[i] = {};
-    for(let k in data){
-      if(k.slice(0,13) === 'virtual_edge_'){
-        data.virtual_edges[i][k.slice(13)] = data[k][i];
+  
+  if(data.virtual_edge_source !== undefined){
+    data.virtual_edges = [];
+    for(let i=0; i<data.virtual_edge_source.length; i++){
+      data.virtual_edges[i] = {};
+      for(let k in data){
+        if(k.slice(0,13) === 'virtual_edge_'){
+          data.virtual_edges[i][k.slice(13)] = data[k][i];
+        }
       }
     }
   }
+  
 
 
 
@@ -758,11 +788,14 @@ function preprocess(data, nodes){
   // }
 
   // data.virtual_edges = data.virtual_edges.filter(e=>e.hops <= 10);
-  for(let e of data.virtual_edges){
-    e.source = data.nodes[data.id2index[e.source]];
-    e.target = data.nodes[data.id2index[e.target]];
-    e.weight *= prescale_weight;
+  if(data.virtual_edges !== undefined){
+    for(let e of data.virtual_edges){
+      e.source = data.nodes[data.id2index[e.source]];
+      e.target = data.nodes[data.id2index[e.target]];
+      e.weight *= prescale_weight;
+    }
   }
+  
 }
 
 
@@ -972,7 +1005,7 @@ function markLabel(nodes, canvas){
   }
   console.log(showLevel);
   for(let n of nodes){
-    if(n.level <= showLevel){
+    if(n.level <= showLevel || n.level <= forceLabelLevel){
       n.shouldShowLabel = true;
     }else{
       n.shouldShowLabel = false;
@@ -1008,24 +1041,18 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
     ctx.arc(x*DPR, y*DPR, r*DPR, 0, 2 * Math.PI);
     ctx.fill();
     
-    //debug bbox:
-    // ctx.lineWidth = 1;
-    // ctx.beginPath();
-    // ctx.rect(n.bbox.left, n.bbox.top, n.bbox.width, n.bbox.height);
-    // ctx.stroke();
-
-    if(forceLabel&&n.level<=forceLabelLevel || label&&n.shouldShowLabel){
+    if(n.shouldShowLabel){
       //draw bbox
-      ctx.globalAlpha = 0.3; 
-      ctx.fillStyle = '#08306b';
-      ctx.beginPath();
-      ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
-      ctx.fill();
+      // ctx.globalAlpha = 0.3; 
+      // ctx.fillStyle = '#08306b';
+      // ctx.beginPath();
+      // ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
+      // ctx.fill();
       
       //draw text
       let l = scales.sl(n.level);
       ctx.globalAlpha = 1.0;
-      if(markOverlap && n.bbox.overlap){
+      if(n.bbox.overlap){
         ctx.fillStyle = 'red';
       }else{
         ctx.fillStyle = '#08306b';
@@ -1041,7 +1068,6 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
 
 
 function drawEdges(ctx, edges, scales, transform){
-  ctx.lineWidth = 1 * Math.pow(transform.k, 1/4) * DPR;
   ctx.strokeStyle = '#aaa';
   ctx.globalAlpha = 1.0;
   for(let e of edges){
@@ -1052,6 +1078,8 @@ function drawEdges(ctx, edges, scales, transform){
     let y0 = scales.sy(e.source.y);
     let x1 = scales.sx(e.target.x);
     let y1 = scales.sy(e.target.y);
+    let lw = scales.sr(Math.min(e.source.level, e.target.level))/1.5;
+    ctx.lineWidth = lw * Math.pow(transform.k, 1/4) * DPR;
     ctx.beginPath();
     ctx.moveTo(x0*DPR, y0*DPR);
     ctx.lineTo(x1*DPR, y1*DPR);

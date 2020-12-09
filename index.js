@@ -81,15 +81,22 @@ window.enabledNodes;
 
 
 
+
+d3.json(`data/json/lastfm/Graph_8-min.json`).then(data=>{
+d3.json(`data/json/lastfm/Graph_8-nodes-12.json`).then(nodes=>{
+
+
 // let fn = 'TopicsLayersData-0/Graph_5000';
 // let version = 3;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
-let fn = 'lastfm/Graph_8';
-let version = 12; //layout version
-d3.json(`data/json/${fn}.json`).then(data=>{
-d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+// let fn = 'lastfm/Graph_8';
+// let version = 12; //layout version
+// d3.json(`data/json/${fn}.json`).then(data=>{
+// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+
+
 
 // let fn = 'TopicsLayersData-0/Graph_5000';
 // let version = 3; //layout version
@@ -1009,7 +1016,7 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
 
     if(forceLabel&&n.level<=forceLabelLevel || label&&n.shouldShowLabel){
       //draw bbox
-      ctx.globalAlpha = 0.3;
+      ctx.globalAlpha = 0.3; 
       ctx.fillStyle = '#08306b';
       ctx.beginPath();
       ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);

@@ -6,11 +6,12 @@ const IS_DYNAMIC = false;
 const EDGE_COLOR = '#aaa';
 // const EDGE_COLOR = d3.rgb(249,180,35);
 const HIDE_OVERLAP = false;
+const DPR = window.devicePixelRatio;
+// const font = 'monospace';
+const FONT = 'Times';
+
 //globals
 let shouldTick = true;
-let shouldHideLabel = false;
-let shouldHideAll = false;
-let shouldDraw = true;
 
 let darkMode = false;
 let bg = darkMode ? '#322':'#fff';
@@ -19,8 +20,14 @@ let runtime = [];
 let nodes;
 let progress = 1e9;
 
-const dpr = window.devicePixelRatio;
-const font = 'monospace';
+let shouldDraw = true;
+let shouldLabel = true;
+let shouldMarkOverlap = false;
+
+let forceLabel = false;
+let forceLabelLevel = 1e9;
+
+
 
 window.enabledNodes;
 
@@ -80,9 +87,15 @@ window.enabledNodes;
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
 let fn = 'lastfm/Graph_8';
-let version = 2; //layout version
+let version = 12; //layout version
 d3.json(`data/json/${fn}.json`).then(data=>{
 d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+
+// let fn = 'TopicsLayersData-0/Graph_5000';
+// let version = 3; //layout version
+// d3.json(`data/json/${fn}.json`).then(data=>{
+// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+
 
   window.data = data;
   // if(nodes !== undefined){
@@ -101,7 +114,10 @@ d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
     preprocess(data, nodes);
   }
   let canvas = init(data);
-  canvas.draw();
+
+  if(shouldDraw){
+    canvas.draw(shouldLabel, forceLabel);
+  }
 
 });
 });
@@ -115,13 +131,29 @@ function init(data){
   let edges = data.edges;
   let canvasData = {nodes, edges};
 
-  let width = window.innerWidth - 50;
-  let height = window.innerHeight - 50;
+  let width = window.innerWidth;
+  let height = window.innerHeight;
   let scales = initScales(nodes, width, height);
-
   let canvas = initCanvas(width, height, canvasData, scales, draw);
-  initInteraction(canvas);
+  canvas.levelScalePairs = getNonOverlapLevels(canvas);
 
+  let simData = {
+    nodes, 
+    edges, 
+    virtualEdges: data.virtual_edges, 
+    enabledNodes: window.enabledNodes, 
+    id2index: data.id2index,
+    xDomain: scales.sx.domain(),
+    xRange: scales.sy.range(),
+    yDomain: scales.sy.domain(),
+    yRange: scales.sy.range(),
+    progress: 1,
+    dpr: DPR,
+  };
+  canvas.worker = initSimulationWorker(canvas, simData);
+
+
+  initInteraction(canvas);
 
   markLabel(nodes, canvas);
   // let svg = initOverlay();
@@ -152,31 +184,35 @@ function init(data){
 
 
 function updateBbox(nodes, canvas){
-  let sx = canvas.scales.sx;
-  let sy = canvas.scales.sy;
+  let scales = canvas.scales;//initScales(nodes, canvas.width, canvas.height);
+  let sx = scales.sx;
+  let sy = scales.sy;
+  let sl = scales.sl;
   let ctx = canvas.context;
-  let sl = canvas.scales.sl;
   for(let n of nodes){
-    let x = sx(n.x) * dpr;
-    let y = sy(n.y) * dpr;
-    ctx.font = `${sl(n.level)}px ${font}`;
+    let x = sx(n.x);
+    let y = sy(n.y);
+    ctx.font = `${sl(n.level)}px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     let m = ctx.measureText(n.label);
     let left = x - m.actualBoundingBoxLeft;
     let right = x + m.actualBoundingBoxRight;
     let top = y - m.actualBoundingBoxAscent;
     let bottom = y + m.actualBoundingBoxDescent;
 
-    // centered text
     let width = right - left;
     let height = bottom - top;
-    left -= width/2;
-    right -= width/2;
-    top += height/2;
-    bottom += height/2;
+
+    // centered text
+    // left -= width/2;
+    // right -= width/2;
+    // top += height/2;
+    // bottom += height/2;
 
     n.bbox = {
-      x: (left+right)/2,
-      y: (top+bottom)/2,
+      x: left,
+      y: top,
       width,
       height,
       left, 
@@ -188,13 +224,13 @@ function updateBbox(nodes, canvas){
 }
 
 
-function getNonOverlapLevels(nodes, canvas){
+function getNonOverlapLevels(canvas){
+  let nodes = canvas.data.nodes;
   updateBbox(nodes, canvas);
   let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
   let res = [];
   for (let l of levels){
-    let nodes_l = nodes.filter(d=>d.level <= l);
-    let bbox = nodes_l.map(d=>d.bbox);
+    let bbox = nodes.filter(d=>d.level <= l).map(d=>d.bbox);
     let [s, a] = areaUtilization(bbox);
     res.push([l, s]);
   }
@@ -203,7 +239,7 @@ function getNonOverlapLevels(nodes, canvas){
 }
 
 
-function initSimulationWorker(){
+function initSimulationWorker(canvas, simData){
   let worker = new Worker('simulation.js');
   worker.postMessage(simData);
   worker.onmessage = function(event) {
@@ -211,41 +247,37 @@ function initSimulationWorker(){
     let type = data.type;
     if(type === 'tick'){
       console.log(`${(data.progress * 100).toFixed(2)}%`);
-
-      // window.nodes = data.nodes;
-      // window.edges = data.edges;
-      // window.simulation = data.simulation;
+      canvas.data.nodes = data.nodes;
+      canvas.data.edges = data.edges;
+      canvas.simulation = data.simulation;
       // window.enabledNodes = data.enabledNodes;
-      draw(
-        data.nodes, data.edges, 
-        drawData.nodeCircles, drawData.linkLines, 
-        drawData.labelTexts, drawData.labelBoxes,
-        drawData.scales.sx, drawData.scales.sy, 
-        drawData.transform
-      );
-
-    }else if(type === 'end'){
-      // window.nodes = data.nodes;
-      // window.edges = data.edges;
-      // window.simulation = data.simulation;
-      // window.enabledNodes = data.enabledNodes;
-      draw(
-        data.nodes, data.edges, 
-        drawData.nodeCircles, drawData.linkLines, 
-        drawData.labelTexts, drawData.labelBoxes,
-        drawData.scales.sx, drawData.scales.sy, 
-        drawData.transform
-      );
-      let t = performance.now() - window.t0;
-      console.log('training time', t/1000, 'secs');
+      if(shouldDraw){
+        canvas.draw(shouldLabel, forceLabel);
+      }
     }
+    // if(type === 'end'){
+    //   // window.nodes = data.nodes;
+    //   // window.edges = data.edges;
+    //   // window.simulation = data.simulation;
+    //   // window.enabledNodes = data.enabledNodes;
+    //   draw(
+    //     data.nodes, data.edges, 
+    //     drawData.nodeCircles, drawData.linkLines, 
+    //     drawData.labelTexts, drawData.labelBoxes,
+    //     drawData.scales.sx, drawData.scales.sy, 
+    //     drawData.transform
+    //   );
+    //   let t = performance.now() - window.t0;
+    //   console.log('training time', t/1000, 'secs');
+    // }
   };
   return worker;
 }
 
+
 function setCanvasSize(canvas, w, h){
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
+  canvas.width = w * DPR;
+  canvas.height = h * DPR;
   canvas.style.width = w;
   canvas.style.height = h;
 }
@@ -258,8 +290,10 @@ function initCanvas(w,h, data, scales, draw){
   canvas.data = data;
   canvas.scales = scales;
   canvas.draw = draw;
+  canvas.clear = ()=>{
+    canvas.context.clearRect(0,0, canvas.width, canvas.height);
+  };
   canvas.transform = d3.zoomIdentity.scale(1);
-  canvas.levelScalePairs = getNonOverlapLevels(data.nodes, canvas);
   return canvas;
 }
 
@@ -279,7 +313,7 @@ function initScales(nodes, w, h){
 
   scales.sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([2,1]);
   scales.ss = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([4,1]);
-  scales.sl = d3.scaleLinear().domain([1,8]).range([19, 12]); //label font size;
+  scales.sl = d3.scaleLinear().domain([1,maxLevel]).range([16, 12]); //label font size;
   return scales;
 }
 
@@ -343,7 +377,7 @@ function debugMsg(){
 function initInteraction(canvas){
   initZoom(canvas);
   // initDrag();
-  // initKeyboard();
+  initKeyboard(canvas);
 }
 
 
@@ -364,46 +398,26 @@ function initZoom(canvas){
     if(sx0 === undefined){
       sx0 = canvas.scales.sx;
       sy0 = canvas.scales.sy;
+      canvas.scales.sx0 = sx0;
+      canvas.scales.sy0 = sy0;
     }
     canvas.scales.sx = canvas.transform.rescaleX(sx0);
     canvas.scales.sy = canvas.transform.rescaleY(sy0);
-
-    // worker.postMessage({
-    //   type: 'zoom',
-    //   xDomain: scales.sx.domain(),
-    //   yDomain: scales.sy.domain(),
-    //   xRange: scales.sx.range(),
-    //   yRange: scales.sy.range(),
-    // });
-
     // ax.scale(scales.sx);
     // ay.scale(scales.sy);
     // gx.call(ax);
     // gy.call(ay);
-    
-    // nodeCircles
-    // .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
-    // .attr('r', d=>sr(d.level));
-    // linkLines
-    // .attr('stroke-width', e => Math.sqrt(transform.k) * ss(e.level)/2 )
-    canvas.draw();
+    markLabel(canvas.data.nodes, canvas);
+    if(shouldDraw){
+      canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
+    }
   })
   .on('end', ()=>{
     markLabel(canvas.data.nodes, canvas);
-    canvas.draw();
-    // debugMsg();
+    if(shouldDraw){
+      canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
+    }
     // labelOverlap(labelTextNodes, 1.0);
-
-    // nodeCircles
-    // .attr('r', d=>sr(d.level)*Math.pow(transform.k, 1/2));
-    // // .attr('r', d=>sr(d.level));
-    // linkLines
-    // .attr('stroke-width', e => Math.sqrt(transform.k) * ss(e.level)/2 )
-
-    // draw(window.nodes, window.edges, 
-    // nodeCircles, linkLines, labelTexts, labelBoxes,
-    // scales.sx, scales.sy, transform);
-
   });
   d3.select(canvas).call(zoom);
 }
@@ -451,7 +465,11 @@ function initDrag(){
 }
 
 
-function initKeyboard(){
+function initKeyboard(canvas){
+  let worker = canvas.worker;
+  const digits = new Set(['1','2','3','4','5','6','7','8','9', '0']);
+
+
   window.addEventListener('keydown', (event)=>{
     let key = event.key;
     console.log(key);
@@ -466,34 +484,28 @@ function initKeyboard(){
         type: 'restart'
       });
     }else if(key === 'c'){//show [C]ollision
-      colorLabel(labelTextNodes, 'white');
-      labelOverlap(labelTextNodes);
-      let labels = labelTextNodes.filter(d=>d.overlap.size > 0);
-      console.log('overlap:', labels.length);
-      colorLabel(labels, 'orange');
-
+      shouldMarkOverlap = !shouldMarkOverlap;
+      if(shouldMarkOverlap){
+        updateBbox(canvas.data.nodes, canvas);
+        markOverlap(canvas.data.nodes.filter(d=>d.level <= forceLabelLevel).map(d=>d.bbox));
+      }
+      canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
     }else if(key === 'l'){//hide [l]abel
-      shouldHideLabel = !shouldHideLabel;
-      d3.selectAll('.labelText')
-      .style('display', shouldHideLabel?'none':'');
-      d3.selectAll('.labelBox')
-      .style('display', shouldHideLabel?'none':'');
-
+      shouldLabel = !shouldLabel;
+      canvas.context.clearRect(0,0, canvas.width, canvas.height);
+      if(shouldDraw){
+        canvas.draw(shouldLabel, forceLabel);
+      }
+    }else if(key === 'L'){//hide [l]abel
+      forceLabel = !forceLabel;
+      if(shouldDraw){
+        canvas.draw(shouldLabel, forceLabel);
+      }
     }else if(key === 'h'){//[h]ide all
-      shouldHideAll = !shouldHideAll;
       shouldDraw = !shouldDraw;
-      d3.selectAll('.labelText')
-      .style('display', (shouldHideAll||shouldHideLabel)?'none':'');
-      d3.selectAll('.node')
-      .style('display', shouldHideAll?'none':'');
-      d3.selectAll('.link')
-      .style('display', shouldHideAll?'none':'');
-      d3.selectAll('.labelBox')
-      .style('display', shouldHideAll?'none':'');
-      if(!shouldHideAll){
-        draw(window.nodes, window.edges, 
-        nodeCircles, linkLines, labelTexts,labelBoxes,
-        scales.sx, scales.sy, transform);
+      canvas.context.clearRect(0,0, canvas.width, canvas.height);
+      if(shouldDraw){
+        canvas.draw(shouldLabel, forceLabel);
       }
     }else if(key === 'a'){//[A]dd a node
       window.t0 = performance.now();
@@ -511,9 +523,12 @@ function initKeyboard(){
         type: 'auto-add-nodes'
       });
     }else if(key === '/'){//log
-      exportJson(pos(),`topics-${window.enabledNodes.size}.json`);
+      exportJson(pos(canvas.data.nodes),`nodes.json`);
     }else if(key === 'e'){ //evaluation
-      evalMsg(nodes, edges, labelTexts);
+      canvas.levelScalePairs = getNonOverlapLevels(canvas);
+      // evalMsg(nodes, edges, labelTexts);
+    }else if(digits.has(key)){
+      forceLabelLevel = parseInt(key);
     }
   });
 }
@@ -744,8 +759,8 @@ function preprocess(data, nodes){
 }
 
 
-function pos(){
-  let nodes = window.nodes.map(d=>({
+function pos(nodes){
+  nodes = nodes.map(d=>({
     id: d.id,
     x:d.x, 
     y:d.y, 
@@ -755,7 +770,6 @@ function pos(){
     nodeCount: d.nodeCount,
     weight: d.weight,
   }));
-  // return JSON.stringify(nodes, null, 2);
   return nodes;
 }
 
@@ -849,8 +863,82 @@ function markCrossing(edges){
   }
 }
 
+
+function markOverlap(bboxes){
+  let count = 0;
+  // let overlapMatrix = [];
+  for(let i=0; i<bboxes.length; i++){
+    // overlapMatrix.push([]);
+    bboxes[i].overlap = false;
+  }
+
+  for(let i=0; i<bboxes.length; i++){
+    // overlapMatrix[i][i] = 0;
+    let bbox1 = bboxes[i];
+    
+    for(let j=i+1; j<bboxes.length; j++){
+      let bbox2 = bboxes[j];
+      let overlap = isRectCollide(bbox1, bbox2);
+      if(overlap){
+        // overlapMatrix[i][j] = 1;
+        // overlapMatrix[j][i] = 1;
+        // l2.overlap.add(i);
+        // l1.overlap.add(j);
+        // l1.show = false;
+        bbox1.overlap = true;
+        bbox2.overlap = true;
+        count += 1;
+      }else{
+        // overlapMatrix[i][j] = 0;
+        // overlapMatrix[i][j] = 0;
+      }
+    }
+  }
+  return count;
+}
+
+
+function labelOverlap(labelNodes){
+  let count = 0;
+  // let overlapMatrix = [];
+  for(let i=0; i<labelNodes.length; i++){
+    // overlapMatrix.push([]);
+    let l1 = labelNodes[i];
+    l1.show = true;
+  }
+
+  let bboxes = labelNodes.map(l=>l.getBoundingClientRect());
+
+  labelNodes.forEach(d=>d.overlap = new Set());
+  for(let i=0; i<labelNodes.length; i++){
+    // overlapMatrix[i][i] = 0;
+    let l1 = labelNodes[i];
+    let bbox1 = bboxes[i];
+    
+    for(let j=i+1; j<labelNodes.length; j++){
+      let l2 = labelNodes[j];
+      let bbox2 = bboxes[j];
+      let overlap = isRectCollide(bbox1, bbox2);
+      if(overlap){
+        // overlapMatrix[i][j] = 1;
+        // overlapMatrix[j][i] = 1;
+        // l2.overlap.add(i);
+        // l1.overlap.add(j);
+        // l1.show = false;
+        l2.show = false;
+        count += 1;
+      }else{
+        // overlapMatrix[i][j] = 0;
+        // overlapMatrix[i][j] = 0;
+      }
+    }
+  }
+  // window.overlapMatrix = overlapMatrix;
+
+  return count;
+}
 // def draw
-function draw(){
+function draw(label=true, forceLabel=false, markOverlap=true){
   // nodes, edges, nodeCircles, linkLines, labelTexts, labelBoxes,sx, sy, transform
   let ctx = this.context;
   let data = this.data;
@@ -861,7 +949,8 @@ function draw(){
   
   ctx.clearRect(0, 0, this.width, this.height);
   drawEdges(ctx, data.edges, this.scales, this.transform);
-  drawNodes(ctx,  data.nodes, this.scales, this.transform);
+  drawNodes(ctx,  data.nodes, this.scales, this.transform, label, forceLabel, markOverlap);
+
 }
 
 
@@ -870,7 +959,7 @@ function markLabel(nodes, canvas){
   let levelScalePairs = canvas.levelScalePairs;
   let showLevel = 0;
   for(ls of levelScalePairs){
-    if(ls[1]/2 < scale){
+    if(ls[1]< scale){
       showLevel = ls[0];
     }
   }
@@ -885,60 +974,80 @@ function markLabel(nodes, canvas){
 }
 
 
-function drawNodes(ctx, nodes, scales, transform, label=true){
+function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap){
   if(label){
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.strokeStyle = '#fff';
     
     ctx.lineJoin = 'round';
-    // ctx.shadowOffsetX = 1;
-    // ctx.shadowOffsetY = 1;
+    // ctx.shadowOffsetX = 0;
+    // ctx.shadowOffsetY = 0;
     // ctx.shadowColor = "rgba(255,255,255,1)";
-    // ctx.shadowBlur = 4;
+    // ctx.shadowBlur = 2;
   }
 
   for(let n of nodes){
+    if(!n.update){
+      continue;
+    }
+
     let x = scales.sx(n.x);
     let y = scales.sy(n.y);
-    let r = scales.sr(n.level) * Math.pow(transform.k, 1/2);
+    let r = scales.sr(n.level) * Math.pow(transform.k, 1/4);
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = '#08306b';
     ctx.beginPath();
-    ctx.arc(x*dpr, y*dpr, r*dpr, 0, 2 * Math.PI);
+    ctx.arc(x*DPR, y*DPR, r*DPR, 0, 2 * Math.PI);
     ctx.fill();
-
+    
     //debug bbox:
     // ctx.lineWidth = 1;
     // ctx.beginPath();
     // ctx.rect(n.bbox.left, n.bbox.top, n.bbox.width, n.bbox.height);
     // ctx.stroke();
 
-    if(label){
-      if(n.shouldShowLabel){
-        let l = scales.sl(n.level);
-        ctx.font = `${l}px ${font}`;        
-        ctx.lineWidth = l / 5;
-
-        ctx.strokeText(n.label, x*dpr, y*dpr);
-        ctx.fillStyle = '#333';
-        ctx.fillText(n.label, x*dpr, y*dpr);
+    if(forceLabel&&n.level<=forceLabelLevel || label&&n.shouldShowLabel){
+      //draw bbox
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#08306b';
+      ctx.beginPath();
+      ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
+      ctx.fill();
+      
+      //draw text
+      let l = scales.sl(n.level);
+      ctx.globalAlpha = 1.0;
+      if(markOverlap && n.bbox.overlap){
+        ctx.fillStyle = 'red';
+      }else{
+        ctx.fillStyle = '#08306b';
       }
+      ctx.strokeStyle = '#fff';
+      ctx.font = `${l*DPR}px ${FONT}`;        
+      ctx.lineWidth = l*DPR/4;
+      ctx.strokeText(n.label, x*DPR, y*DPR);
+      ctx.fillText(n.label, x*DPR, y*DPR);
     }
   }
 }
 
 
 function drawEdges(ctx, edges, scales, transform){
-  ctx.lineWidth = 1 * Math.pow(transform.k, 1/2) * dpr;
-  ctx.strokeStyle = '#333';
-
+  ctx.lineWidth = 1 * Math.pow(transform.k, 1/4) * DPR;
+  ctx.strokeStyle = '#aaa';
+  ctx.globalAlpha = 1.0;
   for(let e of edges){
+    if(!(e.source.update && e.target.update)){
+      continue;
+    }
     let x0 = scales.sx(e.source.x);
     let y0 = scales.sy(e.source.y);
     let x1 = scales.sx(e.target.x);
     let y1 = scales.sy(e.target.y);
     ctx.beginPath();
-    ctx.moveTo(x0*dpr, y0*dpr);
-    ctx.lineTo(x1*dpr, y1*dpr);
+    ctx.moveTo(x0*DPR, y0*DPR);
+    ctx.lineTo(x1*DPR, y1*DPR);
     ctx.stroke();
   }
 }

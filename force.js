@@ -239,11 +239,13 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
             let bkx = bk * dir.x;
             let bky = bk * dir.y;
 
+            //node movement
             n.vx += bkx;
             n.vy += bky;
 
-            let sbkx = 0.5*bkx;
-            let sbky = 0.5*bky;
+            //edge movement
+            let sbkx = 0.7*bkx;
+            let sbky = 0.7*bky;
             e0.vx -= sbkx;
             e0.vy -= sbky;
             e1.vx -= sbkx;
@@ -653,9 +655,8 @@ function forceStress(nodes, edges, enabledNodes, id2index){
     // for(let e of edges){
     // 
     //stochastic
-    for(let i=0; i<nodes.length; i++){
+    for(let i=0; i<nodes.length*6; i++){
       let e = edges[randint(0,edges.length)];
-
       // if(enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id)){
       if(nodes[id2index[e.source.id]].update && nodes[id2index[e.target.id]].update){
         let w = strength(e);
@@ -668,7 +669,7 @@ function forceStress(nodes, edges, enabledNodes, id2index){
         let dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], Math.max(currentDist, 1e-4));
 
         let coef = (currentDist - d) * w;
-        coef = Math.sign(coef) * Math.min(Math.abs(coef), Math.max(1e-4, currentDist*0.4));
+        coef = Math.sign(coef) * Math.min(Math.abs(coef), Math.max(1e-4, currentDist*0.2));
 
         let [dx, dy] = numeric.mul(coef, dir);
         let vx = dx * alpha;

@@ -25,7 +25,7 @@ let maxEdgeWeight;
 let minEdgeWeight;
 let intervalId;
 let iter = 0;
-
+let dpr = 1;
 
 
 function addNode(){
@@ -62,9 +62,18 @@ onmessage = function(event) {
     scales.sx = d3.scaleLinear().domain(dataObj.xDomain).range(dataObj.xRange);
     scales.sy = d3.scaleLinear().domain(dataObj.yDomain).range(dataObj.yRange);
   }else if(type === 'auto-add-nodes'){
+    let niter = 40;
     while(enabledNodes.size < nodes.length){
       addNode();
-      train(1);
+      if(enabledNodes.size % 50 == 0){
+        simulation
+        .alpha(0.90)
+        .velocityDecay(0.4)
+        .alphaDecay(1 - Math.pow(0.001, 1 / niter))
+        .restart();
+        simulation.tick(niter);
+        post();
+      }
     }
     train(10);
 
@@ -92,31 +101,19 @@ onmessage = function(event) {
   else{
     //default init event
     // const idealZoomScale = 25; //for 5000-node topics
-    const idealZoomScale = 10; //for 2588-node lastfm
-    console.log('target non-overlap scale', idealZoomScale);
-    const idealZoomScales = [1,2,3,4,5,6,7,8]; //for 2588-node lastfm
-    const origin = scales.sx.invert(0);
-    const sr = d3.range(8).map((_,i)=>{
-      return d=>{
-        if (d.level <= i+1){
-          return scales.sx.invert( (d.bbox.width+8) / idealZoomScales[i] ) - origin;
-        }else{
-          return 0;
-        }
-      };
-    });
-
-    let aspectRatio = 3;
+    // let aspectRatio = 3;
     nodes = dataObj.nodes;
     edges = dataObj.edges;
+    dpr = dataObj.dpr;
     enabledNodes = dataObj.enabledNodes;
     id2index =  dataObj.id2index;
     virtualEdges = dataObj.virtualEdges;
-
     scales =  {
       sx: d3.scaleLinear().domain(dataObj.xDomain).range(dataObj.xRange),
       sy: d3.scaleLinear().domain(dataObj.yDomain).range(dataObj.yRange),
     };
+    const idealZoomScale = 10; //for 2588-node lastfm
+    
     progress = dataObj.progress;
     maxEdgeWeight = d3.max(edges, e=>e.weight);
     minEdgeWeight = d3.min(edges, e=>e.weight);
@@ -130,88 +127,97 @@ onmessage = function(event) {
     .alphaDecay(1 - Math.pow(0.001, 1 / niter))
     .force('pre', forcePre(scales))
 
-
-
-    .force('link-real',
+    .force('link',
       d3.forceLink(edges)
       .distance(e=>e.weight)
-      .strength(e=>2)
+      .strength(e=>1)
     )
-    // // .force('link-virtual',
-    // //   d3.forceLink(virtualEdges)
-    // //   .distance(e=>Math.pow(e.weight, 0.5+1/e.hops))
-    // //   .strength(e=>0.01 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-    // //   // .strength(e=>0.02 / e.hops )
-    // // )
-    // // .force('ideal-edge-length', 
-    // //   forceStress(nodes, edges, enabledNodes, id2index)
-    // //   // .strength(e=>50/Math.pow(e.weight, 1))
-    // //   .strength(e=>0.1 / e.weight * minEdgeWeight )
-    // //   .distance(e=>Math.pow(e.weight, 0.5))
-    // // )
     .force('stress', 
       forceStress(nodes, virtualEdges, enabledNodes, id2index)
-      // .strength(e=>10 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
-      // .strength(e=>0.1)
-      .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
-      // .distance(e=>e.weight)
-      // .distance(e=>Math.pow(e.weight, 0.7+1/e.hops))
-      // .distance(e=>Math.pow(e.weight, Math.min(1, 0.8+1/e.hops)))
-      .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
-      // .distance(e=>e.weight/(Math.PI/2))
-      // .distance(e=>{
-      //   let r = 45000 / Math.PI;
-      //   let a = e.weight / 45000 * Math.PI / 2;
-      //   let l = 2 * r * Math.sin(a);
-      //   return l;
-      // })
-      // 
+      // .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
+      // .strength(e=>1.6 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
+      .distance(e=>e.weight)
+      // .strength(e=>1 / Math.pow(e.weight, 1.4) * Math.pow(minEdgeWeight, 1.4) )//lastfm
+      .strength(e=>1 / Math.pow(e.weight, 2) * Math.pow(minEdgeWeight, 2) )
     )
 
-
-
-    // // //other aesthetics
+    // // // //other aesthetics
     .force('central', 
      d3.forceRadial(0, 0, 0)
      .strength(0.005)
     )
     .force('charge', 
      d3.forceManyBody()
-     .strength(d=> -6*(d.weight+100))
+     .strength(d=> -1*(d.weight+200))
     )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
     )
-    
+    .stop();
+
 
     // //label overlap removal
-    .force('pre-collide', forceScaleY(nodes, aspectRatio))
-    .force('collide', 
-      d3.forceCollide()
-      .radius(d=>scales.sx.invert( (d.bbox.width+8) / idealZoomScale ) - scales.sx.invert(0))
-      .strength(0.05)
-      .iterations(2)
-    )
+    // simulation
+    // .force('pre-collide', forceScaleY(nodes, aspectRatio))
     // .force('collide', 
     //   d3.forceCollide()
-    //   .radius(sr[sr.length])
+    //   .radius(d=>scales.sx.invert( (d.bbox.width+8) / idealZoomScale ) - scales.sx.invert(0))
     //   .strength(0.05)
     //   .iterations(2)
     // )
-    .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+    // .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+    // 
+    
+    // const levelCount = Array.from(new Set(nodes.map(d=>[d.level, d.nodeCount]))).sort((a,b)=>a-b);
+    // let idealCount = 40;
+    
+    // // for(let lc of levelCount){
+    // //   let [l,c] = lc;
+    // //   level2scale[l] = 1.5*Math.sqrt(c / idealCount);
+    // // }
+    // // 
+    let level2scale = {//lastfm
+      1:3,
+      2:7,
+      4:8,
+      8:10,
+    };
+    // let level2scale = {//topics refined
+    //   1:1,
+    //   2:2,
+    //   3:6,
+    //   8:10,
+    //   18:14,
+    // };
+    console.log(level2scale);
+    const origin = scales.sx.invert(0);
+    const margin = 2;//in pixel
+    for (let l in level2scale){
+      l = parseFloat(l);
+      let s = level2scale[l];
+      let aspectRatio = 3;
+      simulation
+      .force('pre-collide', forceScaleY(nodes, aspectRatio))
+      .force(`collide-${l}`, 
+        d3.forceCollide()
+        .radius(d=>{
+          if(d.level <= l){
+            let r = d.bbox.width/2 / s + margin;
+            r = scales.sx.invert(r/dpr) - origin;
+            return r;
+          }else{
+            return 0;
+          }
+        })
+        .strength(0.5/(maxLevel+1-l))
+        // .strength(0.03)
+        .iterations(1)
+      )
+      .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
+    }   
+    simulation.force('post', forcePost(edges, 500, enabledNodes, id2index, 0));
 
-    // // // .force('label-collide', 
-    // // //   forceEllipse({
-    // // //     nodes: nodes, 
-    // // //     scales: scales,
-    // // //     strength: 3,
-    // // //     b: 2.0,
-    // // //     c: 1.0,
-    // // //   })
-    // // // )
 
-    .force('post', forcePost(edges, 500, enabledNodes, id2index, 0))
-    .stop();
 
     simulation.on('tick', (arg)=>{
       iter += 1;
@@ -262,7 +268,15 @@ function updateBbox(d, bbox, scales){
 
 
   
-
+function post(){
+  postMessage({
+    type: 'tick', 
+    progress: niter / niter,
+    nodes, 
+    edges,
+    enabledNodes,
+  });
+}
 
 function train(niter, wait=false){
   iter = 0;

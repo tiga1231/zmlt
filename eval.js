@@ -10,7 +10,7 @@
 // let nodeCounts = [100, 200, 400, 800, 1600, 2500, 3500, 5000];
 
 let fn = 'lastfm/Graph_8';
-let version = 2;
+let version = 13;
 let nodeCounts = [299, 619, 1043, 1301, 1757, 1967, 2286, 2588];
 
 

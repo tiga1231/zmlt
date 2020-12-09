@@ -330,14 +330,14 @@ function areaUtilization(bboxes){
     let bi = bboxes[i];
     let x = sx(bi);
     let y = sy(bi);
-    let r = bi.width * 0.5;
+    let r = bi.width;
     let neighbors = searchQuadtree(tree, sx, sy, x-r, x+r, y-r, y+r);
     for(let j of neighbors){
       if(i!==j){
         let bj = bboxes[j];
         let min = min0;
         let max = max0;
-        for(let k=0; k<15; k++){
+        for(let k=0; k<20; k++){
           let tmp = (min+max)/2;
           if(isRectCollide2(bi, bj, tmp)){
             [min,max] = [tmp, max];

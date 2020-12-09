@@ -8,6 +8,7 @@ function drawStatic(graph, canvas, dpr){
     let y0 = e.source.y;
     let x1 = e.target.x;
     let y1 = e.target.y;
+    c.lineWidth = dpr;
     c.moveTo(sx(x0), sy(y0));
     c.lineTo(sx(x1), sy(y1));
     c.stroke();

@@ -81,15 +81,14 @@ window.enabledNodes;
 
 
 
-
+//demo lastfm
 // d3.json(`data/json/lastfm/Graph_8-min.json`).then(data=>{
 // d3.json(`data/json/lastfm/Graph_8-nodes-12.json`).then(nodes=>{
 
 //demo topics
-let fn = 'data/json/TopicsLayersData-0/Graph_5000-min.json';
-let fn2 = 'data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json';//for demo, no training
-d3.json(fn).then(data=>{
-d3.json(fn2).then(nodes=>{
+d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
+d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
+
 
 //train topics
 // let fn = 'TopicsLayersData-0/Graph_5000-radial'; //no longer works
@@ -326,7 +325,7 @@ function initScales(nodes, w, h){
   // .range(['#ece7f2','#2b8cbe']);
   .range(['#a6bddb','#023858']);
 
-  scales.sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([1.5,0.25]);
+  scales.sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([1,0.25]);
   scales.ss = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([4,1]);
   scales.sl = d3.scaleLinear().domain([1,maxLevel]).range([14, 12]); //label font size;
   return scales;

@@ -176,27 +176,14 @@ onmessage = function(event) {
     // //   let [l,c] = lc;
     // //   level2scale[l] = 1.5*Math.sqrt(c / idealCount);
     // // }
-    let level2scale = {}; //crossing free init layout 
-    // let level2scale = {//lastfm
-    //   1:3,
-    //   2:7,
-    //   4:8,
-    //   8:10,
-    // };
-    level2scale = {//topics refined
-      1:2.5,
-      2:3,
-      9:6,
-      12:12,
-      18:16,
-    };
+    let level2scale = dataObj.level2scale;
     console.log(level2scale);
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     for (let l in level2scale){
       l = parseFloat(l);
       let s = level2scale[l];
-      let aspectRatio = 4;
+      let aspectRatio = 8;
       simulation
       .force('pre-collide', forceScaleY(nodes, aspectRatio))
       .force(`collide-${l}`, 
@@ -207,11 +194,12 @@ onmessage = function(event) {
             r = scales.sx.invert(r) - origin;
             return r;
           }else{
-            return 0.1;
+            return 0;
           }
         })
         // .strength(0.03)
         // .strength(0.5/(maxLevel+1-l))//lastfm
+        // .strength(0.02 + 0.06/(maxLevel+1-l))//topics
         .strength(0.02 + 0.06/(maxLevel+1-l))//topics
         .iterations(2)
       )

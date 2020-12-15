@@ -86,13 +86,22 @@ window.enabledNodes;
 // d3.json(`data/json/lastfm/Graph_8-nodes-12.json`).then(nodes=>{
 
 //demo topics
-d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
-d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
+// d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
+// d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
+d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
+d3.json('data/json/topics_refined/Graph_5000-nodes-3.json').then(nodes=>{
 
+
+
+// //train topics (//no longer work)
+// let fn = 'TopicsLayersData-0/Graph_5000-radial';
+// let version = 3;
+// d3.json(`data/json/${fn}.json`).then(data=>{
+// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
 //train topics
-// let fn = 'TopicsLayersData-0/Graph_5000-radial'; //no longer works
-// let version = 3;
+// let fn = 'topics_refined/Graph_5000';
+// let version = 4;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
@@ -122,10 +131,25 @@ d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(node
   }else{
     window.enabledNodes = new Set(data.nodeIds);
   }
+
+    
   if(nodes === undefined){
     preprocess(data, undefined);
+    data.level2scale = {}; //crossing free init layout 
   }else{
     preprocess(data, nodes);
+    // data.level2scale = {//lastfm
+    //   1:3,
+    //   2:7,
+    //   4:8,
+    //   8:10,
+    // };
+    // 
+    // data.level2scale = {}; //crossing free init layout 
+    data.level2scale = {//topics refined
+      10: 40,
+      20: 40,
+    };
   }
   let canvas = init(data);
 
@@ -149,8 +173,12 @@ function init(data){
   let height = window.innerHeight;
   let scales = initScales(nodes, width, height);
   let canvas = initCanvas(width, height, canvasData, scales, draw);
+  
+  updateBbox(canvas.data.nodes, canvas);
   canvas.levelScalePairs = getNonOverlapLevels(canvas);
-
+  markNonOverlapLevels(canvas);
+  markLabelByLevel(canvas.data.nodes, canvas);
+  
   let simData = {
     nodes, 
     edges, 
@@ -163,13 +191,13 @@ function init(data){
     yRange: scales.sy.range(),
     progress: 1,
     dpr: DPR,
+    level2scale: data.level2scale,
   };
   canvas.worker = initSimulationWorker(canvas, simData);
 
-
   initInteraction(canvas);
 
-  markLabel(nodes, canvas);
+
   // let svg = initOverlay();
   // initStyles();
   // initKeyboard();
@@ -202,38 +230,53 @@ function updateBbox(nodes, canvas){
   let sx = scales.sx;
   let sy = scales.sy;
   let sl = scales.sl;
+  let sr = scales.sr;
   let ctx = canvas.context;
   for(let n of nodes){
     let x = sx(n.x);
     let y = sy(n.y);
-    ctx.font = `${sl(n.level)}px ${FONT}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    let m = ctx.measureText(n.label);
-    let left = x - m.actualBoundingBoxLeft;
-    let right = x + m.actualBoundingBoxRight;
-    let top = y - m.actualBoundingBoxAscent;
-    let bottom = y + m.actualBoundingBoxDescent;
+    let l = sl(n.level);
+    n.r = sr(n.level);
+    n.l = l;
+    if(n.bbox === undefined){
 
-    let width = right - left;
-    let height = bottom - top;
+      ctx.font = `${l}px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-    // centered text
-    // left -= width/2;
-    // right -= width/2;
-    // top += height/2;
-    // bottom += height/2;
+      let m = ctx.measureText(n.label);
+      let left = x - m.actualBoundingBoxLeft;
+      let right = x + m.actualBoundingBoxRight;
+      let top = y - m.actualBoundingBoxAscent;
+      let bottom = y + m.actualBoundingBoxDescent;
+      let width = right - left;
+      let height = bottom - top;
+      n.bbox = {
+        x: left,
+        y: top,
+        cx: x*DPR,
+        cy: y*DPR,
 
-    n.bbox = {
-      x: left,
-      y: top,
-      width,
-      height,
-      left, 
-      right, 
-      top, 
-      bottom,
-    };
+        width,
+        height,
+        left,
+        right,
+        top,
+        bottom,
+      }; 
+    }else{
+      // n.bbox.cx = Math.round(x * DPR);
+      // n.bbox.cy = Math.round(y * DPR);
+      n.bbox.cx = x*DPR;
+      n.bbox.cy = y*DPR;
+      n.bbox.x = x - n.bbox.width/2;
+      n.bbox.y = y - n.bbox.height/2;
+      n.bbox.left = x - n.bbox.width/2;
+      n.bbox.right = x + n.bbox.width/2;
+      n.bbox.top = y - n.bbox.height/2;
+      n.bbox.bottom = y + n.bbox.height/2;
+    }
+    
   }
 }
 
@@ -253,6 +296,111 @@ function getNonOverlapLevels(canvas){
 }
 
 
+// function areaUtilization(bboxes){
+//   //binary search minimal non-overlap scale
+//   //then compute area usage
+//   bboxes.forEach((b,i)=>b.index=i);
+//   let sx = (d)=>(d.x+d.x+d.width)/2;
+//   let sy = (d)=>(d.y+d.y+d.height)/2;
+//   let tree = d3.quadtree(bboxes, sx, sy);
+
+//   const min0 = 1;
+//   const max0 = 1000;
+//   let lowerbound = min0;
+//   let upperbound = min0;
+//   for(let i=0; i<bboxes.length; i++){
+//     let bi = bboxes[i];
+//     let x = sx(bi);
+//     let y = sy(bi);
+//     let r = bi.width;
+//     let neighbors = searchQuadtree(tree, sx, sy, x-r, x+r, y-r, y+r);
+//     for(let j of neighbors){
+//       if(i!==j){
+//         let bj = bboxes[j];
+//         let min = min0;
+//         let max = max0;
+//         for(let k=0; k<20; k++){
+//           let tmp = (min+max)/2;
+//           if(isRectCollide2(bi, bj, tmp)){
+//             [min,max] = [tmp, max];
+//           }else{
+//             [min,max] = [min, tmp];
+//           }
+//         }
+//         lowerbound = Math.max(min, lowerbound);
+//         upperbound = Math.max(max, upperbound);
+//       }
+//     }
+//   }
+//   return [upperbound, areaCoverage(bboxes, upperbound)];
+// }
+
+function markScale(nodes, higher, all){
+  let sx = d=>d.bbox.cx;
+  let sy = d=>d.bbox.cy;
+  let higherEqual = nodes.concat(higher);
+  let tree = d3.quadtree(higherEqual, sx, sy);
+  let rx = d3.max(higherEqual, d=>d.bbox.width) * 2;//depends on min zoom extent
+  let ry = d3.max(higherEqual, d=>d.bbox.height) * 2;
+
+  const min0 = 0.00001;
+  const max0 = 1000;
+  let current = new Set(higher.map(d=>d.index));
+  for(let n of nodes){
+    let bi = n.bbox;
+    let [x,y] = [bi.cx, bi.cy];
+    let neighbors = searchQuadtree(tree, sx, sy, x-rx, x+rx, y-ry, y+ry);
+    // console.log(neighbors)
+    neighbors = neighbors.filter(i=>current.has(i));
+    let scale = min0;
+    for(let j of neighbors){
+      if(n.index === j){
+        continue;
+      }
+      let min = min0;
+      let max = max0;    
+      let bj = all[j].bbox;
+      let mid;// = (min+max)/2;
+      for(let k=0; k<20; k++){
+        mid = (min+max)/2;
+        if(isRectCollide2(bi, bj, mid)){
+          [min,max] = [mid, max];
+        }else{
+          [min,max] = [min, mid];
+        }
+      }
+      scale = Math.max(scale, max);
+    }
+    n.labelScale = scale;
+    // current.push(n.index);
+    current.add(n.index);
+    // console.log(n.level, n.labelScale);
+  }
+}
+
+
+function markNonOverlapLevels(canvas){
+  let nodes = canvas.data.nodes;
+  updateBbox(nodes, canvas);
+  let l0 = 0;
+  for (let l of [10, 20]){
+  // let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
+  // for (let l of levels){
+  // 
+    let nodes_l = nodes
+    .filter(d=>l0 < d.level && d.level <= l)
+    .sort((a,b)=>b.perplexity - a.perplexity);
+    let higher = nodes.filter(d=>d.level <= l0);
+    markScale(nodes_l, higher, nodes);
+    l0 = l;
+  }
+
+  // for(let i=0; i<nodes.length; i++){
+  //   markScale(nodes.slice(i ,i+1), nodes.slice(0,i), nodes);
+  // }
+}
+
+
 function initSimulationWorker(canvas, simData){
   let worker = new Worker('simulation.js');
   worker.postMessage(simData);
@@ -265,6 +413,8 @@ function initSimulationWorker(canvas, simData){
       canvas.data.edges = data.edges;
       canvas.simulation = data.simulation;
       // window.enabledNodes = data.enabledNodes;
+      updateBbox(canvas.data.nodes, canvas);
+      markLabelByLevel(canvas.data.nodes, canvas);
       if(shouldDraw){
         canvas.draw(shouldLabel, forceLabel);
       }
@@ -316,18 +466,24 @@ function initScales(nodes, w, h){
 
   let xExtent = d3.extent(nodes, d=>d.x);
   let yExtent = d3.extent(nodes, d=>d.y);
-  let maxLevel = d3.max(nodes, d=>d.level);
+  // let maxLevel = d3.max(nodes, d=>d.level);
 
   let scales = getCanvasScales(xExtent, yExtent, w, h);
 
-  scales.sc = d3.scaleLinear()
-  .domain([maxLevel,1])
-  // .range(['#ece7f2','#2b8cbe']);
-  .range(['#a6bddb','#023858']);
+  // scales.sc = d3.scaleLinear()
+  // .domain([maxLevel,1])
+  // // .range(['#ece7f2','#2b8cbe']);
+  // .range(['#a6bddb','#023858']);
 
-  scales.sr = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([1,0.25]);
-  scales.ss = d3.scaleLinear().domain(d3.extent(nodes, d=>d.level)).range([4,1]);
-  scales.sl = d3.scaleLinear().domain([1,maxLevel]).range([14, 12]); //label font size;
+  let extentLevel = d3.extent(nodes, d=>d.level);
+  scales.sr = d3.scaleLinear().domain(extentLevel).range([1,0.25]);
+  scales.ss = d3.scaleLinear().domain(extentLevel).range([4,1]);
+  scales.sl = d3.scaleLinear().domain(extentLevel).range([16, 12]); //label font size;
+  scales.sc = d3.scaleLinear().domain(extentLevel).range(['#08306b', '#9ecae1']); //node & label color
+
+  let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
+  let fonts = levels.map(l=>`${Math.round(scales.sl(l)*DPR)}px ${FONT}`);
+  scales.sf = d3.scaleLinear().domain(levels).range(fonts); //font size
   return scales;
 }
 
@@ -365,7 +521,7 @@ function debugMsg(){
       parseFloat(transform.k.toFixed(2)),
       '\n',
       'overlap:', 
-      labelOverlap(labelTextNodesTmp),
+      // labelOverlap(labelTextNodesTmp),
       '\n',
       'crossings:', 
       countCrossings(edgesTmp),
@@ -401,14 +557,13 @@ function initZoom(canvas){
   // let transform = d3.zoomIdentity.scale(scale0 * dpr);
 
   let zoom = d3.zoom()
-  // .scaleExtent([0.5/scale0, 6.0/scale0])
+  .scaleExtent([1, 1000])
   .on('zoom', (transform0)=>{
     if(transform0 === undefined){
       canvas.transform = d3.event.transform.scale(scale0);
     }else{
       canvas.transform = transform0;
     }
-    console.log('zoom', canvas.transform.k);
     if(sx0 === undefined){
       sx0 = canvas.scales.sx;
       sy0 = canvas.scales.sy;
@@ -421,17 +576,21 @@ function initZoom(canvas){
     // ay.scale(scales.sy);
     // gx.call(ax);
     // gy.call(ay);
-    markLabel(canvas.data.nodes, canvas);
+    // 
+    // 
+    
+    updateBbox(canvas.data.nodes, canvas);
+    // Show label according to non-overlap zoom scale
+    markLabelByLevel(canvas.data.nodes, canvas);
+    // optional: greedy labeling
+    // markLabelByOverlap(canvas.data.nodes, canvas);
+
     if(shouldDraw){
       canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
     }
   })
   .on('end', ()=>{
-    markLabel(canvas.data.nodes, canvas);
-    if(shouldDraw){
-      canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
-    }
-    // labelOverlap(labelTextNodes, 1.0);
+    console.log('zoom', canvas.transform.k);
   });
   d3.select(canvas).call(zoom);
 
@@ -511,8 +670,7 @@ function initKeyboard(canvas){
     }else if(key === 'c'){//show [C]ollision
       shouldMarkOverlap = !shouldMarkOverlap;
       if(shouldMarkOverlap){
-        updateBbox(canvas.data.nodes, canvas);
-        markOverlap(canvas.data.nodes.filter(d=>d.shouldShowLabel).map(d=>d.bbox));
+        markLabelByOverlap(canvas.data.nodes.filter(d=>d.shouldShowLabel), canvas);
       }
       canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
     }else if(key === 'l'){//hide [l]abel
@@ -559,7 +717,7 @@ function initKeyboard(canvas){
         forceLabelLevel = parseInt(key);
       }
       console.log(forceLabel, forceLabelLevel);
-      markLabel(canvas.data.nodes, canvas);
+      markLabelByLevel(canvas.data.nodes, canvas);
       canvas.draw(shouldLabel, forceLabel);
     }
   });
@@ -697,6 +855,11 @@ function preprocess(data, nodes){
     if(nodes[0].weight === undefined){
       nodes.forEach((d,i)=>{
         d.weight = data.node_weight[i];
+      });
+    }
+    if(nodes[0].perplexity === undefined){
+      nodes.forEach((d,i)=>{
+        d.perplexity = data.node_perplexity[i];
       });
     }
     data.nodes0 = data.nodes;
@@ -902,81 +1065,105 @@ function markCrossing(edges){
   }
 }
 
-
-function markOverlap(bboxes){
-  let count = 0;
-  // let overlapMatrix = [];
-  for(let i=0; i<bboxes.length; i++){
-    // overlapMatrix.push([]);
-    bboxes[i].overlap = false;
+let mlbo = {};
+function markLabelByOverlap(nodes, canvas){
+  // updateBbox(nodes, canvas);
+  let bboxes = nodes.map(d=>d.bbox);
+  let sx = canvas.scales.sx;
+  let sy = canvas.scales.sy;
+  if(mlbo.nodes === undefined){
+    mlbo.nodes = nodes.slice().sort((a,b)=>a.level-b.level); //INPLACE REORDERED
+    mlbo.rx = d3.max(bboxes, d=>d.width);
+    mlbo.ry = d3.max(bboxes, d=>d.height);
   }
-
-  for(let i=0; i<bboxes.length; i++){
-    // overlapMatrix[i][i] = 0;
-    let bbox1 = bboxes[i];
-    
-    for(let j=i+1; j<bboxes.length; j++){
-      let bbox2 = bboxes[j];
-      let overlap = isRectCollide(bbox1, bbox2);
-      if(overlap){
-        // overlapMatrix[i][j] = 1;
-        // overlapMatrix[j][i] = 1;
-        // l2.overlap.add(i);
-        // l1.overlap.add(j);
-        // l1.show = false;
-        bbox1.overlap = true;
-        bbox2.overlap = true;
-        count += 1;
+  let [rx, ry] = [mlbo.rx, mlbo.ry];
+  nodes = mlbo.nodes;
+  
+  let tree = d3.quadtree(nodes, (d)=>sx(d.x), (d)=>sy(d.y));
+  
+  let shown = new Set(nodes.filter(d=>d.shouldShowLabel).map(d=>d.index));
+  for(let ni of nodes){
+    if(shown.has(ni.index)){
+      continue;
+    }else{
+      let x = ni.bbox.cx;
+      let y = ni.bbox.cy;
+      if(x < 0 || x > canvas.width 
+        || y < 0 || y > canvas.height 
+      ){
+        continue;
       }else{
-        // overlapMatrix[i][j] = 0;
-        // overlapMatrix[i][j] = 0;
+        let neighbors = searchQuadtree(tree, (d)=>sx(d.x), (d)=>sy(d.y), x-rx, x+rx, y-ry, y+ry);
+        neighbors = new Set(neighbors);
+        let a, b;
+        if(neighbors.size < shown.size){
+          [a,b] = [neighbors, shown];
+        }else{
+          [a,b] = [shown, neighbors];
+        }
+        let shouldShow = true;
+        for(let j of a){
+          if(b.has(j)){
+            if(isRectCollide(bboxes[ni.index], bboxes[j])){
+              shouldShow = false;
+              break;
+            }
+          }
+        }
+        if(shouldShow){
+          ni.shouldShowLabel = true;
+          shown.add(ni.index);
+        }      
       }
     }
   }
-  return count;
 }
 
 
-function labelOverlap(labelNodes){
-  let count = 0;
-  // let overlapMatrix = [];
-  for(let i=0; i<labelNodes.length; i++){
-    // overlapMatrix.push([]);
-    let l1 = labelNodes[i];
-    l1.show = true;
-  }
+// function labelOverlap(labelNodes){
+//   let count = 0;
+//   // let overlapMatrix = [];
+//   for(let i=0; i<labelNodes.length; i++){
+//     // overlapMatrix.push([]);
+//     let l1 = labelNodes[i];
+//     l1.show = true;
+//   }
 
-  let bboxes = labelNodes.map(l=>l.getBoundingClientRect());
+//   let bboxes = labelNodes.map(l=>l.getBoundingClientRect());
 
-  labelNodes.forEach(d=>d.overlap = new Set());
-  for(let i=0; i<labelNodes.length; i++){
-    // overlapMatrix[i][i] = 0;
-    let l1 = labelNodes[i];
-    let bbox1 = bboxes[i];
+//   labelNodes.forEach(d=>d.overlap = new Set());
+//   for(let i=0; i<labelNodes.length; i++){
+//     // overlapMatrix[i][i] = 0;
+//     let l1 = labelNodes[i];
+//     let bbox1 = bboxes[i];
     
-    for(let j=i+1; j<labelNodes.length; j++){
-      let l2 = labelNodes[j];
-      let bbox2 = bboxes[j];
-      let overlap = isRectCollide(bbox1, bbox2);
-      if(overlap){
-        // overlapMatrix[i][j] = 1;
-        // overlapMatrix[j][i] = 1;
-        // l2.overlap.add(i);
-        // l1.overlap.add(j);
-        // l1.show = false;
-        l2.show = false;
-        count += 1;
-      }else{
-        // overlapMatrix[i][j] = 0;
-        // overlapMatrix[i][j] = 0;
-      }
-    }
-  }
-  // window.overlapMatrix = overlapMatrix;
+//     for(let j=i+1; j<labelNodes.length; j++){
+//       let l2 = labelNodes[j];
+//       let bbox2 = bboxes[j];
+//       let overlap = isRectCollide(bbox1, bbox2);
+//       if(overlap){
+//         // overlapMatrix[i][j] = 1;
+//         // overlapMatrix[j][i] = 1;
+//         // l2.overlap.add(i);
+//         // l1.overlap.add(j);
+//         // l1.show = false;
+//         l2.show = false;
+//         count += 1;
+//       }else{
+//         // overlapMatrix[i][j] = 0;
+//         // overlapMatrix[i][j] = 0;
+//       }
+//     }
+//   }
+//   // window.overlapMatrix = overlapMatrix;
 
-  return count;
-}
+//   return count;
+// }
+// 
+// 
+// 
 // def draw
+
 function draw(label=true, forceLabel=false, markOverlap=true){
   // nodes, edges, nodeCircles, linkLines, labelTexts, labelBoxes,sx, sy, transform
   let ctx = this.context;
@@ -985,15 +1172,29 @@ function draw(label=true, forceLabel=false, markOverlap=true){
   //   return;
   // }
   // markCrossing(data.edges);
-  
+  if (this.data.nodesByLevel === undefined){
+    this.data.nodesByLevel = data.nodes.slice().sort((a,b) => a.level - b.level);
+  }
   ctx.clearRect(0, 0, this.width, this.height);
-  drawEdges(ctx, data.edges, this.scales, this.transform);
-  drawNodes(ctx,  data.nodes, this.scales, this.transform, label, forceLabel, markOverlap);
+
+  // let nodes = this.data.nodesByLevel.filter(d=>{
+  let nodes = this.data.nodes.filter(d=>{
+    return d.update 
+    && d.bbox.cx > 0 
+    && d.bbox.cx < this.width 
+    && d.bbox.cy > 0 
+    && d.bbox.cy < this.height;
+  });
+  let edges = data.edges.filter(e=>{
+    return e.source.update && e.target.update;
+  });
+  drawEdges(ctx, edges, this.scales, this.transform);
+  drawNodes(ctx, nodes, this.scales, this.transform, label, forceLabel, markOverlap);
 
 }
 
 
-function markLabel(nodes, canvas){
+function markLabelByLevel(nodes, canvas){
   let scale = canvas.transform.k;
   let levelScalePairs = canvas.levelScalePairs;
   let showLevel = 0;
@@ -1002,9 +1203,9 @@ function markLabel(nodes, canvas){
       showLevel = ls[0];
     }
   }
-  console.log(showLevel);
   for(let n of nodes){
-    if(n.level <= showLevel || n.level <= forceLabelLevel){
+    // if(n.level <= forceLabelLevel || n.level <= showLevel ){
+    if(n.level <= forceLabelLevel || n.labelScale <= canvas.transform.k){
       n.shouldShowLabel = true;
     }else{
       n.shouldShowLabel = false;
@@ -1018,7 +1219,6 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.strokeStyle = '#fff';
-    
     ctx.lineJoin = 'round';
     // ctx.shadowOffsetX = 0;
     // ctx.shadowOffsetY = 0;
@@ -1026,62 +1226,71 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
     // ctx.shadowBlur = 2;
   }
 
+  //draw nodes
+  ctx.globalAlpha = 1.0;
+  ctx.fillStyle = '#08306b';
+  let k = Math.pow(transform.k, 1/4)*DPR;
   for(let n of nodes){
-    if(!n.update){
-      continue;
-    }
-
-    let x = scales.sx(n.x);
-    let y = scales.sy(n.y);
-    let r = scales.sr(n.level) * Math.pow(transform.k, 1/4);
-    ctx.globalAlpha = 1.0;
-    ctx.fillStyle = '#08306b';
-    ctx.beginPath();
-    ctx.arc(x*DPR, y*DPR, r*DPR, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    if(n.shouldShowLabel){
-      //draw bbox
-      // ctx.globalAlpha = 0.3; 
-      // ctx.fillStyle = '#08306b';
-      // ctx.beginPath();
-      // ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
-      // ctx.fill();
-      
-      //draw text
-      let l = scales.sl(n.level);
-      ctx.globalAlpha = 1.0;
-      if(n.bbox.overlap){
-        ctx.fillStyle = 'red';
-      }else{
-        ctx.fillStyle = '#08306b';
-      }
-      ctx.strokeStyle = '#fff';
-      ctx.font = `${l*DPR}px ${FONT}`;        
-      ctx.lineWidth = l*DPR/4;
-      ctx.strokeText(n.label, x*DPR, y*DPR);
-      ctx.fillText(n.label, x*DPR, y*DPR);
+    if(!n.shouldShowLabel){
+      let x = n.bbox.cx;
+      let y = n.bbox.cy;
+      let r = n.r*k;
+      ctx.beginPath();
+      // ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.ellipse(x, y, r, r, 0, 0, 2 * Math.PI);
+      ctx.fill();
     }
   }
+
+
+  //draw text
+  if(label){
+    ctx.strokeStyle = '#fff';
+    ctx.globalAlpha = 1.0;
+    ctx.lineWidth = 8;
+
+    let l0 = -1;
+    for(let n of nodes){
+      if(n.shouldShowLabel){
+        let x = n.bbox.cx;
+        let y = n.bbox.cy;
+        let l = n.l;
+        //draw bbox
+        // ctx.globalAlpha = 0.3; 
+        // ctx.fillStyle = '#08306b';
+        // ctx.beginPath();
+        // ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
+        // ctx.fill();
+        
+        ctx.fillStyle = scales.sc(n.level);
+        if(l0 != l){
+          ctx.font = scales.sf(n.level);
+          l0 = l;
+        }
+        ctx.strokeText(n.label, x, y);
+        ctx.fillText(n.label, x, y);
+      }
+    }
+  }
+  
 }
 
 
 function drawEdges(ctx, edges, scales, transform){
   ctx.strokeStyle = '#aaa';
   ctx.globalAlpha = 1.0;
+  let k = Math.pow(transform.k, 1/4);
   for(let e of edges){
-    if(!(e.source.update && e.target.update)){
-      continue;
-    }
-    let x0 = scales.sx(e.source.x);
-    let y0 = scales.sy(e.source.y);
-    let x1 = scales.sx(e.target.x);
-    let y1 = scales.sy(e.target.y);
+    
+    let x0 = e.source.bbox.cx;
+    let y0 = e.source.bbox.cy;
+    let x1 = e.target.bbox.cx;
+    let y1 = e.target.bbox.cy;
     let lw = scales.sr(Math.min(e.source.level, e.target.level))/1.5;
-    ctx.lineWidth = lw * Math.pow(transform.k, 1/4) * DPR;
+    ctx.lineWidth = lw * k * DPR;
     ctx.beginPath();
-    ctx.moveTo(x0*DPR, y0*DPR);
-    ctx.lineTo(x1*DPR, y1*DPR);
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
     ctx.stroke();
   }
 }

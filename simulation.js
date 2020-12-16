@@ -183,7 +183,7 @@ onmessage = function(event) {
     for (let l in level2scale){
       l = parseFloat(l);
       let s = level2scale[l];
-      let aspectRatio = 8;
+      let aspectRatio = 4;
       simulation
       .force('pre-collide', forceScaleY(nodes, aspectRatio))
       .force(`collide-${l}`, 

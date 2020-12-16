@@ -101916,9 +101916,13 @@ function markNonOverlapResolution(features) {
       console.log(l);
       var nodes_l = features.filter(function (d) {
         return l0 < +d.get('level') && +d.get('level') <= l;
+      }).sort(function (a, b) {
+        return +a.get('level') - +b.get('level');
       });
       var higher = features.filter(function (d) {
         return +d.get('level') <= l0;
+      }).sort(function (a, b) {
+        return +a.get('level') - +b.get('level');
       });
       markScale(nodes_l, higher, features, minResolution, maxResolution);
       l0 = l;
@@ -101950,14 +101954,11 @@ function markBoundingBox(features, sl, font) {
   ctx.textBaseline = 'middle'; //compute bbox
 
   features.forEach(function (d, i) {
-    d.set('index', i);
+    d.set('index', i); // let [x,y] = d.get('pos').split(',').map(d=>+d);
 
-    var _d$get$split$map = d.get('pos').split(',').map(function (d) {
-      return +d;
-    }),
-        _d$get$split$map2 = _slicedToArray(_d$get$split$map, 2),
-        x = _d$get$split$map2[0],
-        y = _d$get$split$map2[1];
+    var _d$values_$geometry$f = _slicedToArray(d.values_.geometry.flatCoordinates, 2),
+        x = _d$values_$geometry$f[0],
+        y = _d$values_$geometry$f[1];
 
     ctx.font = "".concat(sl(+d.get('level')), "px ").concat(font);
     var m = ctx.measureText(d.get('label'));
@@ -101973,6 +101974,8 @@ function markBoundingBox(features, sl, font) {
 }
 
 function markScale(nodes, higher, all, minResolution, maxResolution) {
+  var niter = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 20;
+
   var sx = function sx(d) {
     return d.get('bbox').x;
   };
@@ -101985,15 +101988,10 @@ function markScale(nodes, higher, all, minResolution, maxResolution) {
     return d.get('index');
   };
 
-  var higherEqual = nodes.concat(higher);
-  var tree = d3.quadtree(higherEqual, sx, sy);
-  var rx = maxResolution * d3.max(all, function (d) {
-    return d.get('bbox').width;
-  }); //depends on min zoom extent
+  var higherEqual = nodes.concat(higher); // let tree = d3.quadtree(higherEqual, sx, sy);
+  // let rx = maxResolution * d3.max(all, d=>d.get('bbox').width) * 2;//depends on min zoom extent
+  // let ry = maxResolution * d3.max(all, d=>d.get('bbox').height) * 2;
 
-  var ry = maxResolution * d3.max(all, function (d) {
-    return d.get('bbox').height;
-  });
   var min0 = 1 / maxResolution;
   var max0 = 1 / minResolution;
   var current = new Set(higher.map(function (d) {
@@ -102009,11 +102007,10 @@ function markScale(nodes, higher, all, minResolution, maxResolution) {
       var bi = n.get('bbox');
       var _ref = [bi.x, bi.y],
           x = _ref[0],
-          y = _ref[1];
-      var neighbors = searchQuadtree(tree, sx, sy, id, x - rx, x + rx, y - ry, y + ry);
-      neighbors = neighbors.filter(function (i) {
-        return current.has(i);
-      });
+          y = _ref[1]; // let neighbors = searchQuadtree(tree, sx, sy, id, x-rx, x+rx, y-ry, y+ry);
+      // neighbors = neighbors.filter(i=>current.has(i));
+
+      var neighbors = current;
       var scale = min0;
       var _iteratorNormalCompletion3 = true;
       var _didIteratorError3 = false;
@@ -102032,7 +102029,7 @@ function markScale(nodes, higher, all, minResolution, maxResolution) {
           var bj = all[j].get('bbox');
           var mid = void 0; // = (min+max)/2;
 
-          for (var k = 0; k < 20; k++) {
+          for (var k = 0; k < niter; k++) {
             mid = (min + max) / 2;
 
             if (isRectCollide2(bi, bj, mid)) {
@@ -102126,14 +102123,14 @@ function searchQuadtree(quadtree, xGetter, yGetter, idGetter, xmin, xmax, ymin, 
   });
   return results;
 }
-},{"d3":"node_modules/d3/index.js"}],"geojson/mingwei_topics/im_cluster.geojson":[function(require,module,exports) {
-module.exports = "/im_cluster.56e09672.geojson";
-},{}],"geojson/mingwei_topics/im_cluster_boundary.geojson":[function(require,module,exports) {
-module.exports = "/im_cluster_boundary.8a97022d.geojson";
-},{}],"geojson/mingwei_topics/im_edges.geojson":[function(require,module,exports) {
-module.exports = "/im_edges.4ca91170.geojson";
-},{}],"geojson/mingwei_topics/im_nodes.geojson":[function(require,module,exports) {
-module.exports = "/im_nodes.1ba7808b.geojson";
+},{"d3":"node_modules/d3/index.js"}],"geojson/mingwei-topics-refined/im_cluster.geojson":[function(require,module,exports) {
+module.exports = "/im_cluster.de212021.geojson";
+},{}],"geojson/mingwei-topics-refined/im_cluster_boundary.geojson":[function(require,module,exports) {
+module.exports = "/im_cluster_boundary.89ad781f.geojson";
+},{}],"geojson/mingwei-topics-refined/im_edges.geojson":[function(require,module,exports) {
+module.exports = "/im_edges.ad82d289.geojson";
+},{}],"geojson/mingwei-topics-refined/im_nodes.geojson":[function(require,module,exports) {
+module.exports = "/im_nodes.d29af3a1.geojson";
 },{}],"mingwei_version.js":[function(require,module,exports) {
 var global = arguments[3];
 "use strict";
@@ -102178,41 +102175,36 @@ var d3 = _interopRequireWildcard(require("d3"));
 
 var utils = _interopRequireWildcard(require("./utils"));
 
-var _im_cluster = _interopRequireDefault(require("./geojson/mingwei_topics/im_cluster.geojson"));
+var _im_cluster = _interopRequireDefault(require("./geojson/mingwei-topics-refined/im_cluster.geojson"));
 
-var _im_cluster_boundary = _interopRequireDefault(require("./geojson/mingwei_topics/im_cluster_boundary.geojson"));
+var _im_cluster_boundary = _interopRequireDefault(require("./geojson/mingwei-topics-refined/im_cluster_boundary.geojson"));
 
-var _im_edges = _interopRequireDefault(require("./geojson/mingwei_topics/im_edges.geojson"));
+var _im_edges = _interopRequireDefault(require("./geojson/mingwei-topics-refined/im_edges.geojson"));
 
-var _im_nodes = _interopRequireDefault(require("./geojson/mingwei_topics/im_nodes.geojson"));
+var _im_nodes = _interopRequireDefault(require("./geojson/mingwei-topics-refined/im_nodes.geojson"));
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //see license.txt
-//import data
-// d3.json(nodeData).then(data=>{
-//   let canvas = document.createElement('canvas');
-//   let ctx = canvas.getContext('2d');
-//   ctx.textAlign = 'center';
-//   ctx.textBaseline = 'middle';
-//   //compute bbox
-//   data.features.forEach((d,i)=>{
-//     d.index = i;
-//     let p = d.properties;
-//     let [x,y] = d.geometry.coordinates;
-//     ctx.font = `${sl(+p.level)}px ${FONT}`;
-//     let m = ctx.measureText(p.label);
-//     let width = m.actualBoundingBoxRight + m.actualBoundingBoxLeft;
-//     let height = m.actualBoundingBoxDescent + m.actualBoundingBoxAscent;
-//     p.bbox = {
-//       x, y, width, height
-//     };
-//   });
-//   utils.markNonOverlapResolution(data.features);
-//   console.log(data.features);
-// });
+//data
+// import clusterData from './geojson/mingwei_topics/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/mingwei_topics/im_cluster_boundary.geojson';
+// import edgeyData from './geojson/mingwei_topics/im_edges.geojson';
+// import nodeData from './geojson/mingwei_topics/im_nodes.geojson';
+// import clusterData from './geojson/mingwei-lastfm-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/mingwei-lastfm-refined/im_cluster_boundary.geojson';
+// import edgeyData from './geojson/mingwei-lastfm-refined/im_edges.geojson';
+// import nodeData from './geojson/mingwei-lastfm-refined/im_nodes.geojson';
+// import clusterData from './geojson/reyan-topics-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/reyan-topics-refined/im_cluster_boundary.geojson';
+// import edgeyData from './geojson/reyan-topics-refined/im_edges.geojson';
+// import nodeData from './geojson/reyan-topics-refined/im_nodes.geojson';
+// import clusterData from './geojson/reyan-lastfm-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/reyan-lastfm-refined/im_cluster_boundary.geojson';
+// import edgeyData from './geojson/reyan-lastfm-refined/im_edges.geojson';
+// import nodeData from './geojson/reyan-lastfm-refined/im_nodes.geojson';
 var clusterStyleFunction = function clusterStyleFunction(feature, resolution) {
   var clusterStyle = new _style.Style({
     stroke: new _style.Stroke({
@@ -102240,19 +102232,20 @@ var clusterBoundaryStyleFunction = function clusterBoundaryStyleFunction(feature
 };
 
 var edgeStyleFunction = function edgeStyleFunction(feature, resolution) {
-  var l = feature.get('level');
-  var c = feature.get("stroke");
+  var l = +feature.get('level'); // let c = feature.get('stroke');
+
   var edgeStyle = new _style.Style({
     stroke: new _style.Stroke({
       color: '#aaa',
       //c,
-      width: 0.3 * (10 - l)
+      width: 0.3 * sl(l) / 5
     })
   });
   return edgeStyle;
 };
 
 var nodeStyleFunction = function nodeStyleFunction(feature, resolution) {
+  // console.log(feature.getGeometry());
   if (getVisible(feature, resolution)) {
     return new _style.Style({
       stroke: new _style.Stroke({
@@ -102262,18 +102255,18 @@ var nodeStyleFunction = function nodeStyleFunction(feature, resolution) {
       fill: new _style.Fill({
         color: 'rgba(255,255,255,0.5)'
       }),
-      text: createTextStyle(feature.get("label"), feature.get("fontsize"), feature.get("level"), feature.get("height"), feature.get("weight"), resolution)
+      text: createTextStyle(feature, resolution)
     });
   } else {
     return new _style.Style({// image: new CircleStyle({
       //   fill: new Fill({
       //     color: '#aaa'
       //   }),
-      //   // stroke: new Stroke({
-      //   //   color: '#3399CC',
-      //   //   width: 0
-      //   // }),
-      //   radius: 1
+      // stroke: new Stroke({
+      //   color: '#3399CC',
+      //   width: 0
+      // }),
+      // radius: sl(+feature.get('level'))/2
       // }),
     });
   }
@@ -102322,16 +102315,15 @@ var selectStyleFunctionForEdge = function selectStyleFunctionForEdge(feature, re
 };
 
 var getVisible = function getVisible(feature, resolution) {
-  return feature.get('resolution') >= resolution;
+  return feature.get('resolution') > resolution;
 };
 
-var createTextStyle = function createTextStyle(label, fontsize, level, boxheight, weight, resolution) {
+var createTextStyle = function createTextStyle(feature, resolution) {
   // let remap = 2 + (8-level)*1.5/7;
   // let fsize =  5 * remap;
-  var fsize = sl(level);
   var nodetext = new _Text.default({
-    font: fsize + 'px arial',
-    text: label,
+    font: Math.round(sl(+feature.get('level'))) + "px ".concat(FONT),
+    text: feature.get('label'),
     fill: new _style.Fill({
       color: 'rgba(72,79,90,1)'
     }),
@@ -102347,9 +102339,11 @@ var createTextStyle = function createTextStyle(label, fontsize, level, boxheight
 };
 
 var FONT = 'arial';
-var minResolution = 4;
-var maxResolution = 305;
-var sl = d3.scaleLinear().domain([1, 8]).range([20, 12]);
+var minResolution = 1.194328566955879;
+var maxResolution = 405.7481131407050;
+var maxLevel;
+var sl; // = d3.scaleLinear().domain([1, maxLevel]).range([20,12]);
+
 var clusterSource = new _source.Vector({
   url: _im_cluster.default,
   format: new _GeoJSON.default()
@@ -102389,10 +102383,22 @@ var nodeSource = new _source.Vector({
     xhr.onload = function () {
       if (xhr.status == 200) {
         var features = nodeSource.getFormat().readFeatures(xhr.responseText);
+        maxLevel = d3.max(features, function (d) {
+          return +d.get('level');
+        });
+        sl = d3.scaleLinear().domain([1, maxLevel]).range([20, 12]);
+        features.forEach(function (d) {
+          return d.set('label', d.get('label').slice(0, 16));
+        });
         utils.markBoundingBox(features, sl, FONT);
-        utils.markNonOverlapResolution(features, undefined, minResolution, maxResolution);
+        utils.markNonOverlapResolution(features, undefined, minResolution, maxResolution); // utils.markNonOverlapResolution(features, d3.range(0,maxLevel+1,2), minResolution, maxResolution);
+
         nodeSource.addFeatures(features);
         console.log(features);
+        var debug = new Set(['information visualization', 'computational geometry']);
+        console.log(features.filter(function (d) {
+          return debug.has(d.get('label'));
+        }));
       } else {
         onError();
       }
@@ -102416,7 +102422,7 @@ var map = new _Map.default({
     // minResolution,
     // maxResolution,
     zoom: 11,
-    maxZoom: 15,
+    maxZoom: 17,
     minZoom: 9
   })
 });
@@ -102452,7 +102458,11 @@ map.on('click', function (evt) {
     var geometry = feature.getGeometry();
     var fid = feature.getId();
     var ftype = feature.getGeometry().getType();
-    if (fid && fid.search("cluster") > -1) return 0;
+
+    if (fid && fid.search("cluster") > -1) {
+      return 0;
+    }
+
     $(_element)[0].title = feature.get('label');
     var content = feature.get('label') + " <br> Weight: " + feature.get('weight') + "<br> Level: " + feature.get('level');
     $(_element).popover('destroy');
@@ -102466,7 +102476,7 @@ map.on('click', function (evt) {
     $(_element).popover('show');
   }
 });
-},{"ol":"node_modules/ol/index.js","ol/Map.js":"node_modules/ol/Map.js","ol/View.js":"node_modules/ol/View.js","ol/format/GeoJSON.js":"node_modules/ol/format/GeoJSON.js","ol/geom/MultiPoint.js":"node_modules/ol/geom/MultiPoint.js","ol/layer/Vector.js":"node_modules/ol/layer/Vector.js","ol/source/Vector.js":"node_modules/ol/source/Vector.js","ol/interaction/Select.js":"node_modules/ol/interaction/Select.js","ol/events/condition.js":"node_modules/ol/events/condition.js","ol/style.js":"node_modules/ol/style.js","ol/style/Text":"node_modules/ol/style/Text.js","ol/proj.js":"node_modules/ol/proj.js","ol/geom/Circle":"node_modules/ol/geom/Circle.js","ol/Feature.js":"node_modules/ol/Feature.js","ol/layer.js":"node_modules/ol/layer.js","ol/source.js":"node_modules/ol/source.js","ol/Overlay":"node_modules/ol/Overlay.js","ol/control.js":"node_modules/ol/control.js","d3":"node_modules/d3/index.js","./utils":"utils.js","./geojson/mingwei_topics/im_cluster.geojson":"geojson/mingwei_topics/im_cluster.geojson","./geojson/mingwei_topics/im_cluster_boundary.geojson":"geojson/mingwei_topics/im_cluster_boundary.geojson","./geojson/mingwei_topics/im_edges.geojson":"geojson/mingwei_topics/im_edges.geojson","./geojson/mingwei_topics/im_nodes.geojson":"geojson/mingwei_topics/im_nodes.geojson"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"ol":"node_modules/ol/index.js","ol/Map.js":"node_modules/ol/Map.js","ol/View.js":"node_modules/ol/View.js","ol/format/GeoJSON.js":"node_modules/ol/format/GeoJSON.js","ol/geom/MultiPoint.js":"node_modules/ol/geom/MultiPoint.js","ol/layer/Vector.js":"node_modules/ol/layer/Vector.js","ol/source/Vector.js":"node_modules/ol/source/Vector.js","ol/interaction/Select.js":"node_modules/ol/interaction/Select.js","ol/events/condition.js":"node_modules/ol/events/condition.js","ol/style.js":"node_modules/ol/style.js","ol/style/Text":"node_modules/ol/style/Text.js","ol/proj.js":"node_modules/ol/proj.js","ol/geom/Circle":"node_modules/ol/geom/Circle.js","ol/Feature.js":"node_modules/ol/Feature.js","ol/layer.js":"node_modules/ol/layer.js","ol/source.js":"node_modules/ol/source.js","ol/Overlay":"node_modules/ol/Overlay.js","ol/control.js":"node_modules/ol/control.js","d3":"node_modules/d3/index.js","./utils":"utils.js","./geojson/mingwei-topics-refined/im_cluster.geojson":"geojson/mingwei-topics-refined/im_cluster.geojson","./geojson/mingwei-topics-refined/im_cluster_boundary.geojson":"geojson/mingwei-topics-refined/im_cluster_boundary.geojson","./geojson/mingwei-topics-refined/im_edges.geojson":"geojson/mingwei-topics-refined/im_edges.geojson","./geojson/mingwei-topics-refined/im_nodes.geojson":"geojson/mingwei-topics-refined/im_nodes.geojson"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -102494,7 +102504,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52028" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49553" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

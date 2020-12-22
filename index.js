@@ -88,8 +88,8 @@ window.enabledNodes;
 //demo topics
 // d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
 // d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
-// d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
-// d3.json('data/json/topics_refined/Graph_5000-nodes-3.json').then(nodes=>{
+d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
+d3.json('data/json/topics_refined/Graph_5000-nodes-1.json').then(nodes=>{
 
 
 
@@ -101,9 +101,9 @@ window.enabledNodes;
 
 //train topics
 let fn = 'topics_refined/Graph_5000';
-let version = 1;
-d3.json(`data/json/${fn}.json`).then(data=>{
-d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+// let version = 1;
+// d3.json(`data/json/${fn}.json`).then(data=>{
+// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
 //train lastfm
 // let fn = 'lastfm_refined/Graph_8_2587';

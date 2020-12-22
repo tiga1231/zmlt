@@ -88,8 +88,8 @@ window.enabledNodes;
 //demo topics
 // d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
 // d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
-d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
-d3.json('data/json/topics_refined/Graph_5000-nodes-3.json').then(nodes=>{
+// d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
+// d3.json('data/json/topics_refined/Graph_5000-nodes-3.json').then(nodes=>{
 
 
 
@@ -100,12 +100,16 @@ d3.json('data/json/topics_refined/Graph_5000-nodes-3.json').then(nodes=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
 //train topics
-// let fn = 'topics_refined/Graph_5000';
-// let version = 0;
+let fn = 'topics_refined/Graph_5000';
+let version = 1;
+d3.json(`data/json/${fn}.json`).then(data=>{
+d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+
+//train lastfm
+// let fn = 'lastfm_refined/Graph_8_2587';
+// let version = 1;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-
 
 //paper graph 1
 // let fn = 'TopicsLayersData-0/Graph_5000'; //no longer works
@@ -138,18 +142,18 @@ d3.json('data/json/topics_refined/Graph_5000-nodes-3.json').then(nodes=>{
     data.level2scale = {}; //crossing free init layout 
   }else{
     preprocess(data, nodes);
-    // data.level2scale = {//lastfm
-    //   1:3,
-    //   2:7,
-    //   4:8,
-    //   8:10,
-    // };
-    // 
     // data.level2scale = {}; //crossing free init layout 
-    data.level2scale = {//topics refined
-      6: 20,
-      20: 40,
-    };
+    if(fn.includes('topics')){
+      data.level2scale = {//topics refined
+        6: 10,
+        20: 23,
+      };
+    }else if(fn.includes('lastfm')){
+      data.level2scale = {//lastfm
+        1:5,
+        18:12,
+      };
+    }
   }
   let canvas = init(data);
 
@@ -361,7 +365,7 @@ function markScale(nodes, higher, all){
       let max = max0;    
       let bj = all[j].bbox;
       let mid;// = (min+max)/2;
-      for(let k=0; k<20; k++){
+      for(let k=0; k<12; k++){
         mid = (min+max)/2;
         if(isRectCollide2(bi, bj, mid)){
           [min,max] = [mid, max];
@@ -383,10 +387,9 @@ function markNonOverlapLevels(canvas){
   let nodes = canvas.data.nodes;
   updateBbox(nodes, canvas);
   let l0 = 0;
-  for (let l of [10, 20]){
-  // let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
-  // for (let l of levels){
-  // 
+  // for (let l of [10, 20]){
+  let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
+  for (let l of levels){
     let nodes_l = nodes
     .filter(d=>l0 < d.level && d.level <= l)
     .sort((a,b)=>b.perplexity - a.perplexity);
@@ -476,9 +479,9 @@ function initScales(nodes, w, h){
   // .range(['#a6bddb','#023858']);
 
   let extentLevel = d3.extent(nodes, d=>d.level);
-  scales.sr = d3.scaleLinear().domain(extentLevel).range([1,0.25]);
+  scales.sr = d3.scaleLinear().domain(extentLevel).range([1, 0.25]);
   scales.ss = d3.scaleLinear().domain(extentLevel).range([4,1]);
-  scales.sl = d3.scaleLinear().domain(extentLevel).range([16, 12]); //label font size;
+  scales.sl = d3.scaleLinear().domain(extentLevel).range([18, 12]); //label font size;
   scales.sc = d3.scaleLinear().domain(extentLevel).range(['#08306b', '#9ecae1']); //node & label color
 
   let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
@@ -557,7 +560,7 @@ function initZoom(canvas){
   // let transform = d3.zoomIdentity.scale(scale0 * dpr);
 
   let zoom = d3.zoom()
-  .scaleExtent([1, 1000])
+  .scaleExtent([0.1, 1000])
   .on('zoom', (transform0)=>{
     if(transform0 === undefined){
       canvas.transform = d3.event.transform.scale(scale0);
@@ -1178,13 +1181,14 @@ function draw(label=true, forceLabel=false, markOverlap=true){
   ctx.clearRect(0, 0, this.width, this.height);
 
   // let nodes = this.data.nodesByLevel.filter(d=>{
-  let nodes = this.data.nodes.filter(d=>{
-    return d.update 
-    && d.bbox.cx > 0 
-    && d.bbox.cx < this.width 
-    && d.bbox.cy > 0 
-    && d.bbox.cy < this.height;
-  });
+  let nodes = this.data.nodes
+  // .filter(d=>{
+  //   return d.update 
+  //   && d.bbox.cx > 0 
+  //   && d.bbox.cx < this.width 
+  //   && d.bbox.cy > 0 
+  //   && d.bbox.cy < this.height;
+  // });
   let edges = data.edges.filter(e=>{
     return e.source.update && e.target.update;
   });
@@ -1229,17 +1233,15 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
   //draw nodes
   ctx.globalAlpha = 1.0;
   ctx.fillStyle = '#08306b';
-  let k = Math.pow(transform.k, 1/4)*DPR;
-  for(let n of nodes){
-    if(!n.shouldShowLabel){
-      let x = n.bbox.cx;
-      let y = n.bbox.cy;
-      let r = n.r*k;
-      ctx.beginPath();
-      // ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.ellipse(x, y, r, r, 0, 0, 2 * Math.PI);
-      ctx.fill();
-    }
+  let k = Math.pow(transform.k, 1/2)*DPR;
+  for(let n of nodes.filter(d=>!d.shouldShowLabel)){
+    let x = n.bbox.cx;
+    let y = n.bbox.cy;
+    let r = n.r*k;
+    ctx.beginPath();
+    // ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.ellipse(x, y, r, r, 0, 0, 2 * Math.PI);
+    ctx.fill();
   }
 
 
@@ -1250,26 +1252,24 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
     ctx.lineWidth = 8;
 
     let l0 = -1;
-    for(let n of nodes){
-      if(n.shouldShowLabel){
-        let x = n.bbox.cx;
-        let y = n.bbox.cy;
-        let l = n.l;
-        //draw bbox
-        // ctx.globalAlpha = 0.3; 
-        // ctx.fillStyle = '#08306b';
-        // ctx.beginPath();
-        // ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
-        // ctx.fill();
-        
-        ctx.fillStyle = scales.sc(n.level);
-        if(l0 != l){
-          ctx.font = scales.sf(n.level);
-          l0 = l;
-        }
-        ctx.strokeText(n.label, x, y);
-        ctx.fillText(n.label, x, y);
+    for(let n of nodes.filter(d=>d.shouldShowLabel)){
+      let x = n.bbox.cx;
+      let y = n.bbox.cy;
+      let l = n.l;
+      //draw bbox
+      // ctx.globalAlpha = 0.3; 
+      // ctx.fillStyle = '#08306b';
+      // ctx.beginPath();
+      // ctx.rect(x*DPR-n.bbox.width*DPR/2, y*DPR-n.bbox.height*DPR/2, n.bbox.width*DPR, n.bbox.height*DPR);
+      // ctx.fill();
+      
+      ctx.fillStyle = scales.sc(n.level);
+      if(l0 != l){
+        ctx.font = scales.sf(n.level);
+        l0 = l;
       }
+      ctx.strokeText(n.label, x, y);
+      ctx.fillText(n.label, x, y);
     }
   }
   

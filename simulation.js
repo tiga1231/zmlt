@@ -137,9 +137,9 @@ onmessage = function(event) {
       // .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
       // .strength(e=>1 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
       // .distance(e=>e.weight)
-      // .strength(e=>1 / Math.pow(e.weight, 1.4) * Math.pow(minEdgeWeight, 1.4) )//lastfm
+      .strength(e=>0.06 / Math.pow(e.weight/minEdgeWeight, 0.001))//lastfm
       .distance(e=>e.weight)
-      .strength(e=>1 / Math.pow(e.weight, 2.0) * Math.pow(minEdgeWeight, 2.0) )
+      // .strength(e=>1 / Math.pow(e.weight, 2.0) * Math.pow(minEdgeWeight, 2.0) )
     )
 
     // // // //other aesthetics
@@ -158,31 +158,12 @@ onmessage = function(event) {
 
 
     // //label overlap removal
-    // simulation
-    // .force('pre-collide', forceScaleY(nodes, aspectRatio))
-    // .force('collide', 
-    //   d3.forceCollide()
-    //   .radius(d=>scales.sx.invert( (d.bbox.width+8) / idealZoomScale ) - scales.sx.invert(0))
-    //   .strength(0.05)
-    //   .iterations(2)
-    // )
-    // .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
-    // 
-    
-    // const levelCount = Array.from(new Set(nodes.map(d=>[d.level, d.nodeCount]))).sort((a,b)=>a-b);
-    // let idealCount = 40;
-    
-    // // for(let lc of levelCount){
-    // //   let [l,c] = lc;
-    // //   level2scale[l] = 1.5*Math.sqrt(c / idealCount);
-    // // }
-    let level2scale = dataObj.level2scale;
-    console.log(level2scale);
+    console.log(dataObj.level2scale);
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
-    for (let l in level2scale){
+    for (let l in dataObj.level2scale){
       l = parseFloat(l);
-      let s = level2scale[l];
+      let s = dataObj.level2scale[l];
       let aspectRatio = 4;
       simulation
       .force('pre-collide', forceScaleY(nodes, aspectRatio))
@@ -200,8 +181,10 @@ onmessage = function(event) {
         // .strength(0.03)
         // .strength(0.5/(maxLevel+1-l))//lastfm
         // .strength(0.02 + 0.06/(maxLevel+1-l))//topics
-        .strength(0.02 + 0.06/(maxLevel+1-l))//topics
-        .iterations(2)
+        // .iterations(2)//topics
+        
+        .strength(0.1)//lastfm
+        .iterations(1)
       )
       .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
     }   

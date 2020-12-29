@@ -117,7 +117,15 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"node_modules/ol/util.js":[function(require,module,exports) {
+})({"geojson/reyan-lastfm-refined/im_cluster.geojson":[function(require,module,exports) {
+module.exports = "/im_cluster.c8ae029e.geojson";
+},{}],"geojson/reyan-lastfm-refined/im_cluster_boundary.geojson":[function(require,module,exports) {
+module.exports = "/im_cluster_boundary.abc50206.geojson";
+},{}],"geojson/reyan-lastfm-refined/im_edges.geojson":[function(require,module,exports) {
+module.exports = "/im_edges.8a2fda4b.geojson";
+},{}],"geojson/reyan-lastfm-refined/im_nodes.geojson":[function(require,module,exports) {
+module.exports = "/im_nodes.a3564292.geojson";
+},{}],"node_modules/ol/util.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73437,17 +73445,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.slice = void 0;
 var slice = Array.prototype.slice;
 exports.slice = slice;
-},{}],"node_modules/d3-axis/src/identity.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return x;
-}
 },{}],"node_modules/d3-axis/src/axis.js":[function(require,module,exports) {
 "use strict";
 
@@ -73608,7 +73605,7 @@ function axisBottom(scale) {
 function axisLeft(scale) {
   return axis(left, scale);
 }
-},{"./array.js":"node_modules/d3-axis/src/array.js","./identity.js":"node_modules/d3-axis/src/identity.js"}],"node_modules/d3-axis/src/index.js":[function(require,module,exports) {
+},{"./array.js":"node_modules/d3-axis/src/array.js","./identity.js":"node_modules/d3-array/src/identity.js"}],"node_modules/d3-axis/src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -74093,20 +74090,7 @@ EnterNode.prototype = {
     return this._parent.querySelectorAll(selector);
   }
 };
-},{"./sparse.js":"node_modules/d3-selection/src/selection/sparse.js","./index.js":"node_modules/d3-selection/src/selection/index.js"}],"node_modules/d3-selection/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return function () {
-    return x;
-  };
-}
-},{}],"node_modules/d3-selection/src/selection/data.js":[function(require,module,exports) {
+},{"./sparse.js":"node_modules/d3-selection/src/selection/sparse.js","./index.js":"node_modules/d3-selection/src/selection/index.js"}],"node_modules/d3-selection/src/selection/data.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -74234,7 +74218,7 @@ function _default(value, key) {
   update._exit = exit;
   return update;
 }
-},{"./index.js":"node_modules/d3-selection/src/selection/index.js","./enter.js":"node_modules/d3-selection/src/selection/enter.js","../array.js":"node_modules/d3-selection/src/array.js","../constant.js":"node_modules/d3-selection/src/constant.js"}],"node_modules/d3-selection/src/selection/exit.js":[function(require,module,exports) {
+},{"./index.js":"node_modules/d3-selection/src/selection/index.js","./enter.js":"node_modules/d3-selection/src/selection/enter.js","../array.js":"node_modules/d3-selection/src/array.js","../constant.js":"node_modules/d3-array/src/constant.js"}],"node_modules/d3-selection/src/selection/exit.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76548,18 +76532,7 @@ function _default(values) {
     return (0, _basis.basis)((t - i / n) * n, v0, v1, v2, v3);
   };
 }
-},{"./basis.js":"node_modules/d3-interpolate/src/basis.js"}],"node_modules/d3-interpolate/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _default = x => () => x;
-
-exports.default = _default;
-},{}],"node_modules/d3-interpolate/src/color.js":[function(require,module,exports) {
+},{"./basis.js":"node_modules/d3-interpolate/src/basis.js"}],"node_modules/d3-interpolate/src/color.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76600,7 +76573,7 @@ function nogamma(a, b) {
   var d = b - a;
   return d ? linear(a, d) : (0, _constant.default)(isNaN(a) ? b : a);
 }
-},{"./constant.js":"node_modules/d3-interpolate/src/constant.js"}],"node_modules/d3-interpolate/src/rgb.js":[function(require,module,exports) {
+},{"./constant.js":"node_modules/d3-drag/src/constant.js"}],"node_modules/d3-interpolate/src/rgb.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76917,7 +76890,7 @@ function _default(a, b) {
       c;
   return b == null || t === "boolean" ? (0, _constant.default)(b) : (t === "number" ? _number.default : t === "string" ? (c = (0, _d3Color.color)(b)) ? (b = c, _rgb.default) : _string.default : b instanceof _d3Color.color ? _rgb.default : b instanceof Date ? _date.default : (0, _numberArray.isNumberArray)(b) ? _numberArray.default : Array.isArray(b) ? _array.genericArray : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? _object.default : _number.default)(a, b);
 }
-},{"d3-color":"node_modules/d3-color/src/index.js","./rgb.js":"node_modules/d3-interpolate/src/rgb.js","./array.js":"node_modules/d3-interpolate/src/array.js","./date.js":"node_modules/d3-interpolate/src/date.js","./number.js":"node_modules/d3-interpolate/src/number.js","./object.js":"node_modules/d3-interpolate/src/object.js","./string.js":"node_modules/d3-interpolate/src/string.js","./constant.js":"node_modules/d3-interpolate/src/constant.js","./numberArray.js":"node_modules/d3-interpolate/src/numberArray.js"}],"node_modules/d3-interpolate/src/discrete.js":[function(require,module,exports) {
+},{"d3-color":"node_modules/d3-color/src/index.js","./rgb.js":"node_modules/d3-interpolate/src/rgb.js","./array.js":"node_modules/d3-interpolate/src/array.js","./date.js":"node_modules/d3-interpolate/src/date.js","./number.js":"node_modules/d3-interpolate/src/number.js","./object.js":"node_modules/d3-interpolate/src/object.js","./string.js":"node_modules/d3-interpolate/src/string.js","./constant.js":"node_modules/d3-drag/src/constant.js","./numberArray.js":"node_modules/d3-interpolate/src/numberArray.js"}],"node_modules/d3-interpolate/src/discrete.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -79656,18 +79629,7 @@ var _active = _interopRequireDefault(require("./active.js"));
 var _interrupt = _interopRequireDefault(require("./interrupt.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./selection/index.js":"node_modules/d3-transition/src/selection/index.js","./transition/index.js":"node_modules/d3-transition/src/transition/index.js","./active.js":"node_modules/d3-transition/src/active.js","./interrupt.js":"node_modules/d3-transition/src/interrupt.js"}],"node_modules/d3-brush/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _default = x => () => x;
-
-exports.default = _default;
-},{}],"node_modules/d3-brush/src/event.js":[function(require,module,exports) {
+},{"./selection/index.js":"node_modules/d3-transition/src/selection/index.js","./transition/index.js":"node_modules/d3-transition/src/transition/index.js","./active.js":"node_modules/d3-transition/src/active.js","./interrupt.js":"node_modules/d3-transition/src/interrupt.js"}],"node_modules/d3-brush/src/event.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -79712,23 +79674,6 @@ function BrushEvent(type, {
       value: dispatch
     }
   });
-}
-},{}],"node_modules/d3-brush/src/noevent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.nopropagation = nopropagation;
-exports.default = _default;
-
-function nopropagation(event) {
-  event.stopImmediatePropagation();
-}
-
-function _default(event) {
-  event.preventDefault();
-  event.stopImmediatePropagation();
 }
 },{}],"node_modules/d3-brush/src/brush.js":[function(require,module,exports) {
 "use strict";
@@ -80369,7 +80314,7 @@ function brush(dim) {
 
   return brush;
 }
-},{"d3-dispatch":"node_modules/d3-dispatch/src/index.js","d3-drag":"node_modules/d3-drag/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./constant.js":"node_modules/d3-brush/src/constant.js","./event.js":"node_modules/d3-brush/src/event.js","./noevent.js":"node_modules/d3-brush/src/noevent.js"}],"node_modules/d3-brush/src/index.js":[function(require,module,exports) {
+},{"d3-dispatch":"node_modules/d3-dispatch/src/index.js","d3-drag":"node_modules/d3-drag/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./constant.js":"node_modules/d3-drag/src/constant.js","./event.js":"node_modules/d3-brush/src/event.js","./noevent.js":"node_modules/d3-drag/src/noevent.js"}],"node_modules/d3-brush/src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -80745,29 +80690,7 @@ Object.defineProperty(exports, "path", {
 var _path = _interopRequireDefault(require("./path.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./path.js":"node_modules/d3-path/src/path.js"}],"node_modules/d3-chord/src/array.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.slice = void 0;
-var slice = Array.prototype.slice;
-exports.slice = slice;
-},{}],"node_modules/d3-chord/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return function () {
-    return x;
-  };
-}
-},{}],"node_modules/d3-chord/src/ribbon.js":[function(require,module,exports) {
+},{"./path.js":"node_modules/d3-path/src/path.js"}],"node_modules/d3-chord/src/ribbon.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -80916,7 +80839,7 @@ function _default() {
 function ribbonArrow() {
   return ribbon(defaultArrowheadRadius);
 }
-},{"d3-path":"node_modules/d3-path/src/index.js","./array.js":"node_modules/d3-chord/src/array.js","./constant.js":"node_modules/d3-chord/src/constant.js","./math.js":"node_modules/d3-chord/src/math.js"}],"node_modules/d3-chord/src/index.js":[function(require,module,exports) {
+},{"d3-path":"node_modules/d3-path/src/index.js","./array.js":"node_modules/d3-axis/src/array.js","./constant.js":"node_modules/d3-array/src/constant.js","./math.js":"node_modules/d3-chord/src/math.js"}],"node_modules/d3-chord/src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -80996,17 +80919,6 @@ function _default(ring) {
 
   return area;
 }
-},{}],"node_modules/d3-contour/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _default = x => () => x;
-
-exports.default = _default;
 },{}],"node_modules/d3-contour/src/contains.js":[function(require,module,exports) {
 "use strict";
 
@@ -81294,7 +81206,7 @@ function _default() {
 
   return contours;
 }
-},{"d3-array":"node_modules/d3-array/src/index.js","./array.js":"node_modules/d3-contour/src/array.js","./ascending.js":"node_modules/d3-contour/src/ascending.js","./area.js":"node_modules/d3-contour/src/area.js","./constant.js":"node_modules/d3-contour/src/constant.js","./contains.js":"node_modules/d3-contour/src/contains.js","./noop.js":"node_modules/d3-contour/src/noop.js"}],"node_modules/d3-contour/src/blur.js":[function(require,module,exports) {
+},{"d3-array":"node_modules/d3-array/src/index.js","./array.js":"node_modules/d3-contour/src/array.js","./ascending.js":"node_modules/d3-contour/src/ascending.js","./area.js":"node_modules/d3-contour/src/area.js","./constant.js":"node_modules/d3-drag/src/constant.js","./contains.js":"node_modules/d3-contour/src/contains.js","./noop.js":"node_modules/d3-contour/src/noop.js"}],"node_modules/d3-contour/src/blur.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -81549,7 +81461,7 @@ function _default() {
 
   return density;
 }
-},{"d3-array":"node_modules/d3-array/src/index.js","./array.js":"node_modules/d3-contour/src/array.js","./blur.js":"node_modules/d3-contour/src/blur.js","./constant.js":"node_modules/d3-contour/src/constant.js","./contours.js":"node_modules/d3-contour/src/contours.js"}],"node_modules/d3-contour/src/index.js":[function(require,module,exports) {
+},{"d3-array":"node_modules/d3-array/src/index.js","./array.js":"node_modules/d3-contour/src/array.js","./blur.js":"node_modules/d3-contour/src/blur.js","./constant.js":"node_modules/d3-drag/src/constant.js","./contours.js":"node_modules/d3-contour/src/contours.js"}],"node_modules/d3-contour/src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84215,20 +84127,7 @@ Object.defineProperty(exports, "quadtree", {
 var _quadtree = _interopRequireDefault(require("./quadtree.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./quadtree.js":"node_modules/d3-quadtree/src/quadtree.js"}],"node_modules/d3-force/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return function () {
-    return x;
-  };
-}
-},{}],"node_modules/d3-force/src/jiggle.js":[function(require,module,exports) {
+},{"./quadtree.js":"node_modules/d3-quadtree/src/quadtree.js"}],"node_modules/d3-force/src/jiggle.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84362,7 +84261,7 @@ function _default(radius) {
 
   return force;
 }
-},{"d3-quadtree":"node_modules/d3-quadtree/src/index.js","./constant.js":"node_modules/d3-force/src/constant.js","./jiggle.js":"node_modules/d3-force/src/jiggle.js"}],"node_modules/d3-force/src/link.js":[function(require,module,exports) {
+},{"d3-quadtree":"node_modules/d3-quadtree/src/index.js","./constant.js":"node_modules/d3-array/src/constant.js","./jiggle.js":"node_modules/d3-force/src/jiggle.js"}],"node_modules/d3-force/src/link.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84488,7 +84387,7 @@ function _default(links) {
 
   return force;
 }
-},{"./constant.js":"node_modules/d3-force/src/constant.js","./jiggle.js":"node_modules/d3-force/src/jiggle.js"}],"node_modules/d3-force/src/lcg.js":[function(require,module,exports) {
+},{"./constant.js":"node_modules/d3-array/src/constant.js","./jiggle.js":"node_modules/d3-force/src/jiggle.js"}],"node_modules/d3-force/src/lcg.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84796,7 +84695,7 @@ function _default() {
 
   return force;
 }
-},{"d3-quadtree":"node_modules/d3-quadtree/src/index.js","./constant.js":"node_modules/d3-force/src/constant.js","./jiggle.js":"node_modules/d3-force/src/jiggle.js","./simulation.js":"node_modules/d3-force/src/simulation.js"}],"node_modules/d3-force/src/radial.js":[function(require,module,exports) {
+},{"d3-quadtree":"node_modules/d3-quadtree/src/index.js","./constant.js":"node_modules/d3-array/src/constant.js","./jiggle.js":"node_modules/d3-force/src/jiggle.js","./simulation.js":"node_modules/d3-force/src/simulation.js"}],"node_modules/d3-force/src/radial.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84864,7 +84763,7 @@ function _default(radius, x, y) {
 
   return force;
 }
-},{"./constant.js":"node_modules/d3-force/src/constant.js"}],"node_modules/d3-force/src/x.js":[function(require,module,exports) {
+},{"./constant.js":"node_modules/d3-array/src/constant.js"}],"node_modules/d3-force/src/x.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84916,7 +84815,7 @@ function _default(x) {
 
   return force;
 }
-},{"./constant.js":"node_modules/d3-force/src/constant.js"}],"node_modules/d3-force/src/y.js":[function(require,module,exports) {
+},{"./constant.js":"node_modules/d3-array/src/constant.js"}],"node_modules/d3-force/src/y.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84968,7 +84867,7 @@ function _default(y) {
 
   return force;
 }
-},{"./constant.js":"node_modules/d3-force/src/constant.js"}],"node_modules/d3-force/src/index.js":[function(require,module,exports) {
+},{"./constant.js":"node_modules/d3-array/src/constant.js"}],"node_modules/d3-force/src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -85267,18 +85166,7 @@ var _default = {
   "x": x => Math.round(x).toString(16)
 };
 exports.default = _default;
-},{"./formatDecimal.js":"node_modules/d3-format/src/formatDecimal.js","./formatPrefixAuto.js":"node_modules/d3-format/src/formatPrefixAuto.js","./formatRounded.js":"node_modules/d3-format/src/formatRounded.js"}],"node_modules/d3-format/src/identity.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return x;
-}
-},{}],"node_modules/d3-format/src/locale.js":[function(require,module,exports) {
+},{"./formatDecimal.js":"node_modules/d3-format/src/formatDecimal.js","./formatPrefixAuto.js":"node_modules/d3-format/src/formatPrefixAuto.js","./formatRounded.js":"node_modules/d3-format/src/formatRounded.js"}],"node_modules/d3-format/src/locale.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -85438,7 +85326,7 @@ function _default(locale) {
     formatPrefix: formatPrefix
   };
 }
-},{"./exponent.js":"node_modules/d3-format/src/exponent.js","./formatGroup.js":"node_modules/d3-format/src/formatGroup.js","./formatNumerals.js":"node_modules/d3-format/src/formatNumerals.js","./formatSpecifier.js":"node_modules/d3-format/src/formatSpecifier.js","./formatTrim.js":"node_modules/d3-format/src/formatTrim.js","./formatTypes.js":"node_modules/d3-format/src/formatTypes.js","./formatPrefixAuto.js":"node_modules/d3-format/src/formatPrefixAuto.js","./identity.js":"node_modules/d3-format/src/identity.js"}],"node_modules/d3-format/src/defaultLocale.js":[function(require,module,exports) {
+},{"./exponent.js":"node_modules/d3-format/src/exponent.js","./formatGroup.js":"node_modules/d3-format/src/formatGroup.js","./formatNumerals.js":"node_modules/d3-format/src/formatNumerals.js","./formatSpecifier.js":"node_modules/d3-format/src/formatSpecifier.js","./formatTrim.js":"node_modules/d3-format/src/formatTrim.js","./formatTypes.js":"node_modules/d3-format/src/formatTypes.js","./formatPrefixAuto.js":"node_modules/d3-format/src/formatPrefixAuto.js","./identity.js":"node_modules/d3-array/src/identity.js"}],"node_modules/d3-format/src/defaultLocale.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -86246,20 +86134,7 @@ function _default(object) {
 
   return [(0, _math.atan2)(y, x) * _math.degrees, (0, _math.asin)(z / m) * _math.degrees];
 }
-},{"d3-array":"node_modules/d3-array/src/index.js","./math.js":"node_modules/d3-geo/src/math.js","./noop.js":"node_modules/d3-geo/src/noop.js","./stream.js":"node_modules/d3-geo/src/stream.js"}],"node_modules/d3-geo/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return function () {
-    return x;
-  };
-}
-},{}],"node_modules/d3-geo/src/compose.js":[function(require,module,exports) {
+},{"d3-array":"node_modules/d3-array/src/index.js","./math.js":"node_modules/d3-geo/src/math.js","./noop.js":"node_modules/d3-geo/src/noop.js","./stream.js":"node_modules/d3-geo/src/stream.js"}],"node_modules/d3-geo/src/compose.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -86450,7 +86325,7 @@ function _default() {
 
   return circle;
 }
-},{"./cartesian.js":"node_modules/d3-geo/src/cartesian.js","./constant.js":"node_modules/d3-geo/src/constant.js","./math.js":"node_modules/d3-geo/src/math.js","./rotation.js":"node_modules/d3-geo/src/rotation.js"}],"node_modules/d3-geo/src/clip/buffer.js":[function(require,module,exports) {
+},{"./cartesian.js":"node_modules/d3-geo/src/cartesian.js","./constant.js":"node_modules/d3-array/src/constant.js","./math.js":"node_modules/d3-geo/src/math.js","./rotation.js":"node_modules/d3-geo/src/rotation.js"}],"node_modules/d3-geo/src/clip/buffer.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90283,17 +90158,6 @@ function _default() {
 
   return nodes;
 }
-},{}],"node_modules/d3-hierarchy/src/hierarchy/descendants.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default() {
-  return Array.from(this);
-}
 },{}],"node_modules/d3-hierarchy/src/hierarchy/leaves.js":[function(require,module,exports) {
 "use strict";
 
@@ -90478,7 +90342,7 @@ Node.prototype = hierarchy.prototype = {
   copy: node_copy,
   [Symbol.iterator]: _iterator.default
 };
-},{"./count.js":"node_modules/d3-hierarchy/src/hierarchy/count.js","./each.js":"node_modules/d3-hierarchy/src/hierarchy/each.js","./eachBefore.js":"node_modules/d3-hierarchy/src/hierarchy/eachBefore.js","./eachAfter.js":"node_modules/d3-hierarchy/src/hierarchy/eachAfter.js","./find.js":"node_modules/d3-hierarchy/src/hierarchy/find.js","./sum.js":"node_modules/d3-hierarchy/src/hierarchy/sum.js","./sort.js":"node_modules/d3-hierarchy/src/hierarchy/sort.js","./path.js":"node_modules/d3-hierarchy/src/hierarchy/path.js","./ancestors.js":"node_modules/d3-hierarchy/src/hierarchy/ancestors.js","./descendants.js":"node_modules/d3-hierarchy/src/hierarchy/descendants.js","./leaves.js":"node_modules/d3-hierarchy/src/hierarchy/leaves.js","./links.js":"node_modules/d3-hierarchy/src/hierarchy/links.js","./iterator.js":"node_modules/d3-hierarchy/src/hierarchy/iterator.js"}],"node_modules/d3-hierarchy/src/array.js":[function(require,module,exports) {
+},{"./count.js":"node_modules/d3-hierarchy/src/hierarchy/count.js","./each.js":"node_modules/d3-hierarchy/src/hierarchy/each.js","./eachBefore.js":"node_modules/d3-hierarchy/src/hierarchy/eachBefore.js","./eachAfter.js":"node_modules/d3-hierarchy/src/hierarchy/eachAfter.js","./find.js":"node_modules/d3-hierarchy/src/hierarchy/find.js","./sum.js":"node_modules/d3-hierarchy/src/hierarchy/sum.js","./sort.js":"node_modules/d3-hierarchy/src/hierarchy/sort.js","./path.js":"node_modules/d3-hierarchy/src/hierarchy/path.js","./ancestors.js":"node_modules/d3-hierarchy/src/hierarchy/ancestors.js","./descendants.js":"node_modules/d3-selection/src/selection/nodes.js","./leaves.js":"node_modules/d3-hierarchy/src/hierarchy/leaves.js","./links.js":"node_modules/d3-hierarchy/src/hierarchy/links.js","./iterator.js":"node_modules/d3-hierarchy/src/hierarchy/iterator.js"}],"node_modules/d3-hierarchy/src/array.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -98298,18 +98162,7 @@ function _default(x0, y0, y1) {
 
   return area;
 }
-},{"d3-path":"node_modules/d3-path/src/index.js","./array.js":"node_modules/d3-shape/src/array.js","./constant.js":"node_modules/d3-shape/src/constant.js","./curve/linear.js":"node_modules/d3-shape/src/curve/linear.js","./line.js":"node_modules/d3-shape/src/line.js","./point.js":"node_modules/d3-shape/src/point.js"}],"node_modules/d3-shape/src/descending.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(a, b) {
-  return b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;
-}
-},{}],"node_modules/d3-shape/src/identity.js":[function(require,module,exports) {
+},{"d3-path":"node_modules/d3-path/src/index.js","./array.js":"node_modules/d3-shape/src/array.js","./constant.js":"node_modules/d3-shape/src/constant.js","./curve/linear.js":"node_modules/d3-shape/src/curve/linear.js","./line.js":"node_modules/d3-shape/src/line.js","./point.js":"node_modules/d3-shape/src/point.js"}],"node_modules/d3-shape/src/identity.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -98416,7 +98269,7 @@ function _default() {
 
   return pie;
 }
-},{"./array.js":"node_modules/d3-shape/src/array.js","./constant.js":"node_modules/d3-shape/src/constant.js","./descending.js":"node_modules/d3-shape/src/descending.js","./identity.js":"node_modules/d3-shape/src/identity.js","./math.js":"node_modules/d3-shape/src/math.js"}],"node_modules/d3-shape/src/curve/radial.js":[function(require,module,exports) {
+},{"./array.js":"node_modules/d3-shape/src/array.js","./constant.js":"node_modules/d3-shape/src/constant.js","./descending.js":"node_modules/d3-array/src/descending.js","./identity.js":"node_modules/d3-shape/src/identity.js","./math.js":"node_modules/d3-shape/src/math.js"}],"node_modules/d3-shape/src/curve/radial.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -98882,16 +98735,7 @@ function _default(type, size) {
 
   return symbol;
 }
-},{"d3-path":"node_modules/d3-path/src/index.js","./symbol/circle.js":"node_modules/d3-shape/src/symbol/circle.js","./symbol/cross.js":"node_modules/d3-shape/src/symbol/cross.js","./symbol/diamond.js":"node_modules/d3-shape/src/symbol/diamond.js","./symbol/star.js":"node_modules/d3-shape/src/symbol/star.js","./symbol/square.js":"node_modules/d3-shape/src/symbol/square.js","./symbol/triangle.js":"node_modules/d3-shape/src/symbol/triangle.js","./symbol/wye.js":"node_modules/d3-shape/src/symbol/wye.js","./constant.js":"node_modules/d3-shape/src/constant.js"}],"node_modules/d3-shape/src/noop.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default() {}
-},{}],"node_modules/d3-shape/src/curve/basis.js":[function(require,module,exports) {
+},{"d3-path":"node_modules/d3-path/src/index.js","./symbol/circle.js":"node_modules/d3-shape/src/symbol/circle.js","./symbol/cross.js":"node_modules/d3-shape/src/symbol/cross.js","./symbol/diamond.js":"node_modules/d3-shape/src/symbol/diamond.js","./symbol/star.js":"node_modules/d3-shape/src/symbol/star.js","./symbol/square.js":"node_modules/d3-shape/src/symbol/square.js","./symbol/triangle.js":"node_modules/d3-shape/src/symbol/triangle.js","./symbol/wye.js":"node_modules/d3-shape/src/symbol/wye.js","./constant.js":"node_modules/d3-shape/src/constant.js"}],"node_modules/d3-shape/src/curve/basis.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -99059,7 +98903,7 @@ BasisClosed.prototype = {
 function _default(context) {
   return new BasisClosed(context);
 }
-},{"../noop.js":"node_modules/d3-shape/src/noop.js","./basis.js":"node_modules/d3-shape/src/curve/basis.js"}],"node_modules/d3-shape/src/curve/basisOpen.js":[function(require,module,exports) {
+},{"../noop.js":"node_modules/d3-contour/src/noop.js","./basis.js":"node_modules/d3-shape/src/curve/basis.js"}],"node_modules/d3-shape/src/curve/basisOpen.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -99376,7 +99220,7 @@ var _default = function custom(tension) {
 }(0);
 
 exports.default = _default;
-},{"../noop.js":"node_modules/d3-shape/src/noop.js","./cardinal.js":"node_modules/d3-shape/src/curve/cardinal.js"}],"node_modules/d3-shape/src/curve/cardinalOpen.js":[function(require,module,exports) {
+},{"../noop.js":"node_modules/d3-contour/src/noop.js","./cardinal.js":"node_modules/d3-shape/src/curve/cardinal.js"}],"node_modules/d3-shape/src/curve/cardinalOpen.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -99675,7 +99519,7 @@ var _default = function custom(alpha) {
 }(0.5);
 
 exports.default = _default;
-},{"./cardinalClosed.js":"node_modules/d3-shape/src/curve/cardinalClosed.js","../noop.js":"node_modules/d3-shape/src/noop.js","./catmullRom.js":"node_modules/d3-shape/src/curve/catmullRom.js"}],"node_modules/d3-shape/src/curve/catmullRomOpen.js":[function(require,module,exports) {
+},{"./cardinalClosed.js":"node_modules/d3-shape/src/curve/cardinalClosed.js","../noop.js":"node_modules/d3-contour/src/noop.js","./catmullRom.js":"node_modules/d3-shape/src/curve/catmullRom.js"}],"node_modules/d3-shape/src/curve/catmullRomOpen.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -99793,7 +99637,7 @@ LinearClosed.prototype = {
 function _default(context) {
   return new LinearClosed(context);
 }
-},{"../noop.js":"node_modules/d3-shape/src/noop.js"}],"node_modules/d3-shape/src/curve/monotone.js":[function(require,module,exports) {
+},{"../noop.js":"node_modules/d3-contour/src/noop.js"}],"node_modules/d3-shape/src/curve/monotone.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -100840,18 +100684,7 @@ var _reverse = _interopRequireDefault(require("./order/reverse.js"));
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./arc.js":"node_modules/d3-shape/src/arc.js","./area.js":"node_modules/d3-shape/src/area.js","./line.js":"node_modules/d3-shape/src/line.js","./pie.js":"node_modules/d3-shape/src/pie.js","./areaRadial.js":"node_modules/d3-shape/src/areaRadial.js","./lineRadial.js":"node_modules/d3-shape/src/lineRadial.js","./pointRadial.js":"node_modules/d3-shape/src/pointRadial.js","./link/index.js":"node_modules/d3-shape/src/link/index.js","./symbol.js":"node_modules/d3-shape/src/symbol.js","./symbol/circle.js":"node_modules/d3-shape/src/symbol/circle.js","./symbol/cross.js":"node_modules/d3-shape/src/symbol/cross.js","./symbol/diamond.js":"node_modules/d3-shape/src/symbol/diamond.js","./symbol/square.js":"node_modules/d3-shape/src/symbol/square.js","./symbol/star.js":"node_modules/d3-shape/src/symbol/star.js","./symbol/triangle.js":"node_modules/d3-shape/src/symbol/triangle.js","./symbol/wye.js":"node_modules/d3-shape/src/symbol/wye.js","./curve/basisClosed.js":"node_modules/d3-shape/src/curve/basisClosed.js","./curve/basisOpen.js":"node_modules/d3-shape/src/curve/basisOpen.js","./curve/basis.js":"node_modules/d3-shape/src/curve/basis.js","./curve/bundle.js":"node_modules/d3-shape/src/curve/bundle.js","./curve/cardinalClosed.js":"node_modules/d3-shape/src/curve/cardinalClosed.js","./curve/cardinalOpen.js":"node_modules/d3-shape/src/curve/cardinalOpen.js","./curve/cardinal.js":"node_modules/d3-shape/src/curve/cardinal.js","./curve/catmullRomClosed.js":"node_modules/d3-shape/src/curve/catmullRomClosed.js","./curve/catmullRomOpen.js":"node_modules/d3-shape/src/curve/catmullRomOpen.js","./curve/catmullRom.js":"node_modules/d3-shape/src/curve/catmullRom.js","./curve/linearClosed.js":"node_modules/d3-shape/src/curve/linearClosed.js","./curve/linear.js":"node_modules/d3-shape/src/curve/linear.js","./curve/monotone.js":"node_modules/d3-shape/src/curve/monotone.js","./curve/natural.js":"node_modules/d3-shape/src/curve/natural.js","./curve/step.js":"node_modules/d3-shape/src/curve/step.js","./stack.js":"node_modules/d3-shape/src/stack.js","./offset/expand.js":"node_modules/d3-shape/src/offset/expand.js","./offset/diverging.js":"node_modules/d3-shape/src/offset/diverging.js","./offset/none.js":"node_modules/d3-shape/src/offset/none.js","./offset/silhouette.js":"node_modules/d3-shape/src/offset/silhouette.js","./offset/wiggle.js":"node_modules/d3-shape/src/offset/wiggle.js","./order/appearance.js":"node_modules/d3-shape/src/order/appearance.js","./order/ascending.js":"node_modules/d3-shape/src/order/ascending.js","./order/descending.js":"node_modules/d3-shape/src/order/descending.js","./order/insideOut.js":"node_modules/d3-shape/src/order/insideOut.js","./order/none.js":"node_modules/d3-shape/src/order/none.js","./order/reverse.js":"node_modules/d3-shape/src/order/reverse.js"}],"node_modules/d3-zoom/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _default = x => () => x;
-
-exports.default = _default;
-},{}],"node_modules/d3-zoom/src/event.js":[function(require,module,exports) {
+},{"./arc.js":"node_modules/d3-shape/src/arc.js","./area.js":"node_modules/d3-shape/src/area.js","./line.js":"node_modules/d3-shape/src/line.js","./pie.js":"node_modules/d3-shape/src/pie.js","./areaRadial.js":"node_modules/d3-shape/src/areaRadial.js","./lineRadial.js":"node_modules/d3-shape/src/lineRadial.js","./pointRadial.js":"node_modules/d3-shape/src/pointRadial.js","./link/index.js":"node_modules/d3-shape/src/link/index.js","./symbol.js":"node_modules/d3-shape/src/symbol.js","./symbol/circle.js":"node_modules/d3-shape/src/symbol/circle.js","./symbol/cross.js":"node_modules/d3-shape/src/symbol/cross.js","./symbol/diamond.js":"node_modules/d3-shape/src/symbol/diamond.js","./symbol/square.js":"node_modules/d3-shape/src/symbol/square.js","./symbol/star.js":"node_modules/d3-shape/src/symbol/star.js","./symbol/triangle.js":"node_modules/d3-shape/src/symbol/triangle.js","./symbol/wye.js":"node_modules/d3-shape/src/symbol/wye.js","./curve/basisClosed.js":"node_modules/d3-shape/src/curve/basisClosed.js","./curve/basisOpen.js":"node_modules/d3-shape/src/curve/basisOpen.js","./curve/basis.js":"node_modules/d3-shape/src/curve/basis.js","./curve/bundle.js":"node_modules/d3-shape/src/curve/bundle.js","./curve/cardinalClosed.js":"node_modules/d3-shape/src/curve/cardinalClosed.js","./curve/cardinalOpen.js":"node_modules/d3-shape/src/curve/cardinalOpen.js","./curve/cardinal.js":"node_modules/d3-shape/src/curve/cardinal.js","./curve/catmullRomClosed.js":"node_modules/d3-shape/src/curve/catmullRomClosed.js","./curve/catmullRomOpen.js":"node_modules/d3-shape/src/curve/catmullRomOpen.js","./curve/catmullRom.js":"node_modules/d3-shape/src/curve/catmullRom.js","./curve/linearClosed.js":"node_modules/d3-shape/src/curve/linearClosed.js","./curve/linear.js":"node_modules/d3-shape/src/curve/linear.js","./curve/monotone.js":"node_modules/d3-shape/src/curve/monotone.js","./curve/natural.js":"node_modules/d3-shape/src/curve/natural.js","./curve/step.js":"node_modules/d3-shape/src/curve/step.js","./stack.js":"node_modules/d3-shape/src/stack.js","./offset/expand.js":"node_modules/d3-shape/src/offset/expand.js","./offset/diverging.js":"node_modules/d3-shape/src/offset/diverging.js","./offset/none.js":"node_modules/d3-shape/src/offset/none.js","./offset/silhouette.js":"node_modules/d3-shape/src/offset/silhouette.js","./offset/wiggle.js":"node_modules/d3-shape/src/offset/wiggle.js","./order/appearance.js":"node_modules/d3-shape/src/order/appearance.js","./order/ascending.js":"node_modules/d3-shape/src/order/ascending.js","./order/descending.js":"node_modules/d3-shape/src/order/descending.js","./order/insideOut.js":"node_modules/d3-shape/src/order/insideOut.js","./order/none.js":"node_modules/d3-shape/src/order/none.js","./order/reverse.js":"node_modules/d3-shape/src/order/reverse.js"}],"node_modules/d3-zoom/src/event.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -100951,23 +100784,6 @@ function transform(node) {
   while (!node.__zoom) if (!(node = node.parentNode)) return identity;
 
   return node.__zoom;
-}
-},{}],"node_modules/d3-zoom/src/noevent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.nopropagation = nopropagation;
-exports.default = _default;
-
-function nopropagation(event) {
-  event.stopImmediatePropagation();
-}
-
-function _default(event) {
-  event.preventDefault();
-  event.stopImmediatePropagation();
 }
 },{}],"node_modules/d3-zoom/src/zoom.js":[function(require,module,exports) {
 "use strict";
@@ -101430,7 +101246,7 @@ function _default() {
 
   return zoom;
 }
-},{"d3-dispatch":"node_modules/d3-dispatch/src/index.js","d3-drag":"node_modules/d3-drag/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./constant.js":"node_modules/d3-zoom/src/constant.js","./event.js":"node_modules/d3-zoom/src/event.js","./transform.js":"node_modules/d3-zoom/src/transform.js","./noevent.js":"node_modules/d3-zoom/src/noevent.js"}],"node_modules/d3-zoom/src/index.js":[function(require,module,exports) {
+},{"d3-dispatch":"node_modules/d3-dispatch/src/index.js","d3-drag":"node_modules/d3-drag/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./constant.js":"node_modules/d3-drag/src/constant.js","./event.js":"node_modules/d3-zoom/src/event.js","./transform.js":"node_modules/d3-zoom/src/transform.js","./noevent.js":"node_modules/d3-drag/src/noevent.js"}],"node_modules/d3-zoom/src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -102123,17 +101939,16 @@ function searchQuadtree(quadtree, xGetter, yGetter, idGetter, xmin, xmax, ymin, 
   });
   return results;
 }
-},{"d3":"node_modules/d3/index.js"}],"geojson/reyan-lastfm-refined/im_cluster.geojson":[function(require,module,exports) {
-module.exports = "/im_cluster.c8ae029e.geojson";
-},{}],"geojson/reyan-lastfm-refined/im_cluster_boundary.geojson":[function(require,module,exports) {
-module.exports = "/im_cluster_boundary.abc50206.geojson";
-},{}],"geojson/reyan-lastfm-refined/im_edges.geojson":[function(require,module,exports) {
-module.exports = "/im_edges.8a2fda4b.geojson";
-},{}],"geojson/reyan-lastfm-refined/im_nodes.geojson":[function(require,module,exports) {
-module.exports = "/im_nodes.a3564292.geojson";
-},{}],"reyan_lastfm.js":[function(require,module,exports) {
+},{"d3":"node_modules/d3/index.js"}],"style.css":[function(require,module,exports) {
+
+},{}],"vis.js":[function(require,module,exports) {
 var global = arguments[3];
 "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.draw = draw;
 
 var _ol = _interopRequireDefault(require("ol"));
 
@@ -102175,13 +101990,7 @@ var d3 = _interopRequireWildcard(require("d3"));
 
 var utils = _interopRequireWildcard(require("./utils"));
 
-var _im_cluster = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_cluster.geojson"));
-
-var _im_cluster_boundary = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_cluster_boundary.geojson"));
-
-var _im_edges = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_edges.geojson"));
-
-var _im_nodes = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_nodes.geojson"));
+require("./style.css");
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
@@ -102189,33 +101998,65 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 //see license.txt
 //data
-var clusterStyleFunction = function clusterStyleFunction(feature, resolution) {
+// import clusterData from './geojson/mingwei_topics/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/mingwei_topics/im_cluster_boundary.geojson';
+// import edgeData from './geojson/mingwei_topics/im_edges.geojson';
+// import nodeData from './geojson/mingwei_topics/im_nodes.geojson';
+// import clusterData from './geojson/mingwei-topics-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/mingwei-topics-refined/im_cluster_boundary.geojson';
+// import edgeData from './geojson/mingwei-topics-refined/im_edges.geojson';
+// import nodeData from './geojson/mingwei-topics-refined/im_nodes.geojson';
+// import clusterData from './geojson/mingwei-lastfm-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/mingwei-lastfm-refined/im_cluster_boundary.geojson';
+// import edgeData from './geojson/mingwei-lastfm-refined/im_edges.geojson';
+// import nodeData from './geojson/mingwei-lastfm-refined/im_nodes.geojson';
+// import clusterData from './geojson/reyan-topics-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/reyan-topics-refined/im_cluster_boundary.geojson';
+// import edgeData from './geojson/reyan-topics-refined/im_edges.geojson';
+// import nodeData from './geojson/reyan-topics-refined/im_nodes.geojson';
+// import clusterData from './geojson/reyan-lastfm-refined/im_cluster.geojson';
+// import clusterBoundaryData from './geojson/reyan-lastfm-refined/im_cluster_boundary.geojson';
+// import edgeData from './geojson/reyan-lastfm-refined/im_edges.geojson';
+// import nodeData from './geojson/reyan-lastfm-refined/im_nodes.geojson';
+//consts
+var FONT = 'arial';
+var maxFont = 20,
+    minFont = 12; //globals
+
+var sl;
+var searched;
+
+function clusterStyleFunction(feature, resolution) {
   var clusterStyle = new _style.Style({
     stroke: new _style.Stroke({
-      color: feature.get("stroke"),
+      color: feature.get('stroke'),
       width: 1
     }),
     fill: new _style.Fill({
-      color: feature.get("fill")
+      color: feature.get('fill')
     })
   });
   return clusterStyle;
-};
+}
 
-var clusterBoundaryStyleFunction = function clusterBoundaryStyleFunction(feature, resolution) {
+;
+
+function clusterBoundaryStyleFunction(feature, resolution) {
   var clusterStyle = new _style.Style({
     stroke: new _style.Stroke({
-      color: feature.get("stroke"),
+      color: feature.get('stroke'),
       width: 0
     }),
     fill: new _style.Fill({
-      color: feature.get("fill")
+      color: feature.get('fill')
     })
   });
   return clusterStyle;
-};
+}
 
-var edgeStyleFunction = function edgeStyleFunction(feature, resolution) {
+;
+
+function edgeStyleFunction(feature, resolution) {
   var l = +feature.get('level'); // let c = feature.get('stroke');
 
   var edgeStyle = new _style.Style({
@@ -102226,9 +102067,11 @@ var edgeStyleFunction = function edgeStyleFunction(feature, resolution) {
     })
   });
   return edgeStyle;
-};
+}
 
-var nodeStyleFunction = function nodeStyleFunction(feature, resolution) {
+;
+
+function nodeStyleFunction(feature, resolution) {
   // console.log(feature.getGeometry());
   if (getVisible(feature, resolution)) {
     return new _style.Style({
@@ -102246,70 +102089,79 @@ var nodeStyleFunction = function nodeStyleFunction(feature, resolution) {
       //   fill: new Fill({
       //     color: '#aaa'
       //   }),
-      // stroke: new Stroke({
-      //   color: '#3399CC',
-      //   width: 0
-      // }),
-      // radius: sl(+feature.get('level'))/2
+      //   stroke: new Stroke({
+      //     color: '#3399CC',
+      //     width: 0
+      //   }),
+      //   radius: sl(+feature.get('level'))/2
       // }),
     });
   }
-};
+}
 
-var selectStyleFunction = function selectStyleFunction(feature, resolution) {
-  var nodestyle = new _style.Style({
-    stroke: new _style.Stroke({
-      color: 'rgba(0,0,0,0.5)',
-      width: 1
-    }),
-    fill: new _style.Fill({
-      color: 'rgba(255,255,255,0.5)'
-    })
+; // function selectStyleFunction(feature, resolution) {
+//   let nodestyle = new Style({
+//     stroke: new Stroke({
+//       color: 'rgba(0,0,0,0.5)',
+//       width: 1
+//     }),
+//     fill: new Fill({
+//       color: 'rgba(255,255,255,0.5)'
+//     })
+//   });
+// };
+
+function selectStyleFunctionForNode(feature, resolution) {
+  // let style = nodeStyleFunction(feature, resolution);
+  // if (style.getFill()){
+  //   style.setFill( new Fill({
+  //     color: 'rgba(255,255,255,1)'
+  //   }));
+  //   style.setStroke( new Stroke({
+  //     color: 'rgba(255,0,0,0.5)',
+  //     width: 2
+  //   }))
+  // }
+  // return style;
+  return new _style.Style({
+    text: createTextStyle(feature, resolution, true)
   });
-};
+}
 
-var selectStyleFunctionForNode = function selectStyleFunctionForNode(feature, resolution) {
-  var style = nodeStyleFunction(feature, resolution);
+;
 
-  if (style.getFill()) {
-    style.setFill(new _style.Fill({
-      color: 'rgba(255,255,255,1)'
-    }));
-    style.setStroke(new _style.Stroke({
-      color: 'rgba(255,0,0,0.5)',
-      width: 2
-    }));
-  }
-
-  return style;
-};
-
-var selectStyleFunctionForEdge = function selectStyleFunctionForEdge(feature, resolution) {
+function selectStyleFunctionForEdge(feature, resolution) {
   var style = edgeStyleFunction(feature, resolution);
   var stk = style.getStroke();
 
   if (stk) {
     stk.width_ = stk.width_ + 2;
-    stk.color_ = "red";
+    stk.color_ = 'red';
     style.setStroke(stk);
   } //console.log(stk)
 
 
   return style;
-};
+}
 
-var getVisible = function getVisible(feature, resolution) {
+;
+
+function getVisible(feature, resolution) {
   return feature.get('resolution') > resolution;
-};
+}
 
-var createTextStyle = function createTextStyle(feature, resolution) {
+;
+
+function createTextStyle(feature, resolution) {
+  var fullText = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
   // let remap = 2 + (8-level)*1.5/7;
   // let fsize =  5 * remap;
+  var fontsize = sl(+feature.get('level'));
   var nodetext = new _Text.default({
-    font: Math.round(sl(+feature.get('level'))) + "px ".concat(FONT),
-    text: feature.get('label'),
+    font: "".concat(fontsize, "px ").concat(FONT),
+    text: fullText ? feature.get('label-full') : feature.get('label'),
     fill: new _style.Fill({
-      color: 'rgba(72,79,90,1)'
+      color: searched == feature ? 'rgba(72,79,255,1)' : 'rgba(72,79,90,1)'
     }),
     stroke: new _style.Stroke({
       color: 'rgba(250,250,250,1)',
@@ -102320,348 +102172,213 @@ var createTextStyle = function createTextStyle(feature, resolution) {
 
   });
   return nodetext;
-};
-
-var FONT = 'arial';
-var minResolution = 1.194328566955879;
-var maxResolution = 405.7481131407050;
-var maxLevel;
-var sl; // = d3.scaleLinear().domain([1, maxLevel]).range([20,12]);
-
-var clusterSource = new _source.Vector({
-  url: _im_cluster.default,
-  format: new _GeoJSON.default()
-});
-var clusterLayer = new _Vector.default({
-  source: clusterSource,
-  style: clusterStyleFunction
-});
-var clusterBoundaySource = new _source.Vector({
-  url: _im_cluster_boundary.default,
-  format: new _GeoJSON.default()
-});
-var clusterBoundayLayer = new _Vector.default({
-  source: clusterBoundaySource,
-  style: clusterBoundaryStyleFunction
-});
-var edgeSource = new _source.Vector({
-  url: _im_edges.default,
-  format: new _GeoJSON.default()
-});
-var edgesLayer = new _Vector.default({
-  source: edgeSource,
-  style: edgeStyleFunction
-}); // let nodeSource = new Vector({  url: nodeData,  format: new GeoJSON()});
-
-var nodeSource = new _source.Vector({
-  format: new _GeoJSON.default(),
-  loader: function loader(extent, resolution, projection, callee) {
-    var url = _im_nodes.default;
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-
-    xhr.onerror = function () {
-      nodeSource.removeLoadedExtent(extent);
-    };
-
-    xhr.onload = function () {
-      if (xhr.status == 200) {
-        var features = nodeSource.getFormat().readFeatures(xhr.responseText);
-        maxLevel = d3.max(features, function (d) {
-          return +d.get('level');
-        });
-        sl = d3.scaleLinear().domain([1, maxLevel]).range([20, 12]);
-        features.forEach(function (d) {
-          return d.set('label', d.get('label').slice(0, 16));
-        });
-        utils.markBoundingBox(features, sl, FONT);
-        utils.markNonOverlapResolution(features, undefined, minResolution, maxResolution); // utils.markNonOverlapResolution(features, d3.range(0,maxLevel+1,2), minResolution, maxResolution);
-
-        nodeSource.addFeatures(features);
-        console.log(features);
-        var debug = new Set(['information visualization', 'computational geometry']);
-        console.log(features.filter(function (d) {
-          return debug.has(d.get('label'));
-        }));
-      } else {
-        onError();
-      }
-    };
-
-    xhr.send();
-  }
-});
-var nodesLayer = new _Vector.default({
-  source: nodeSource,
-  style: nodeStyleFunction
-}); //let geolayer = new TileLayer({  source: new OSM()});
-// ClusterLayer,clusterBoundayLayer,
-
-var map = new _Map.default({
-  controls: (0, _control.defaults)().extend([new _control.OverviewMap()]),
-  layers: [clusterLayer, clusterBoundayLayer, edgesLayer, nodesLayer],
-  target: 'map',
-  view: new _View.default({
-    center: [0, 0],
-    // minResolution,
-    // maxResolution,
-    zoom: 11,
-    maxZoom: 17,
-    minZoom: 9
-  })
-});
-global.map = map;
-console.log(map.getView().minResolution_, map.getView().maxResolution_);
-var popup = new _Overlay.default({
-  element: document.getElementById('popup')
-});
-map.addOverlay(popup);
-global.popup = popup;
-var edgeSelectPointerMove = new _Select.default({
-  condition: _condition.pointerMove,
-  layers: [edgesLayer],
-  style: selectStyleFunctionForEdge
-});
-var nodeSelectPointerMove = new _Select.default({
-  condition: _condition.pointerMove,
-  layers: [nodesLayer],
-  style: selectStyleFunctionForNode
-});
-map.addInteraction(edgeSelectPointerMove);
-map.addInteraction(nodeSelectPointerMove);
-map.on('click', function (evt) {
-  var element = popup.getElement();
-  $(element).popover('destroy');
-  var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-    return feature;
-  });
-
-  if (feature) {
-    var _element = popup.getElement();
-
-    var geometry = feature.getGeometry();
-    var fid = feature.getId();
-    var ftype = feature.getGeometry().getType();
-
-    if (fid && fid.search("cluster") > -1) {
-      return 0;
-    }
-
-    $(_element)[0].title = feature.get('label');
-    var content = feature.get('label') + " <br> Weight: " + feature.get('weight') + "<br> Level: " + feature.get('level');
-    $(_element).popover('destroy');
-    popup.setPosition(evt.coordinate);
-    $(_element).popover({
-      placement: 'top',
-      animation: false,
-      html: true,
-      content: content
-    });
-    $(_element).popover('show');
-  }
-});
-},{"ol":"node_modules/ol/index.js","ol/Map.js":"node_modules/ol/Map.js","ol/View.js":"node_modules/ol/View.js","ol/format/GeoJSON.js":"node_modules/ol/format/GeoJSON.js","ol/geom/MultiPoint.js":"node_modules/ol/geom/MultiPoint.js","ol/layer/Vector.js":"node_modules/ol/layer/Vector.js","ol/source/Vector.js":"node_modules/ol/source/Vector.js","ol/interaction/Select.js":"node_modules/ol/interaction/Select.js","ol/events/condition.js":"node_modules/ol/events/condition.js","ol/style.js":"node_modules/ol/style.js","ol/style/Text":"node_modules/ol/style/Text.js","ol/proj.js":"node_modules/ol/proj.js","ol/geom/Circle":"node_modules/ol/geom/Circle.js","ol/Feature.js":"node_modules/ol/Feature.js","ol/layer.js":"node_modules/ol/layer.js","ol/source.js":"node_modules/ol/source.js","ol/Overlay":"node_modules/ol/Overlay.js","ol/control.js":"node_modules/ol/control.js","d3":"node_modules/d3/index.js","./utils":"utils.js","./geojson/reyan-lastfm-refined/im_cluster.geojson":"geojson/reyan-lastfm-refined/im_cluster.geojson","./geojson/reyan-lastfm-refined/im_cluster_boundary.geojson":"geojson/reyan-lastfm-refined/im_cluster_boundary.geojson","./geojson/reyan-lastfm-refined/im_edges.geojson":"geojson/reyan-lastfm-refined/im_edges.geojson","./geojson/reyan-lastfm-refined/im_nodes.geojson":"geojson/reyan-lastfm-refined/im_nodes.geojson"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
-var global = arguments[3];
-var OVERLAY_ID = '__parcel__error__overlay__';
-var OldModule = module.bundle.Module;
-
-function Module(moduleName) {
-  OldModule.call(this, moduleName);
-  this.hot = {
-    data: module.bundle.hotData,
-    _acceptCallbacks: [],
-    _disposeCallbacks: [],
-    accept: function (fn) {
-      this._acceptCallbacks.push(fn || function () {});
-    },
-    dispose: function (fn) {
-      this._disposeCallbacks.push(fn);
-    }
-  };
-  module.bundle.hotData = null;
 }
 
-module.bundle.Module = Module;
-var checkedAssets, assetsToAccept;
-var parent = module.bundle.parent;
+;
 
-if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = "localhost" || location.hostname;
-  var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60255" + '/');
+function focus(map, nodeFeature) {
+  var center = nodeFeature.values_.geometry.flatCoordinates;
+  var resolution = nodeFeature.get('resolution') - 1;
+  console.log(map.getView().getResolution(), resolution); // let zoom = map.getView().getZoom() + 1;
 
-  ws.onmessage = function (event) {
-    checkedAssets = {};
-    assetsToAccept = [];
-    var data = JSON.parse(event.data);
+  map.getView().animate({
+    resolution: resolution,
+    center: center,
+    duration: 750
+  });
+}
 
-    if (data.type === 'update') {
-      var handled = false;
-      data.assets.forEach(function (asset) {
-        if (!asset.isNew) {
-          var didAccept = hmrAcceptCheck(global.parcelRequire, asset.id);
+function initSearchBar(map, features) {
+  // <input type="text" placeholder="Search..">
+  var barDiv = d3.select('body').append('div').style('position', 'absolute').style('top', '1em').style('right', '2em').style('width', '12em');
+  var bar = barDiv.append('input').attr('type', 'text').attr('placeholder', 'Search..').style('width', '12em');
+  var barWidth = "".concat(bar.node().offsetWidth, "px");
+  var icon = barDiv.append('i').attr('class', 'fa fa-search').style('margin-left', '-1.3em');
+  var list = barDiv.append('ul').style('padding', '0').style('max-height', '60vh').style('max-width', barWidth).style('overflow', 'auto').style('list-style-type', 'none');
+  bar.node().addEventListener('keyup', function (e) {
+    var query = bar.node().value.toLowerCase();
 
-          if (didAccept) {
-            handled = true;
-          }
-        }
-      }); // Enable HMR for CSS by default.
-
-      handled = handled || data.assets.every(function (asset) {
-        return asset.type === 'css' && asset.generated.js;
+    if (query.length == 0) {
+      searched = undefined;
+      list.selectAll('li').remove();
+    } else {
+      var hits = features.filter(function (d) {
+        return d.get('label-full').toLowerCase().includes(query);
       });
-
-      if (handled) {
-        console.clear();
-        data.assets.forEach(function (asset) {
-          hmrApply(global.parcelRequire, asset);
-        });
-        assetsToAccept.forEach(function (v) {
-          hmrAcceptRun(v[0], v[1]);
-        });
-      } else {
-        window.location.reload();
-      }
+      list.selectAll('li').remove();
+      var items = list.selectAll('li').data(hits).enter().append('li').text(function (d) {
+        return d.get('label-full');
+      });
+      items.on('click', function () {
+        searched = d3.select(this).datum();
+        focus(map, searched);
+      });
     }
-
-    if (data.type === 'reload') {
-      ws.close();
-
-      ws.onclose = function () {
-        location.reload();
-      };
-    }
-
-    if (data.type === 'error-resolved') {
-      console.log('[parcel] ✨ Error resolved');
-      removeErrorOverlay();
-    }
-
-    if (data.type === 'error') {
-      console.error('[parcel] 🚨  ' + data.error.message + '\n' + data.error.stack);
-      removeErrorOverlay();
-      var overlay = createErrorOverlay(data);
-      document.body.appendChild(overlay);
-    }
-  };
-}
-
-function removeErrorOverlay() {
-  var overlay = document.getElementById(OVERLAY_ID);
-
-  if (overlay) {
-    overlay.remove();
-  }
-}
-
-function createErrorOverlay(data) {
-  var overlay = document.createElement('div');
-  overlay.id = OVERLAY_ID; // html encode message and stack trace
-
-  var message = document.createElement('div');
-  var stackTrace = document.createElement('pre');
-  message.innerText = data.error.message;
-  stackTrace.innerText = data.error.stack;
-  overlay.innerHTML = '<div style="background: black; font-size: 16px; color: white; position: fixed; height: 100%; width: 100%; top: 0px; left: 0px; padding: 30px; opacity: 0.85; font-family: Menlo, Consolas, monospace; z-index: 9999;">' + '<span style="background: red; padding: 2px 4px; border-radius: 2px;">ERROR</span>' + '<span style="top: 2px; margin-left: 5px; position: relative;">🚨</span>' + '<div style="font-size: 18px; font-weight: bold; margin-top: 20px;">' + message.innerHTML + '</div>' + '<pre>' + stackTrace.innerHTML + '</pre>' + '</div>';
-  return overlay;
-}
-
-function getParents(bundle, id) {
-  var modules = bundle.modules;
-
-  if (!modules) {
-    return [];
-  }
-
-  var parents = [];
-  var k, d, dep;
-
-  for (k in modules) {
-    for (d in modules[k][1]) {
-      dep = modules[k][1][d];
-
-      if (dep === id || Array.isArray(dep) && dep[dep.length - 1] === id) {
-        parents.push(k);
-      }
-    }
-  }
-
-  if (bundle.parent) {
-    parents = parents.concat(getParents(bundle.parent, id));
-  }
-
-  return parents;
-}
-
-function hmrApply(bundle, asset) {
-  var modules = bundle.modules;
-
-  if (!modules) {
-    return;
-  }
-
-  if (modules[asset.id] || !bundle.parent) {
-    var fn = new Function('require', 'module', 'exports', asset.generated.js);
-    asset.isNew = !modules[asset.id];
-    modules[asset.id] = [fn, asset.deps];
-  } else if (bundle.parent) {
-    hmrApply(bundle.parent, asset);
-  }
-}
-
-function hmrAcceptCheck(bundle, id) {
-  var modules = bundle.modules;
-
-  if (!modules) {
-    return;
-  }
-
-  if (!modules[id] && bundle.parent) {
-    return hmrAcceptCheck(bundle.parent, id);
-  }
-
-  if (checkedAssets[id]) {
-    return;
-  }
-
-  checkedAssets[id] = true;
-  var cached = bundle.cache[id];
-  assetsToAccept.push([bundle, id]);
-
-  if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
-    return true;
-  }
-
-  return getParents(global.parcelRequire, id).some(function (id) {
-    return hmrAcceptCheck(global.parcelRequire, id);
   });
 }
 
-function hmrAcceptRun(bundle, id) {
-  var cached = bundle.cache[id];
-  bundle.hotData = {};
+function draw(clusterData, clusterBoundaryData, edgeData, nodeData) {
+  var clusterSource = new _source.Vector({
+    url: clusterData,
+    format: new _GeoJSON.default()
+  });
+  var clusterLayer = new _Vector.default({
+    source: clusterSource,
+    style: clusterStyleFunction
+  });
+  var clusterBoundaySource = new _source.Vector({
+    url: clusterBoundaryData,
+    format: new _GeoJSON.default()
+  });
+  var clusterBoundayLayer = new _Vector.default({
+    source: clusterBoundaySource,
+    style: clusterBoundaryStyleFunction
+  });
+  var edgeSource = new _source.Vector({
+    url: edgeData,
+    format: new _GeoJSON.default()
+  });
+  var edgesLayer = new _Vector.default({
+    source: edgeSource,
+    style: edgeStyleFunction
+  });
+  var features; // let nodeSource = new Vector({  url: nodeData,  format: new GeoJSON()});
 
-  if (cached) {
-    cached.hot.data = bundle.hotData;
-  }
+  var nodeSource = new _source.Vector({
+    format: new _GeoJSON.default(),
+    loader: function loader(extent, resolution, projection, callee) {
+      var url = nodeData;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
 
-  if (cached && cached.hot && cached.hot._disposeCallbacks.length) {
-    cached.hot._disposeCallbacks.forEach(function (cb) {
-      cb(bundle.hotData);
+      xhr.onerror = function () {
+        nodeSource.removeLoadedExtent(extent);
+      };
+
+      xhr.onload = function () {
+        var minResolution = 1.194328566955879;
+        var maxResolution = 405.7481131407050;
+
+        if (xhr.status == 200) {
+          features = nodeSource.getFormat().readFeatures(xhr.responseText);
+          var maxLevel = d3.max(features, function (d) {
+            return +d.get('level');
+          });
+          sl = d3.scaleLinear().domain([1, maxLevel]).range([maxFont, minFont]);
+          var trunc = 16;
+          features.forEach(function (d) {
+            var l = d.get('label');
+            d.set('label', l.slice(0, trunc));
+            d.set('label-full', l);
+          });
+          utils.markBoundingBox(features, sl, FONT);
+          utils.markNonOverlapResolution(features, undefined, minResolution, maxResolution);
+          nodeSource.addFeatures(features); // console.log(features);
+        } else {
+          onError();
+        }
+      };
+
+      xhr.send();
+    }
+  });
+  var nodesLayer = new _Vector.default({
+    source: nodeSource,
+    style: nodeStyleFunction
+  }); //let geolayer = new TileLayer({  source: new OSM()});
+  // ClusterLayer,clusterBoundayLayer,
+
+  var map = new _Map.default({
+    controls: (0, _control.defaults)().extend([new _control.OverviewMap()]),
+    layers: [clusterLayer, clusterBoundayLayer, edgesLayer, nodesLayer],
+    target: 'map',
+    view: new _View.default({
+      center: [0, 0],
+      // minResolution,
+      // maxResolution,
+      zoom: 11,
+      maxZoom: 17,
+      minZoom: 9
+    })
+  });
+  var intervalId = setInterval(function () {
+    if (features !== undefined) {
+      initSearchBar(map, features);
+      clearInterval(intervalId);
+    }
+  }, 100);
+  global.map = map;
+  var popup = new _Overlay.default({
+    element: document.getElementById('popup')
+  });
+  map.addOverlay(popup);
+  global.popup = popup;
+  var nodeSelectPointerMove = new _Select.default({
+    condition: _condition.pointerMove,
+    layers: [nodesLayer],
+    style: selectStyleFunctionForNode
+  });
+  map.addInteraction(nodeSelectPointerMove); // let edgeSelectPointerMove = new Select({
+  //   condition: pointerMove,
+  //   layers: [edgesLayer],
+  //   style:selectStyleFunctionForEdge
+  // });
+  // map.addInteraction(edgeSelectPointerMove);
+
+  map.on('click', function (evt) {
+    var element = popup.getElement();
+    $(element).popover('destroy');
+    var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+      return feature;
     });
-  }
 
-  delete bundle.cache[id];
-  bundle(id);
-  cached = bundle.cache[id];
+    if (feature) {
+      var _element = popup.getElement();
 
-  if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
-    cached.hot._acceptCallbacks.forEach(function (cb) {
-      cb();
-    });
+      var geometry = feature.getGeometry();
+      var fid = feature.getId();
+      var ftype = feature.getGeometry().getType();
 
-    return true;
-  }
+      if (fid && fid.search('cluster') > -1) {
+        return 0;
+      }
+
+      if (ftype == 'LineString') {
+        return 0;
+      }
+
+      var label = feature.get('label-full');
+      var level = feature.get('level');
+      $(_element)[0].title = label;
+      var content = "\n        ".concat(label, "<br>\n        Level: ").concat(level, "\n      ");
+      $(_element).popover('destroy');
+      popup.setPosition(evt.coordinate);
+      $(_element).popover({
+        placement: 'top',
+        animation: true,
+        html: true,
+        content: content
+      });
+      $(_element).popover('show');
+    }
+  });
 }
-},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","reyan_lastfm.js"], null)
+},{"ol":"node_modules/ol/index.js","ol/Map.js":"node_modules/ol/Map.js","ol/View.js":"node_modules/ol/View.js","ol/format/GeoJSON.js":"node_modules/ol/format/GeoJSON.js","ol/geom/MultiPoint.js":"node_modules/ol/geom/MultiPoint.js","ol/layer/Vector.js":"node_modules/ol/layer/Vector.js","ol/source/Vector.js":"node_modules/ol/source/Vector.js","ol/interaction/Select.js":"node_modules/ol/interaction/Select.js","ol/events/condition.js":"node_modules/ol/events/condition.js","ol/style.js":"node_modules/ol/style.js","ol/style/Text":"node_modules/ol/style/Text.js","ol/proj.js":"node_modules/ol/proj.js","ol/geom/Circle":"node_modules/ol/geom/Circle.js","ol/Feature.js":"node_modules/ol/Feature.js","ol/layer.js":"node_modules/ol/layer.js","ol/source.js":"node_modules/ol/source.js","ol/Overlay":"node_modules/ol/Overlay.js","ol/control.js":"node_modules/ol/control.js","d3":"node_modules/d3/index.js","./utils":"utils.js","./style.css":"style.css"}],"reyan_lastfm.js":[function(require,module,exports) {
+"use strict";
+
+var _im_cluster = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_cluster.geojson"));
+
+var _im_cluster_boundary = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_cluster_boundary.geojson"));
+
+var _im_edges = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_edges.geojson"));
+
+var _im_nodes = _interopRequireDefault(require("./geojson/reyan-lastfm-refined/im_nodes.geojson"));
+
+var _vis = require("./vis");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//main
+(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_edges.default, _im_nodes.default);
+},{"./geojson/reyan-lastfm-refined/im_cluster.geojson":"geojson/reyan-lastfm-refined/im_cluster.geojson","./geojson/reyan-lastfm-refined/im_cluster_boundary.geojson":"geojson/reyan-lastfm-refined/im_cluster_boundary.geojson","./geojson/reyan-lastfm-refined/im_edges.geojson":"geojson/reyan-lastfm-refined/im_edges.geojson","./geojson/reyan-lastfm-refined/im_nodes.geojson":"geojson/reyan-lastfm-refined/im_nodes.geojson","./vis":"vis.js"}]},{},["reyan_lastfm.js"], null)
 //# sourceMappingURL=/reyan_lastfm.f062a8a0.js.map

@@ -29,8 +29,7 @@ let forceLabelLevel = -1;
 
 
 
-window.enabledNodes;
-
+// window.enabledNodes;
 
 //--------data----------
 // d3.json('data/json/lastfm-iqbal/lastfm_8.json').then(data=>{
@@ -88,8 +87,8 @@ window.enabledNodes;
 //demo topics
 // d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
 // d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
-d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
-d3.json('data/json/topics_refined/Graph_5000-nodes-1.json').then(nodes=>{
+// d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
+// d3.json('data/json/topics_refined/Graph_5000-nodes-1.json').then(nodes=>{
 
 
 
@@ -99,17 +98,18 @@ d3.json('data/json/topics_refined/Graph_5000-nodes-1.json').then(nodes=>{
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
-//train topics
-let fn = 'topics_refined/Graph_5000';
+//train topics refined
+// let fn = 'topics_refined/Graph_5000';
 // let version = 1;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
-//train lastfm
+//train lastfm refined
 // let fn = 'lastfm_refined/Graph_8_2587';
 // let version = 1;
 // d3.json(`data/json/${fn}.json`).then(data=>{
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
+
 
 //paper graph 1
 // let fn = 'TopicsLayersData-0/Graph_5000'; //no longer works
@@ -124,35 +124,56 @@ let fn = 'topics_refined/Graph_5000';
 // d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
 
 
-  window.data = data;
-  // if(nodes !== undefined){
-  //   progress = data.node_id.length;
-  // }
-  
-  if(IS_PROGRESSIVE){
-    // enabledNodes = new Set();
-    window.enabledNodes = new Set(data.node_id.slice(0,progress));
-  }else{
-    window.enabledNodes = new Set(data.nodeIds);
-  }
 
+// train steiner
+// let fns = [
+  // 'data/json/topics_steiner/Graph_15-1608744450.json',
+  // 'data/json/topics_steiner/Graph_15-1608744450-nodes-1.json',
+// ];
+let fns = [
+  'data/json/lastfm_steiner/Graph_14-1608710991.json', //graph and init pos
+  'data/json/lastfm_steiner/Graph_14-1608710991-nodes-1.json',//node positions
+]; 
+
+let promises = Promise.all(fns.map(fn=>d3.json(fn)))
+.then((data)=>{
+  let nodes;
+  if(data.length == 1){
+    data = data[0];
+  }else{
+    [data, nodes] = data;
+  }
+  window.data = data;
+
+  // if(IS_PROGRESSIVE){
+  //   window.enabledNodes = new Set(data.node_id.slice(0,progress));
+  // }else{
+  //   window.enabledNodes = new Set(data.nodeIds);
+  // }
     
   if(nodes === undefined){
     preprocess(data, undefined);
     data.level2scale = {}; //crossing free init layout 
   }else{
     preprocess(data, nodes);
+    let maxLevel = d3.max(data.nodes, d=>d.level);
     // data.level2scale = {}; //crossing free init layout 
-    if(fn.includes('topics')){
-      data.level2scale = {//topics refined
-        6: 10,
-        20: 23,
+    if(fns[0].includes('topics')){
+      // data.level2scale = {//topics refined
+      //   6: 10,
+      // };
+      // data.level2scale[maxLevel] = 23;
+
+      data.level2scale = {//topics steiner
+        6: 13,
       };
-    }else if(fn.includes('lastfm')){
+      data.level2scale[maxLevel] = 30;
+
+    }else if(fns[0].includes('lastfm')){
       data.level2scale = {//lastfm
-        1:5,
-        18:12,
+        1: 5,
       };
+      data.level2scale[maxLevel] = 12;
     }
   }
   let canvas = init(data);
@@ -161,7 +182,6 @@ let fn = 'topics_refined/Graph_5000';
     canvas.draw(shouldLabel, forceLabel);
   }
 
-});
 });
 
 
@@ -518,7 +538,8 @@ function debugMsg(){
     let edgesTmp = window.edges.filter(e=>window.enabledNodes.has(e.source.id) && window.enabledNodes.has(e.target.id));
     let nodesTmp = window.nodes.filter(d=>window.enabledNodes.has(d.id));
     // let labelTextNodesTmp = labelTexts.filter(d=>window.enabledNodes.has(d.id)).nodes();
-    let labelTextNodesTmp = labelTexts.filter(d=>d.update).nodes();
+    // let labelTextNodesTmp = labelTexts.filter(d=>d.update).nodes();
+    let labelTextNodesTmp = labelTexts.nodes();
     console.log(
       'zoom:', 
       parseFloat(transform.k.toFixed(2)),
@@ -923,7 +944,7 @@ function preprocess(data, nodes){
     data.id2index[d.id] = d.index;
     d.label = d.label.slice(0,16);
     d.norm = Math.sqrt(d.x*d.x + d.y*d.y);
-    d.update = IS_PROGRESSIVE ? window.enabledNodes.has(d.id) : true;
+    d.update = true;//IS_PROGRESSIVE ? window.enabledNodes.has(d.id) : true;
   });
   data.node_center = math.mean(data.nodes.map(d=>[d.x, d.y]), 0);
 
@@ -1048,14 +1069,8 @@ function markCrossing(edges){
   }
   for(let i=0; i<edges.length; i++){
     let e0 = edges[i];
-    if(!e0.source.update || !e0.target.update){
-      continue;
-    }
     for(let j=i+1; j<edges.length; j++){
       let e1 = edges[j];
-      if(!e1.source.update || !e1.target.update){
-        continue;
-      }
       let isIncident = e0.source.id == e1.source.id 
       || e0.source.id == e1.target.id 
       || e0.target.id == e1.source.id 
@@ -1189,9 +1204,10 @@ function draw(label=true, forceLabel=false, markOverlap=true){
   //   && d.bbox.cy > 0 
   //   && d.bbox.cy < this.height;
   // });
-  let edges = data.edges.filter(e=>{
-    return e.source.update && e.target.update;
-  });
+  let edges = data.edges;
+  // .filter(e=>{
+  //   return e.source.update && e.target.update;
+  // });
   drawEdges(ctx, edges, this.scales, this.transform);
   drawNodes(ctx, nodes, this.scales, this.transform, label, forceLabel, markOverlap);
 

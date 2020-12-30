@@ -49,55 +49,35 @@ function addNode(){
 onmessage = function(event) {
   dataObj = event.data;
   let type = event.data.type;
-  console.log(type);
+  console.log('type', type);
   if(type === 'restart'){
     simulation.alpha(0.99);
     train(niter);
-  }else if(type === 'add-node'){  
-    addNode();
-    train(1);
   }else if(type === 'stop'){  
     simulation.stop();
   }else if(type === 'zoom'){  
     scales.sx = d3.scaleLinear().domain(dataObj.xDomain).range(dataObj.xRange);
     scales.sy = d3.scaleLinear().domain(dataObj.yDomain).range(dataObj.yRange);
-  }else if(type === 'auto-add-nodes'){
-    let niter = 40;
-    while(enabledNodes.size < nodes.length){
-      addNode();
-      if(enabledNodes.size % 50 == 0){
-        simulation
-        .alpha(0.90)
-        .velocityDecay(0.4)
-        .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-        .restart();
-        simulation.tick(niter);
-        post();
-      }
-    }
-    train(10);
-
-    // if(intervalId === undefined){
-    //   console.log('adding nodes...');
-    //   intervalId = setInterval(()=>{
-    //     addNode();
-    //     train(1);
-    //     if(enabledNodes.size === nodes.length){
-    //       console.log('paused adding');
-    //       clearInterval(intervalId);
-    //       intervalId = undefined;
-    //       // setTimeout(()=>{
-    //       //   simulation.stop();
-    //       // }, 15000);
-    //       train(10);
-    //     }
-    //   }, 1000);
-    // }else{
-    //   console.log('stop');
-    //   clearInterval(intervalId);
-    //   intervalId = undefined;
-    // }
   }
+  // else if(type === 'add-node'){  
+  //   addNode();
+  //   train(1);
+  // }else if(type === 'auto-add-nodes'){
+  //   let niter = 40;
+  //   while(enabledNodes.size < nodes.length){
+  //     addNode();
+  //     if(enabledNodes.size % 50 == 0){
+  //       simulation
+  //       .alpha(0.90)
+  //       .velocityDecay(0.4)
+  //       .alphaDecay(1 - Math.pow(0.001, 1 / niter))
+  //       .restart();
+  //       simulation.tick(niter);
+  //       post();
+  //     }
+  //   }
+  //   train(10);
+  // }
   else{
     //default init event
     // const idealZoomScale = 25; //for 5000-node topics
@@ -130,14 +110,15 @@ onmessage = function(event) {
     .force('link',
       d3.forceLink(edges)
       .distance(e=>e.weight)
-      .strength(e=>1)
+      .strength(e=>0.8)
     )
     .force('stress', 
       forceStress(nodes, virtualEdges, enabledNodes, id2index)
       // .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
       // .strength(e=>1 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
       // .distance(e=>e.weight)
-      .strength(e=>0.06 / Math.pow(e.weight/minEdgeWeight, 0.001))//lastfm
+      .strength(e=>0.5 / Math.pow(e.weight/minEdgeWeight, 2))//lastfm
+      // .strength(e=>0.1)//lastfm
       .distance(e=>e.weight)
       // .strength(e=>1 / Math.pow(e.weight, 2.0) * Math.pow(minEdgeWeight, 2.0) )
     )
@@ -149,7 +130,8 @@ onmessage = function(event) {
     // )
     .force('charge', 
      d3.forceManyBody()
-     .strength(d=> -1*(d.weight+50))
+     // .strength(d=> -1*(d.weight+50))
+     .strength(d=> -0.1*(d.weight))
     )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
@@ -158,7 +140,7 @@ onmessage = function(event) {
 
 
     // //label overlap removal
-    console.log(dataObj.level2scale);
+    console.log('level2scale', dataObj.level2scale);
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     for (let l in dataObj.level2scale){
@@ -180,10 +162,8 @@ onmessage = function(event) {
         })
         // .strength(0.03)
         // .strength(0.5/(maxLevel+1-l))//lastfm
-        // .strength(0.02 + 0.06/(maxLevel+1-l))//topics
-        // .iterations(2)//topics
-        
-        .strength(0.1)//lastfm
+        .strength(0.02 + 0.06/(maxLevel+1-l))//topics
+        // .strength(0.1)//lastfm
         .iterations(1)
       )
       .force('post-collide', forceScaleY(nodes, 1/aspectRatio))

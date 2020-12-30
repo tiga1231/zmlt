@@ -173,9 +173,9 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
       let e0 = e.source;
       let e1 = e.target;
 
-      if(!enabledNodes.has(e0.id) || !enabledNodes.has(e1.id)){
-        continue;
-      }
+      // if(!enabledNodes.has(e0.id) || !enabledNodes.has(e1.id)){
+      //   continue;
+      // }
 
 
       //rotational and translational params
@@ -223,9 +223,9 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
 
 
         // if(!enabledNodes.has(n.id)){
-        if(!n.update){
-          continue;
-        }
+        // if(!n.update){
+        //   continue;
+        // }
         if(n.id !== e0.id && n.id !== e1.id){
           p = translate(n, -center.x, -center.y);
           p = rotate(p, cos, -sin);
@@ -519,13 +519,13 @@ function forcePost(edges, radius, enabledNodes, id2index, damping=0.2){
   let forcePost_ = (alpha)=>{
     let nodes, edges;
 
-    if(enabledNodes.size < force.nodes.length){
-      nodes = force.nodes.filter(d=>d.update);
-      edges = force.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
-    }else{
-      nodes = force.nodes;
-      edges = force.edges
-    }
+    // if(enabledNodes.size < force.nodes.length){
+    //   nodes = force.nodes.filter(d=>d.update);
+    //   edges = force.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
+    // }else{
+    nodes = force.nodes;
+    edges = force.edges
+    // }
     // updateSides(nodes, getX, getY);
     // markCrossings(edges);
 
@@ -657,8 +657,7 @@ function forceStress(nodes, edges, enabledNodes, id2index){
     //stochastic
     for(let i=0; i<nodes.length*6; i++){
       let e = edges[randint(0,edges.length)];
-      // if(enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id)){
-      if(nodes[id2index[e.source.id]].update && nodes[id2index[e.target.id]].update){
+      // if(nodes[id2index[e.source.id]].update && nodes[id2index[e.target.id]].update){
         let w = strength(e);
         let d = distance(e);
 
@@ -669,7 +668,10 @@ function forceStress(nodes, edges, enabledNodes, id2index){
         let dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], Math.max(currentDist, 1e-4));
 
         let coef = (currentDist - d) * w;
-        coef = Math.sign(coef) * Math.min(Math.abs(coef), Math.max(1e-4, currentDist*0.2));
+        coef = Math.sign(coef) * Math.min(
+          Math.abs(coef), 
+          currentDist*0.2
+        );
 
         let [dx, dy] = numeric.mul(coef, dir);
         let vx = dx * alpha;
@@ -679,7 +681,7 @@ function forceStress(nodes, edges, enabledNodes, id2index){
         e.target.vx += -vx;
         e.target.vy += -vy;
 
-      }
+      // }
     }
   }
 

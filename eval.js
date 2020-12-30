@@ -5,14 +5,38 @@
 // 
 // 
 
+
+//paper
 // let fn = 'TopicsLayersData-0/Graph_5000';
 // let version = 3;
 // let nodeCounts = [100, 200, 400, 800, 1600, 2500, 3500, 5000];
 
-let fn = 'lastfm/Graph_8';
-let version = 13;
-let nodeCounts = [299, 619, 1043, 1301, 1757, 1967, 2286, 2588];
+// let fn = 'lastfm/Graph_8';
+// let version = 13;
+// let nodeCounts = [299, 619, 1043, 1301, 1757, 1967, 2286, 2588];
 
+
+// refined
+let fn = 'topics_refined/Graph_5000';
+let version = 1;
+let nodeCounts = [5001];
+
+
+// let fn = 'lastfm_refined/Graph_8_2587';
+// let version = 1;
+// let nodeCounts = [26,51,76,101,201,299,401,501,619,701,801,1043,1301,1757,1967,2286,2588];
+
+
+//steiner
+
+// let fn = 'topics_steiner/Graph_15-1608744450';
+// let version = 1;
+// // let nodeCounts = [26,47,70,103,197,314,502,731,906,1380,1802,2398,3582,4172,5058,5947];
+// let nodeCounts = [5947];
+
+// let fn = 'lastfm_steiner/Graph_14-1608710991';
+// let version = 1;
+// let nodeCounts = [26, 60, 95, 184, 266, 384, 518, 606, 836, 1002, 1271, 1734, 1952, 2271, 2588];
 
 
 let dpr = window.devicePixelRatio * 2;
@@ -48,9 +72,12 @@ load(
     let [w,h] = [1000,1000];
     let domainX = d3.extent(data.nodes, d=>d.x);
     let domainY = d3.extent(data.nodes, d=>d.y);
+    let maxLevel = d3.max(data.nodes, d=>d.level);
     let domain = [Math.min(domainX[0], domainY[0]), Math.max(domainX[1], domainY[1])];
     let sx = d3.scaleLinear().domain(domain).range([0,w]);
     let sy = d3.scaleLinear().domain(domain).range([0,h]);
+    let sl = d3.scaleLinear().domain([1,maxLevel]).range([20,12]);
+
     let svg = d3.select('body')
     .append('svg')
     .attr('width', w)
@@ -64,7 +91,7 @@ load(
     .attr('x', d=>sx(d.x))
     .attr('y', d=>sy(d.y))
     .attr('fill', '#555')
-    .style('font-size', d=>`${20-d.level}px`)
+    .style('font-size', d=>`${sl(d.level)}px`)
     .text(d=>d.label);
     evalMsg(data.nodes, data.edges, labelTexts);
   }

@@ -80,8 +80,6 @@ onmessage = function(event) {
   // }
   else{
     //default init event
-    // const idealZoomScale = 25; //for 5000-node topics
-    // let aspectRatio = 3;
     nodes = dataObj.nodes;
     edges = dataObj.edges;
     dpr = dataObj.dpr;
@@ -92,13 +90,14 @@ onmessage = function(event) {
       sx: d3.scaleLinear().domain(dataObj.xDomain).range(dataObj.xRange),
       sy: d3.scaleLinear().domain(dataObj.yDomain).range(dataObj.yRange),
     };
-    const idealZoomScale = 10; //for 2588-node lastfm
     
     progress = dataObj.progress;
     maxEdgeWeight = d3.max(edges, e=>e.weight);
     minEdgeWeight = d3.min(edges, e=>e.weight);
 
     let maxLevel = d3.max(nodes, d=>d.level);
+    let cx = d3.mean(nodes, d=>d.x);
+    let cy = d3.mean(nodes, d=>d.y);
 
     self.progress = progress;
     // def force
@@ -110,28 +109,27 @@ onmessage = function(event) {
     .force('link',
       d3.forceLink(edges)
       .distance(e=>e.weight)
-      .strength(e=>0.8)
+      .strength(e=>0.5)
     )
     .force('stress', 
-      forceStress(nodes, virtualEdges, enabledNodes, id2index)
+      forceStress(nodes, virtualEdges.filter(e=>e.hops>1))
       // .distance(e=>Math.pow(e.weight, 0.95+1/e.hops))
       // .strength(e=>1 / Math.pow(e.weight, 1.3) * Math.pow(minEdgeWeight, 1.3) )
       // .distance(e=>e.weight)
-      .strength(e=>0.5 / Math.pow(e.weight/minEdgeWeight, 2))//lastfm
-      // .strength(e=>0.1)//lastfm
+      .strength(e=>0.6 / Math.pow(e.weight/minEdgeWeight, 2))//lastfm
       .distance(e=>e.weight)
       // .strength(e=>1 / Math.pow(e.weight, 2.0) * Math.pow(minEdgeWeight, 2.0) )
     )
 
     // // // //other aesthetics
-    // .force('central', 
-    //  d3.forceRadial(0, 0, 0)
-    //  .strength(0.005)
-    // )
+    .force('central', 
+     d3.forceRadial(cx, cy, 0)
+     .strength(0.0005)
+    )
     .force('charge', 
      d3.forceManyBody()
      // .strength(d=> -1*(d.weight+50))
-     .strength(d=> -0.1*(d.weight))
+     .strength(d=> -1*(d.weight/2))
     )
     .force('node-edge-repulsion', 
       forceNodeEdgeRepulsion(nodes, edges, enabledNodes)
@@ -140,20 +138,19 @@ onmessage = function(event) {
 
 
     // //label overlap removal
-    console.log('level2scale', dataObj.level2scale);
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     for (let l in dataObj.level2scale){
       l = parseFloat(l);
       let s = dataObj.level2scale[l];
-      let aspectRatio = 4;
+      let aspectRatio = 5;
       simulation
       .force('pre-collide', forceScaleY(nodes, aspectRatio))
       .force(`collide-${l}`, 
         d3.forceCollide()
         .radius(d=>{
           if(d.level <= l){
-            let r = d.bbox.width/2 / s + margin;
+            let r = d.bbox.width / s + margin;
             r = scales.sx.invert(r) - origin;
             return r;
           }else{
@@ -162,13 +159,13 @@ onmessage = function(event) {
         })
         // .strength(0.03)
         // .strength(0.5/(maxLevel+1-l))//lastfm
-        .strength(0.02 + 0.06/(maxLevel+1-l))//topics
-        // .strength(0.1)//lastfm
+        // .strength(0.02 + 0.06/(maxLevel+1-l))//topics
+        .strength(0.1)//lastfm
         .iterations(1)
       )
       .force('post-collide', forceScaleY(nodes, 1/aspectRatio))
     }   
-    simulation.force('post', forcePost(edges, 500, enabledNodes, id2index, 0));
+    simulation.force('post', forcePost(edges));
 
 
 
@@ -199,28 +196,6 @@ onmessage = function(event) {
 };
 
 
-
-
-function updateBbox(d, bbox, scales){
-  let marginLeft = bbox.width * 0;
-  let marginTop = bbox.height * 0;
-  let x = scales.sx(d.x);
-  let y = scales.sy(d.y);
-  d.bbox = {
-    width: bbox.width,
-    height: bbox.height,
-    left: x - bbox.width/2 - marginLeft,
-    top: y - bbox.height/2 - marginTop,
-    right: x + bbox.width/2 + marginLeft,
-    bottom: y + bbox.height/2 + marginTop,
-  };
-}
-
-
-
-
-
-  
 function post(){
   postMessage({
     type: 'tick', 

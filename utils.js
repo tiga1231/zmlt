@@ -8,6 +8,48 @@ function exportJson(obj, fn='result.json'){
   anchor.click();
 }
 
+
+function getCanvasScales(xExtent, yExtent, width, height, prescaling=1.0){
+  let margin = 50;
+  let xSize = xExtent[1] - xExtent[0];
+  let ySize = yExtent[1] - yExtent[0];
+
+  //scale up
+  let scale = 1/prescaling;
+  let xCenter = (xExtent[0] + xExtent[1])/2;
+  let yCenter = (yExtent[0] + yExtent[1])/2;
+  xExtent[0] = xCenter - xSize/2*scale;
+  xExtent[1] = xCenter + xSize/2*scale;
+  yExtent[0] = yCenter - ySize/2*scale;
+  yExtent[1] = yCenter + ySize/2*scale;
+  xSize = xExtent[1] - xExtent[0];
+  ySize = yExtent[1] - yExtent[0];
+
+  let xViewport = [margin, width-margin];
+  let yViewport = [margin, height-margin];
+  let drawWidth = xViewport[1] - xViewport[0];
+  let drawHeight = yViewport[1] - yViewport[0];
+
+  if (drawWidth/drawHeight > xSize/ySize){
+    let adjust = (ySize / drawHeight * drawWidth) - xSize;
+    xExtent[0] -= adjust/2;
+    xExtent[1] += adjust/2;
+  }else{
+    let adjust = (xSize / drawWidth * drawHeight) - ySize;
+    yExtent[0] -= adjust/2;
+    yExtent[1] += adjust/2;
+  }
+  
+  let sx = d3.scaleLinear()
+  .domain(xExtent)
+  .range(xViewport);
+  let sy = d3.scaleLinear()
+  .domain(yExtent)
+  .range(yViewport);
+  return {sx, sy};
+}
+
+
 function randint(min, max){
   return Math.floor(Math.random()*(max-min) + min);
 }
@@ -320,18 +362,20 @@ function areaUtilization(bboxes){
   bboxes.forEach((b,i)=>b.index=i);
   let sx = (d)=>(d.x+d.x+d.width)/2;
   let sy = (d)=>(d.y+d.y+d.height)/2;
+
   let tree = d3.quadtree(bboxes, sx, sy);
 
-  const min0 = 1;
+  const min0 = 0.1;
   const max0 = 1000;
   let lowerbound = min0;
   let upperbound = min0;
+  let r = d3.max(bboxes, b=>b.width);
   for(let i=0; i<bboxes.length; i++){
     let bi = bboxes[i];
     let x = sx(bi);
     let y = sy(bi);
-    let r = bi.width;
     let neighbors = searchQuadtree(tree, sx, sy, x-r, x+r, y-r, y+r);
+    // console.log('n neighbor', neighbors.length);
     for(let j of neighbors){
       if(i!==j){
         let bj = bboxes[j];
@@ -388,17 +432,24 @@ function areaCoverage(labelDoms, scale=1){
   }
   for(let bbox of labelDoms){
     labelArea += bbox.width * bbox.height / s2;
-    if(bbox.x < xmin){
-      xmin = bbox.x;
+
+    let cx = (bbox.x + bbox.x + bbox.width)/2;
+    let cy = (bbox.y + bbox.y + bbox.height)/2;
+    let left = cx - bbox.width/2/scale;
+    let right = cx + bbox.width/2/scale;
+    let top = cy - bbox.height/2/scale;
+    let bottom = cy + bbox.height/2/scale;
+    if(left < xmin){
+      xmin = left;
     }
-    if(bbox.x + bbox.width > xmax){
-      xmax = bbox.x + bbox.width;
+    if(right > xmax){
+      xmax = right;
     }
-    if(bbox.y < ymin){
-      ymin = bbox.y;
+    if(top < ymin){
+      ymin = top;
     }
-    if(bbox.y + bbox.height > ymax){
-      ymax = bbox.y + bbox.height;
+    if(bottom > ymax){
+      ymax = bottom;
     }
   }
   let boundingArea = (ymax - ymin) * (xmax - xmin);
@@ -664,6 +715,8 @@ function countCrossings(edges0, edges1){
 //     && signOf(p0, q0, q1)*signOf(p1, q0, q1) <= 0
 //   );
 // }
+
+
 function isCrossed(e0, e1){
   //ref: graphic gems 3, "FASTER LINE SEGMENT INTERSECTION", pg.199
   let p1 = e0.source;
@@ -678,22 +731,22 @@ function isCrossed(e0, e1){
   let denom = a.y*b.x - a.x*b.y;
   let numer = b.y*c.x - b.x*c.y;
   if(denom > 0){
-    if (numer <= 0 || numer >= denom){
+    if (numer < 0 || numer > denom){
       return false;
     }
   }else{
-    if (numer >= 0 || numer <= denom){
+    if (numer > 0 || numer < denom){
       return false;
     }
   }
 
   let numer2 = a.x*c.y - a.y*c.x;
   if(denom > 0){
-    if (numer2 <= 0 || numer2 >= denom){
+    if (numer2 < 0 || numer2 > denom){
       return false;
     }
   }else{
-    if (numer2 >= 0 || numer2 <= denom){
+    if (numer2 > 0 || numer2 < denom){
       return false;
     }
   }

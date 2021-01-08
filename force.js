@@ -1,3 +1,5 @@
+importScripts("lib/underscore-min.js");
+
 function forceScaleY(nodes, k){
   let force = ()=>{
     for(let n of nodes){
@@ -156,13 +158,14 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     }else{
       // let c2 = c*2;
       // return 10*c2/(y2+c2/2);
-      return 2*c/(ay+1);
+      return 20*c/(ay+c);
     }
   };
 
   let force = (alpha)=>{
     // let n = -Math.log(alpha);
-    let beta = alpha;
+    let beta = 1;
+    // let beta = alpha;
     // let beta = Math.pow((1-alpha), 7) * Math.pow(alpha, 3) * 450;
     // let beta = alpha > 0.5 ? (1-alpha) * 15/Math.sqrt(n+10) : 7.5/Math.sqrt(n+10);
 
@@ -240,23 +243,23 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
             let bky = bk * dir.y;
 
             //node movement
-            n.vx += bkx;
-            n.vy += bky;
+            n.vx += bkx / n.perplexity;
+            n.vy += bky / n.perplexity;
 
             //edge movement
             let sbkx = 0.7*bkx;
             let sbky = 0.7*bky;
-            e0.vx -= sbkx;
-            e0.vy -= sbky;
-            e1.vx -= sbkx;
-            e1.vy -= sbky;
+            e0.vx -= sbkx / e0.perplexity;
+            e0.vy -= sbky / e0.perplexity;
+            e1.vx -= sbkx / e1.perplexity;
+            e1.vy -= sbky / e1.perplexity;
           }
 
         }
 
       }
     }
-    return;
+
   };
 
   force.initialize = (nodes)=>{
@@ -465,18 +468,58 @@ function forceDummy(){
 }
 
 
-function forcePre(scales, decay){
+function forcePre(scales, rotate=true){
   let force = (alpha)=>{
-    for(let n of force.nodes){
-      // n.vx = n.vx0 !== undefined ? n.vx0*(1-decay) : n.vx;
-      // n.vy = n.vy0 !== undefined ? n.vy0*(1-decay) : n.vy;
-      n.vx = 0;
-      n.vy = 0;
-      // n.fx = null;
-      // n.fy = null;
-      updateBbox(n, n.bbox, scales);
+    if(rotate){
+      for(let n of force.nodes){
+        [n.x0, n.y0] = [n.x, n.y];
+        [n.vx0, n.vy0] = [n.vx, n.vy];
+      }
+
+      let thetaBest = 0;
+      if(true){
+      // if(0.3 < alpha && alpha < 0.9 && Math.random() < 0.5){
+        let thetas = d3.range(18).map(i=>(i+(Math.random()-0.5))/18 * Math.PI);
+        let metricBest = -Infinity;
+        for(let theta of thetas){
+          //rotate
+          let [cos, sin] = [Math.cos(theta), Math.sin(theta)];
+          for(let n of force.nodes){
+            [n.x, n.y] = [cos*n.x0-sin*n.y0, sin*n.x0+cos*n.y0];
+            updateBboxXY(n, n.bbox, scales);
+          }
+          ////eval & choose best
+          let bbox = force.nodes.map(d=>d.bbox);
+          let [s, compactness] = areaUtilization(bbox);
+
+          if(compactness > metricBest){
+            thetaBest = theta;
+            metricBest = compactness;
+          }
+        }
+        console.log(
+          'alpha:', alpha.toFixed(2), 
+          'rot:', (thetaBest/(Math.PI)*180).toFixed(2), 
+          'CM:', metricBest.toFixed(6)
+        );
+      }
+
+      let [cos, sin] = [Math.cos(thetaBest), Math.sin(thetaBest)];
+      for(let n of force.nodes){
+        [n.x, n.y] = [cos*n.x0-sin*n.y0, sin*n.x0+cos*n.y0];
+        [n.vx, n.vy] = [cos*n.vx0-sin*n.vy0, sin*n.vx0+cos*n.vy0];
+      }
     }
+
+    for(let n of force.nodes){
+      updateBboxXY(n, n.bbox, scales);
+    }
+
+
+
+    
   };
+
 
   force.initialize = (nodes)=>{
     force.nodes = nodes;
@@ -489,145 +532,48 @@ function forcePre(scales, decay){
 
 
 
-function forcePost(edges, radius, enabledNodes, id2index, damping=0.2){
-  let getX = (d)=>d.x;
-  let getY = (d)=>d.y;
-  // let updateNeighbors = (nodes, getX, getY, r)=>{
-  //   let tree = d3.quadtree(nodes, getX, getX);
-  //   for(let n of nodes){
-  //     n.neighbors = new Set(
-  //       searchQuadtree(tree, getX, getY, n.x-r, n.x+r, n.y-r, n.y+r)
-  //     );
-  //   }
-  // };
-  // 
-  // let updateSides = (nodes, getX, getY)=>{
-  //   nodes = nodes.slice();
-  //   let n = nodes.length;
-  //   let xSorted = nodes.sort((a,b)=>getX(a)-getX(b)).map(d=>d.index);
-  //   let ySorted = nodes.sort((a,b)=>getY(a)-getY(b)).map(d=>d.index);
-  //   for(let i=0; i<n; i++){
-  //     let node = nodes[xSorted[i]];
-  //     node.left = new Set(xSorted.slice(0,i));
-  //     node.right = new Set(xSorted.slice(i));
-  //     node.down = new Set(ySorted.slice(0,i));
-  //     node.up = new Set(ySorted.slice(i));
-  //   }
-  // };
-
+function forcePost(edges){
 
   let forcePost_ = (alpha)=>{
     let nodes, edges;
-
-    // if(enabledNodes.size < force.nodes.length){
-    //   nodes = force.nodes.filter(d=>d.update);
-    //   edges = force.edges.filter(e=>enabledNodes.has(e.source.id) && enabledNodes.has(e.target.id));
-    // }else{
     nodes = force.nodes;
     edges = force.edges
-    // }
-    // updateSides(nodes, getX, getY);
-    // markCrossings(edges);
 
     for(let n of nodes){
-      n.x0 = n.x;
-      n.y0 = n.y;
-      n.vx0 = n.vx;
-      n.vy0 = n.vy;
-      n.vx = 0;
-      n.vy = 0;
+      [n.x0, n.y0] = [n.x, n.y];
+      [n.vx0, n.vy0] = [n.vx, n.vy];
     }
 
-    for(let n of nodes){
-      let steps = 12;
-      let t = 1.0;
+    for(let n of _.shuffle(nodes)){
       let edges1 = edges.filter(e=>n.id === e.source.id || n.id === e.target.id);
-      while(steps>0){
-        if(n.vx0 !== 0 || n.vy0 !== 0){
-          n.x = damping * n.x0 + (1-damping) * (n.x0 + n.vx0 * t);
-          n.y = damping * n.y0 + (1-damping) * (n.y0 + n.vy0 * t);
-        }
+      let t = 1.0;
+      let steps = 12;
+      while(steps > 0){
+        n.x = n.x0 + n.vx;
+        n.y = n.y0 + n.vy;
         let crossings = countCrossings(edges, edges1);
         if(crossings == 0){
           break;
         }else{
-          t *= 0.8;
+          n.vx *= 0.8;
+          n.vy *= 0.8;
         }
-        // if(n.crossed){
-        //   t *= 0.8;
-        // }else{
-        //   break;
-        // }
         steps -= 1;
       }
       if(steps == 0){
+        n.vx = 0;
+        n.vy = 0;
         n.x = n.x0;
         n.y = n.y0;
       }
     }
 
-    // if(alpha < 0.5){
-    //   for(let i=0; i<nodes.length; i++){
-    //     if(!nodes[i].update){
-    //       continue;
-    //     }
-    //     let n = nodes[i];
-    //     n.fx = n.x0;
-    //     n.fy = n.y0;
-    //   }
-    // }
-    
+    for(let n of nodes){
+      [n.x, n.y] = [n.x0, n.y0];
+      // [n.x, n.y] = [n.x0+n.vx, n.y0+n.vy];
+      // [n.vx, n.vy] = [0, 0];
+    }
 
-    // if(force.tree2 === undefined || Math.random()>0){
-    //   updateNeighbors(force.nodes, getX, getX, radius);
-    // }
-
-    // let nodes = force.nodes;
-    // nodes.forEach((n)=>{
-    //   n.x0 = n.x;
-    //   n.y0 = n.y;
-    //   n.vx0 = n.vx;
-    //   n.vy0 = n.vy;
-    //   n.vx = 0;
-    //   n.vy = 0;
-    // })
-
-    // let samples = _.sample(nodes.filter(d=>d.update), nodes.length); //a random shuffle
-    // for(let n of samples){
-    //   if(!n.update){
-    //     continue;
-    //   }
-
-    //   let steps = 12;
-    //   let t = 1.0;
-    //   // let neighbors = n.neighbors;
-    //   // let neighbors = new Set(Array.from(n.neighbors).filter(i=>nodes[i].update));
-    //   let neighbors = new Set(samples.map(d=>d.index));
-    //   let edges = force.edges.filter(e=>neighbors.has(e.source.index) || neighbors.has(e.target.index));
-
-    //   let crossings;
-    //   while(steps>0){
-    //     n.x = n.x0 + n.vx0 * t;
-    //     n.y = n.y0 + n.vy0 * t;
-
-    //     crossings = countCrossings(edges, n);
-    //     if(crossings == 0){
-    //       break;
-    //     }else{
-    //       t *= 0.8;
-    //     }
-    //     steps -= 1;
-    //   }
-    //   console.log(crossings);
-
-    //   if(steps == 0){
-    //     console.log('reseting node', n);
-    //     n.x = n.x0;
-    //     n.y = n.y0;
-    //   }
-    // }
-    
-    
   };
 
   let force = forcePost_;
@@ -643,15 +589,17 @@ function forcePost(edges, radius, enabledNodes, id2index, damping=0.2){
 
 
 
-function forceStress(nodes, edges, enabledNodes, id2index){
+function forceStress(nodes, edges){
   
   let sampleSize;
   let strength = (e)=>1;
   let distance = (e)=>1;
-  let schedule = (a)=>a;
+  let schedule = (a)=>Math.sqrt(a);
 
   let force = (alpha)=>{
-    alpha = schedule(alpha);
+    // alpha = schedule(alpha);
+    alpha = 1;
+
     // for(let e of edges){
     // 
     //stochastic
@@ -705,4 +653,23 @@ function forceStress(nodes, edges, enabledNodes, id2index){
   };
 
   return force;
+}
+
+
+
+function updateBboxXY(d, bbox, scales){
+  let x = scales.sx(d.x);
+  let y = scales.sy(d.y);
+  d.bbox = {
+    width: bbox.width,
+    height: bbox.height,
+    
+    left: x - bbox.width/2,
+    right: x + bbox.width/2,
+
+    top: y - bbox.height/2,
+    bottom: y + bbox.height/2,
+  };
+  d.bbox.x = d.bbox.left;
+  d.bbox.y = d.bbox.top;
 }

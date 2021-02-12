@@ -149,7 +149,11 @@ let t = 1609350693;
 //// let t = 1609350777;
 
 let fns = [
+
+  //file 1: graph data
   `data/json/lastfm_steiner/random/Graph_14-${t}.json`, 
+
+  //(optional) file 2: computed layout
   // `data/json/lastfm_steiner/random/Graph_14-${t}-nodes-0.json`,
   // `data/json/lastfm_steiner/random/1609350693/nodes-2.json`,
 ]; 
@@ -450,7 +454,8 @@ function initSimulationWorker(canvas, simData){
     let data = event.data;
     let type = data.type;
     if(type === 'tick'){
-      console.log(`${(data.progress * 100).toFixed(2)}%`);
+      let runtime = performance.now()-window.t0;//in ms
+      console.log(`${(data.progress * 100).toFixed(2)}%, runtime: ${(runtime/1000).toFixed(2)} sec`, );
       canvas.data.nodes = data.nodes;
       canvas.data.edges = data.edges;
       canvas.simulation = data.simulation;

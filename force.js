@@ -477,32 +477,32 @@ function forcePre(scales, rotate=true){
       }
 
       let thetaBest = 0;
-      if(true){
-      // if(0.3 < alpha && alpha < 0.9 && Math.random() < 0.5){
-        let thetas = d3.range(18).map(i=>(i+(Math.random()-0.5))/18 * Math.PI);
-        let metricBest = -Infinity;
-        for(let theta of thetas){
-          //rotate
-          let [cos, sin] = [Math.cos(theta), Math.sin(theta)];
-          for(let n of force.nodes){
-            [n.x, n.y] = [cos*n.x0-sin*n.y0, sin*n.x0+cos*n.y0];
-            updateBboxXY(n, n.bbox, scales);
-          }
-          ////eval & choose best
-          let bbox = force.nodes.map(d=>d.bbox);
-          let [s, compactness] = areaUtilization(bbox);
+      // if(true){
+      // // if(0.3 < alpha && alpha < 0.9 && Math.random() < 0.5){
+      //   let thetas = d3.range(18).map(i=>(i+(Math.random()-0.5))/18 * Math.PI);
+      //   let metricBest = -Infinity;
+      //   for(let theta of thetas){
+      //     //rotate
+      //     let [cos, sin] = [Math.cos(theta), Math.sin(theta)];
+      //     for(let n of force.nodes){
+      //       [n.x, n.y] = [cos*n.x0-sin*n.y0, sin*n.x0+cos*n.y0];
+      //       updateBboxXY(n, n.bbox, scales);
+      //     }
+      //     ////eval & choose best
+      //     let bbox = force.nodes.map(d=>d.bbox);
+      //     let [s, compactness] = areaUtilization(bbox);
 
-          if(compactness > metricBest){
-            thetaBest = theta;
-            metricBest = compactness;
-          }
-        }
-        console.log(
-          'alpha:', alpha.toFixed(2), 
-          'rot:', (thetaBest/(Math.PI)*180).toFixed(2), 
-          'CM:', metricBest.toFixed(6)
-        );
-      }
+      //     if(compactness > metricBest){
+      //       thetaBest = theta;
+      //       metricBest = compactness;
+      //     }
+      //   }
+      //   console.log(
+      //     'alpha:', alpha.toFixed(2), 
+      //     'rot:', (thetaBest/(Math.PI)*180).toFixed(2), 
+      //     'CM:', metricBest.toFixed(6)
+      //   );
+      // }
 
       let [cos, sin] = [Math.cos(thetaBest), Math.sin(thetaBest)];
       for(let n of force.nodes){

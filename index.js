@@ -3,7 +3,7 @@ const colorscheme = d3.schemeAccent;//schemePastel1
 const OPACITY_NOT_UPDATE = 0.1;
 const IS_PROGRESSIVE = true;
 const IS_DYNAMIC = false;
-const EDGE_COLOR = '#aaa';
+const EDGE_COLOR = '#000';
 // const EDGE_COLOR = d3.rgb(249,180,35);
 const HIDE_OVERLAP = false;
 const DPR = window.devicePixelRatio;
@@ -141,22 +141,61 @@ let forceLabelLevel = -1;
 // let t = 1609350593;
 // let t = 1609350655;
 // let t = 1609350673;
-let t = 1609350693;
+// let t = 1609350693;
 // let t = 1609350737;
 // let t = 1609350756;
 
-
-//// let t = 1609350777;
-
+// //// last.fm
+// let fns = [
+//   // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
+//   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`, 
+//   // `data/json/lastfm_linear/Graph_8-1615801589.json`,
+//   // `data/json/lastfm_linear/Graph_8-1615802931.json`,
+//   `data/json/lastfm_linear/Graph_8-1615803307.json`,
+//   `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+// ];
+ 
+//// topics
+// let fns = [
+//   `data/json/topics_steiner_exp/Graph_15-1614145975.json`, 
+// ];
 let fns = [
+  `data/json/topics_refined_exp/Graph_5000-1614147219.json`, ////factor: 1 (uniform edge length)
+  // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-2.json`, 
+  `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
+  // 
+  // `data/json/topics_refined_exp/Graph_5000-1614743825.json`, ////factor: 1 (uniform edge length) ordered by sfdp
+  // // 
+  // `data/json/topics_refined_exp/Graph_5000-1614748981.json`, ////factor: 1 (uniform edge length) ordered by centralizing large sub-trees
+  // `data/json/topics_refined_exp/Graph_5000-1614748981-nodes-1.json`, 
 
-  //file 1: graph data
-  `data/json/lastfm_steiner/random/Graph_14-${t}.json`, 
+  // `data/json/topics_refined_exp/Graph_5000-1614752137.json`, ////factor: 1 (uniform edge length) ordered by interleaving large sub-trees
+  // `data/json/topics_refined_exp/Graph_5000-1614752137-nodes-1.json`, 
+  
+  // `data/json/topics_refined_exp/Graph_5000-1614758844.json`, ////factor: 1 (uniform edge length) ordered by centralizing large sub-trees
+  // `data/json/topics_refined_exp/Graph_5000-1614758844-nodes-1.json`, 
 
-  //(optional) file 2: computed layout
-  // `data/json/lastfm_steiner/random/Graph_14-${t}-nodes-0.json`,
-  // `data/json/lastfm_steiner/random/1609350693/nodes-2.json`,
-]; 
+  //topics-linear
+  // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
+];
+
+//// tree of life 
+// let fns = [
+// // (~3000 nodes)
+//   'data/json/tol_graphs_exp/Graph_4-1615352218.json', //uniform, mw-radial
+//   //'data/json/tol_graphs_exp/Graph_4-1615352218-nodes-3.json',
+// // (~5000 nodes)
+//   // 'data/json/tol_graphs_exp/Graph_6-1615403421.json', //uniform, sfdp+mw-radial
+//   // 'data/json/tol_graphs_exp/Graph_6-1615405627.json', //uniform, mw-radial
+// ];
+
+// math genealogy
+// let fns = [
+//   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
+//   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
+// ];
+
+
 
 let promises = Promise.all(fns.map(fn=>d3.json(fn)))
 .then((data)=>{
@@ -178,24 +217,34 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
 
   // data.level2scale = {}; //crossing free init layout 
   let maxLevel = d3.max(data.nodes, d=>d.level);
-  if(fns[0].includes('topics')){
-    // data.level2scale = {//topics refined
-    //   6: 10,
-    // };
-    // data.level2scale[maxLevel] = 23;
-    data.level2scale = {//topics steiner
-      6: 13,
-    };
-    data.level2scale[maxLevel] = 30;
+  if(fns[0].includes('topics_refined')){
+    data.level2scale = {};
+    data.level2scale[maxLevel] = 20;
+  }else if(fns[0].includes('topics_steiner')){
+    data.level2scale = {};
+    data.level2scale[maxLevel-1] = 20;
+    data.level2scale[maxLevel] = 200;
   }else if(fns[0].includes('lastfm')){
-    // data.level2scale = {//lastfm
-    //   1: 5,
-    // };
-    // data.level2scale[maxLevel] = 12;
-    data.level2scale = {//lastfm
-      // 1: ,
+    let baseScale = 1;
+    let scaleFactor = Math.pow(15, 1/(maxLevel-1));
+    data.level2scale = {
+      // 1:1,
+      // 15:15,
     };
-    data.level2scale[maxLevel] = 10;
+    for(let i=1; i<=maxLevel; i++){
+      if(i==maxLevel){
+        data.level2scale[i] = baseScale * Math.pow(scaleFactor, i-1);
+      }
+    }
+  }else if(fns[0].includes('tol_graphs')){
+    data.level2scale = {
+      5:15,
+      //7:50
+    };
+  }else if(fns[0].includes('math_genealogy')){
+    data.level2scale = {
+      4:15,
+    };
   }
   console.log(data.level2scale);
 
@@ -523,10 +572,12 @@ function initScales(nodes, w, h){
   // .range(['#a6bddb','#023858']);
 
   let extentLevel = d3.extent(nodes, d=>d.level);
-  scales.sr = d3.scaleLinear().domain(extentLevel).range([1,1]);
+  scales.sr = d3.scaleLinear().domain(extentLevel).range([0,0]);
   scales.ss = d3.scaleLinear().domain(extentLevel).range([4,1]);
-  scales.sl = d3.scaleLinear().domain(extentLevel).range([18, 12]); //label font size;
-  scales.sc = d3.scaleLinear().domain(extentLevel).range(['#08306b', '#9ecae1']); //node & label color
+  // scales.sl = d3.scaleLinear().domain(extentLevel).range([18, 12]); //label font size;
+  scales.sl = d3.scaleLinear().domain(extentLevel).range([14, 14]); //label font size;
+  // scales.sc = d3.scaleLinear().domain(extentLevel).range(['#08306b', '#9ecae1']); //node & label color
+  scales.sc = d3.scaleLinear().domain(extentLevel).range(['black', 'black']); //node & label color
 
   let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
   let fonts = levels.map(l=>`${Math.round(scales.sl(l)*DPR)}px ${FONT}`);
@@ -1174,7 +1225,6 @@ function markLabelByOverlap(nodes, canvas){
 // 
 // 
 // def draw
-
 function draw(label=true, forceLabel=false, markOverlap=true){
   // nodes, edges, nodeCircles, linkLines, labelTexts, labelBoxes,sx, sy, transform
   let ctx = this.context;
@@ -1212,7 +1262,7 @@ function markLabelByLevel(nodes, canvas){
   let levelScalePairs = canvas.levelScalePairs;
   let showLevel = 0;
   for(ls of levelScalePairs){
-    if(ls[1]< scale){
+    if(ls[1] < scale){
       showLevel = ls[0];
     }
   }
@@ -1227,7 +1277,7 @@ function markLabelByLevel(nodes, canvas){
 }
 
 
-function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap){
+function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap, drawOval=false){
   if(label){
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -1253,12 +1303,12 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
     ctx.fill();
   }
 
+  
+
 
   //draw text
   if(label){
-    ctx.strokeStyle = '#fff';
-    ctx.globalAlpha = 1.0;
-    ctx.lineWidth = 8;
+    
 
     let l0 = -1;
     for(let n of nodes.filter(d=>d.shouldShowLabel)){
@@ -1277,8 +1327,37 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
         ctx.font = scales.sf(n.level);
         l0 = l;
       }
+      ctx.strokeStyle = '#fff';
+      ctx.globalAlpha = 1.0;
+      ctx.lineWidth = 8;
       ctx.strokeText(n.label, x, y);
       ctx.fillText(n.label, x, y);
+
+      if(drawOval){
+        
+        const margin = 2;//in pixel
+        if(n.bbox !== undefined){
+          let x = n.bbox.cx;
+          let y = n.bbox.cy;
+
+          n.scaleY = Math.max(2, Math.min(n.bbox.width/n.bbox.height, 5));//TODO fix it
+          let [x0, y0] = [n.bbox.width/2*DPR, n.bbox.height/2*DPR];
+          let a = Math.sqrt(x0*x0 + y0*y0*n.scaleY*n.scaleY); //figure out the major axis (a) of the ellipse 
+          let b = a / n.scaleY;
+          a += margin;
+          b += margin;
+
+          ctx.globalAlpha = 1.0;
+          ctx.fillStyle = '#08306b';
+          ctx.strokeStyle = '#08306b';
+          ctx.lineWidth = DPR;
+          ctx.beginPath();
+          ctx.ellipse(x, y, a, b, 0, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
+      }
+
+
     }
   }
   
@@ -1286,7 +1365,7 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
 
 
 function drawEdges(ctx, edges, scales, transform){
-  ctx.strokeStyle = '#aaa';
+  ctx.strokeStyle = EDGE_COLOR;
   ctx.globalAlpha = 1.0;
   let k = Math.pow(transform.k, 1/4);
   for(let e of edges){

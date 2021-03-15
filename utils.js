@@ -353,6 +353,8 @@ function bestIdealEdgeLengthPreservation(links, lengths){
     den += il;
   }
   s = num / den;
+  console.log('best scale:', s);
+  console.log('not scaled:', idealEdgeLengthPreservation2(links, lengths, s+0.01));
   return idealEdgeLengthPreservation2(links, lengths, s);
 }
 
@@ -705,54 +707,55 @@ function countCrossings(edges0, edges1){
 
 
 
-// function isCrossed(e0, e1){
-//   let p0 = e0.source;
-//   let p1 = e0.target;
-//   let q0 = e1.source;
-//   let q1 = e1.target;
-//   return (
-//     signOf(q0, p0, p1)*signOf(q1, p0, p1) <= 0
-//     && signOf(p0, q0, q1)*signOf(p1, q0, q1) <= 0
-//   );
-// }
-
-
 function isCrossed(e0, e1){
-  //ref: graphic gems 3, "FASTER LINE SEGMENT INTERSECTION", pg.199
-  let p1 = e0.source;
-  let p2 = e0.target;
-  let p3 = e1.source;
-  let p4 = e1.target;
-
-  let a = {x: p2.x-p1.x, y: p2.y-p1.y};
-  let b = {x: p3.x-p4.x, y: p3.y-p4.y};
-  let c = {x: p1.x-p3.x, y: p1.y-p3.y};
-
-  let denom = a.y*b.x - a.x*b.y;
-  let numer = b.y*c.x - b.x*c.y;
-  if(denom > 0){
-    if (numer < 0 || numer > denom){
-      return false;
-    }
-  }else{
-    if (numer > 0 || numer < denom){
-      return false;
-    }
-  }
-
-  let numer2 = a.x*c.y - a.y*c.x;
-  if(denom > 0){
-    if (numer2 < 0 || numer2 > denom){
-      return false;
-    }
-  }else{
-    if (numer2 > 0 || numer2 < denom){
-      return false;
-    }
-  }
-
-  return true;
+  let p0 = e0.source;
+  let p1 = e0.target;
+  let q0 = e1.source;
+  let q1 = e1.target;
+  return (
+    signOf(q0, p0, p1)*signOf(q1, p0, p1) <= 0
+    && signOf(p0, q0, q1)*signOf(p1, q0, q1) <= 0
+  );
 }
+
+
+// function isCrossed(e0, e1){
+//   let epsilon = 0;
+//   //ref: graphic gems 3, "FASTER LINE SEGMENT INTERSECTION", pg.199
+//   let p1 = e0.source;
+//   let p2 = e0.target;
+//   let p3 = e1.source;
+//   let p4 = e1.target;
+
+//   let a = {x: p2.x-p1.x, y: p2.y-p1.y};
+//   let b = {x: p3.x-p4.x, y: p3.y-p4.y};
+//   let c = {x: p1.x-p3.x, y: p1.y-p3.y};
+
+//   let denom = a.y*b.x - a.x*b.y;
+//   let numer = b.y*c.x - b.x*c.y;
+//   if(denom > 0){
+//     if (numer < -epsilon || numer > denom + epsilon){
+//       return false;
+//     }
+//   }else{
+//     if (numer < -epsilon || numer < denom + epsilon){
+//       return false;
+//     }
+//   }
+
+//   let numer2 = a.x*c.y - a.y*c.x;
+//   if(denom > 0){
+//     if (numer2 < -epsilon || numer2 > denom + epsilon){
+//       return false;
+//     }
+//   }else{
+//     if (numer2 > -epsilon || numer2 < denom + epsilon){
+//       return false;
+//     }
+//   }
+
+//   return true;
+// }
 
 
 function signOf(p, l0, l1){
@@ -760,9 +763,10 @@ function signOf(p, l0, l1){
   let b = -(l0.x - l1.x);
   let c = l0.y * (l0.x - l1.x) - l0.x * (l0.y - l1.y);
   let z = p.x * a + p.y*b + c;
-  if(z>0){
+  let epsilon = 1e-8;
+  if(z>epsilon){
     return +1;
-  }else if(z<0){
+  }else if(z<-epsilon){
     return -1;
   }else{
     return 0;

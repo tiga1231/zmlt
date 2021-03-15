@@ -1,8 +1,51 @@
 importScripts("lib/underscore-min.js");
 
-function forceScaleY(nodes, k){
+
+function forceRestoreCache(nodes){
   let force = ()=>{
     for(let n of nodes){
+      if(n.cache !== undefined){
+        n.vx += n.cache.vx;
+        n.vy += n.cache.vy;
+        n.cache.vx = 0;
+        n.cache.vy = 0;
+      }
+    }
+  };
+  force.initialize = (newNodes)=>{
+    nodes = newNodes;
+  };
+  return force;
+}
+
+
+function forceCache(nodes){
+  let force = ()=>{
+    for(let n of nodes){
+      if(n.cache === undefined){
+        n.cache = {
+          vx: n.vx, 
+          vy: n.vy
+        };
+      }else{
+        n.cache.vx += n.vx;
+        n.cache.vy += n.vy;
+      }
+      n.vx = 0;
+      n.vy = 0;
+    }
+  };
+
+  force.initialize = (newNodes)=>{
+    nodes = newNodes;
+  };
+  return force;
+}
+
+function forceScaleY(nodes, scaleAccessor){
+  let force = ()=>{
+    for(let n of nodes){
+      let k = scaleAccessor(n);
       n.y *= k;
       n.vy *= 1/k;
     }
@@ -119,7 +162,7 @@ function forceEllipse(kwargs){
 }
 
 
-function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
+function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0=1){
   let nodes = nodes0;
   let edges = edges0;
 
@@ -158,14 +201,13 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
     }else{
       // let c2 = c*2;
       // return 10*c2/(y2+c2/2);
-      return 20*c/(ay+c);
+      return strength0 * c/(ay+c);
     }
   };
 
   let force = (alpha)=>{
     // let n = -Math.log(alpha);
-    let beta = 1;
-    // let beta = alpha;
+    let beta = Math.pow(alpha, 0.5);
     // let beta = Math.pow((1-alpha), 7) * Math.pow(alpha, 3) * 450;
     // let beta = alpha > 0.5 ? (1-alpha) * 15/Math.sqrt(n+10) : 7.5/Math.sqrt(n+10);
 
@@ -219,11 +261,12 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
 
       // for(let i=0; i<nodes.length; i++){
       //   let n = nodes[i];
-
+      //   n.vxTmp = 0;
+      //   n.vyTmp = 0;
+      // }
       for(let i of e.neighbors){
       //   i = id2index[i];
         let n = nodes[i];
-
 
         // if(!enabledNodes.has(n.id)){
         // if(!n.update){
@@ -254,10 +297,15 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes){
             e1.vx -= sbkx / e1.perplexity;
             e1.vy -= sbky / e1.perplexity;
           }
-
         }
-
       }
+      // for(let i=0; i<nodes.length; i++){
+      //   let n = nodes[i];
+      //   n.vx += Math.sign(n.vxTmp) * Math.min(1, Math.abs(n.vxTmp)) / n.perplexity;
+      //   n.vy += Math.sign(n.vyTmp) * Math.min(1, Math.abs(n.vyTmp)) / n.perplexity;
+      //   n.vxTmp = undefined;
+      //   n.vyTmp = undefined;
+      // }
     }
 
   };
@@ -417,9 +465,6 @@ marginLeft, marginTop
             vy[j] -= force.dir.y * force.magnitude;
           }
         }
-
-
-
 
       }
       console.log('alpha', alpha);
@@ -589,45 +634,73 @@ function forcePost(edges){
 
 
 
-function forceStress(nodes, edges){
+function forceStress(nodes, edges, nSample){
   
   let sampleSize;
   let strength = (e)=>1;
   let distance = (e)=>1;
   let schedule = (a)=>Math.sqrt(a);
+  if(nSample === undefined){
+    nSample = nodes.length * 6;
+  }
 
   let force = (alpha)=>{
     // alpha = schedule(alpha);
-    alpha = 1;
+    // alpha = 1;
 
     // for(let e of edges){
     // 
     //stochastic
-    for(let i=0; i<nodes.length*6; i++){
+    for(let i=0; i<nSample; i++){
       let e = edges[randint(0,edges.length)];
+      // let e = edges[i];
       // if(nodes[id2index[e.source.id]].update && nodes[id2index[e.target.id]].update){
         let w = strength(e);
         let d = distance(e);
-
         let p0 = [e.source.x, e.source.y];
         let p1 = [e.target.x, e.target.y];
 
-        let currentDist = Math.sqrt(Math.pow(p0[0]-p1[0], 2)+Math.pow(p0[1]-p1[1], 2));
-        let dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], Math.max(currentDist, 1e-4));
+        let currentDist = Math.sqrt(
+          Math.pow(p0[0]-p1[0], 2)
+          + Math.pow(p0[1]-p1[1], 2)
+        );
 
+        // let dir;
+        // if(currentDist < 1){
+        //   dir = [Math.random()-0.5, Math.random()-0.5];
+        //   currentDist = 1;
+        // }else{
+        //   dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], Math.max(currentDist, 1));
+        // }
+
+        let dir = numeric.div([p1[0]-p0[0], p1[1]-p0[1]], Math.max(currentDist, 1));
         let coef = (currentDist - d) * w;
         coef = Math.sign(coef) * Math.min(
           Math.abs(coef), 
-          currentDist*0.2
+          currentDist*0.1,
+          1,
         );
 
+
+
+        
         let [dx, dy] = numeric.mul(coef, dir);
+
+        // if(Math.abs(dx) > 3 || Math.abs(dy) > 3){
+        //   console.log(
+        //     Math.abs(currentDist - d) * w,
+        //     currentDist * 0.1,
+        //   );
+        //   break;
+        // }
         let vx = dx * alpha;
         let vy = dy * alpha;
         e.source.vx += vx;
         e.source.vy += vy;
         e.target.vx += -vx;
         e.target.vy += -vy;
+
+        
 
       // }
     }

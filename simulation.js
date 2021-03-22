@@ -121,20 +121,26 @@ onmessage = function(event) {
     //   // .distance(e=>e.weight/minEdgeWeight)
     // )
     .force('stress', 
-      //lastfm-uniform
+      // lastfm-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
       // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1.3))
-      //lastfm-linear
-      forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
-      .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
-      .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 1.3))
-      //topics-refined-uniform
+      // lastfm-linear
+      // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
+      // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
+      // .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 1.3))
+      
+      // topics-refined-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
       // // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       // // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1.3))
       // .distance(e=>e.weight/minEdgeWeight)
       // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1))
+      // topics-refined-linear
+      // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
+      // .distance(e=>Math.pow(e.weight/minEdgeWeight, 1))
+      // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 2))
+      // .strength(e=>0.01)
       //topics-steiner-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
       // // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
@@ -145,10 +151,24 @@ onmessage = function(event) {
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
       // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       // .strength(e=>0.04 / Math.pow(e.weight/minEdgeWeight, 1.3))
+      // //tree-of-life-linear
+      // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
+      // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
+      // .strength(e=>0.04 / Math.pow(e.weight/minEdgeWeight, 1.3))
       // //math-genealogy-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
       // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 2))
+      // math-genealogy-linear
+      forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
+      .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
+      .strength(e=>0.03 / Math.pow(e.weight/minEdgeWeight, 2))
+    )
+    .force('stress-edge', 
+      // topics-refined-linear
+      forceStress(nodes, edges, nodes.length, false)
+      .distance(e=>e.weight/minEdgeWeight)
+      .strength(e=>0.2)
     )
     .force('stress-local', 
       // //lastfm-uniform
@@ -156,19 +176,28 @@ onmessage = function(event) {
       // .distance(e=>e.weight/minEdgeWeight)
       // .strength(e=>0.3 / Math.pow(e.weight/minEdgeWeight, 2))
       // //lastfm-linear
-      forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
-      .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 2))
-      // //topics-refined-uniform
+      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
+      // .distance(e=>e.weight/minEdgeWeight)
+      // .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 2))
+      // topics-refined-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2))
+      // .distance(e=>e.weight/minEdgeWeight)
+      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+      // topics-refined-linear
+      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops > 1))
       // .distance(e=>e.weight/minEdgeWeight)
       // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
       //topics-steiner-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2))
       // .distance(e=>e.weight/minEdgeWeight)
       // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+      
       // tree-of-life-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2), nodes.length)
+      // .distance(e=>e.weight/minEdgeWeight)
+      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+      // // tree-of-life-linear
+      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
       // .distance(e=>e.weight/minEdgeWeight)
       // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
       // 
@@ -176,35 +205,48 @@ onmessage = function(event) {
       // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
       // .distance(e=>e.weight/minEdgeWeight)
       // .strength(e=>0.3 / Math.pow(e.weight/minEdgeWeight, 2))
+      // //math-genealogy-linear
+      forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops > 1), nodes.length)
+      .distance(e=>e.weight/minEdgeWeight)
+      .strength(e=>0.4 / Math.pow(e.weight/minEdgeWeight, 2))
     )
     // // // // // //other aesthetics
     .force('central', 
      d3.forceRadial(cx, cy, 0)
      // .strength(0.0005)//lastfm-uniform
-     .strength(0.0005)//lastfm-linear
+     // .strength(0.0005)//lastfm-linear
      // .strength(0.0005)//topics-refined-uniform
+     // .strength(0.001)//topics-refined-linear
      // .strength(0.0001)//topics-steiner-uniform
      // .strength(0.0005)//tree-of-life-uniform
+     // .strength(0.002)//tree-of-life-linear
      // .strength(0.0001)//math-genealogy-uniform
+     .strength(0.0001)//math-genealogy-linear
     )
     .force('charge', 
      d3.forceManyBody()
      .distanceMin(0.1)
      .distanceMax(10)
      // .strength(d=> -0.01)//lastfm-uniform
-     .strength(d=> -0.01)//lastfm-linear
+     // .strength(d=> -0.01)//lastfm-linear
      // .strength(d=> -0.001)//topics-refined-uniform
+     // .strength(d=> -0.04)//topics-refined-linear
      // .strength(d=> -0.01) // topics-steiner-uniform
      // .strength(d=> -0.05)//tree-of-life-uniform
+     // .strength(d=> -0.05)//tree-of-life-linear
      // .strength(d=> -0.001)//math-genealogy-uniform
+     .strength(d=> -0.01)//math-genealogy-linear
     )
     .force('node-edge-repulsion', 
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.5)// lastfm-uniform
-      forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// lastfm-linear
+      // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// lastfm-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// topics-refined-uniform
+      // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.2)// topics-refined-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.01)// topics-steiner-uniform
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// tree-of-life-uniform
+      // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.3)// tree-of-life-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.02)//math-genealogy-uniform
+      forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)//math-genealogy-linear
     )
     .stop();
 
@@ -213,22 +255,20 @@ onmessage = function(event) {
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     collision_sims = [];
-    nodes.forEach(d=>{
-      d.scaleY = 5;//Math.max(2, Math.min(d.bbox.width/d.bbox.height, 5));//TODO fix it
-    });
+    let scaleY = 5;
     for (let l in dataObj.level2scale){
       l = parseFloat(l);
       let s = dataObj.level2scale[l];
       let n = nodes.filter(d=>d.level <= l);
       // let sim = d3.forceSimulation(n)
       simulation
-      .force(`pre-scale`, forceScaleY(n, d=>d.scaleY))
+      .force(`pre-scale`, forceScaleY(n, d=>scaleY))
       .force(`collide-${l}`, 
         d3.forceCollide()
         .radius(d=>{
           let [x0, y0] = [d.bbox.width/2, d.bbox.height/2];
           // let a = d.bbox.width/2;
-          let a = Math.sqrt(x0*x0 + y0*y0*d.scaleY*d.scaleY); //figure out the major axis (a) of the ellipse 
+          let a = Math.sqrt(x0*x0 + y0*y0*scaleY*scaleY); //figure out the major axis (a) of the ellipse 
           let r = a / s + margin;
           r = scales.sx.invert(r) - origin;
           return r;
@@ -236,7 +276,7 @@ onmessage = function(event) {
         .strength(0.1)
         .iterations(1)
       )
-      .force(`post-scale`, forceScaleY(n, d=>1/d.scaleY ))
+      .force(`post-scale`, forceScaleY(n, d=>1/scaleY ))
       // .force('post', forcePost(edges));
       // .stop();
       // collision_sims.push(sim);

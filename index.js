@@ -159,41 +159,42 @@ let forceLabelLevel = -1;
 // let fns = [
 //   `data/json/topics_steiner_exp/Graph_15-1614145975.json`, 
 // ];
-let fns = [
-  `data/json/topics_refined_exp/Graph_5000-1614147219.json`, ////factor: 1 (uniform edge length)
-  // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-2.json`, 
-  `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
-  // 
-  // `data/json/topics_refined_exp/Graph_5000-1614743825.json`, ////factor: 1 (uniform edge length) ordered by sfdp
-  // // 
-  // `data/json/topics_refined_exp/Graph_5000-1614748981.json`, ////factor: 1 (uniform edge length) ordered by centralizing large sub-trees
-  // `data/json/topics_refined_exp/Graph_5000-1614748981-nodes-1.json`, 
+// let fns = [
+//   // `data/json/topics_refined_exp/Graph_5000-1614147219.json`, ////factor: 1 (uniform edge length)
+//   // // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-2.json`, 
+//   // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
 
-  // `data/json/topics_refined_exp/Graph_5000-1614752137.json`, ////factor: 1 (uniform edge length) ordered by interleaving large sub-trees
-  // `data/json/topics_refined_exp/Graph_5000-1614752137-nodes-1.json`, 
-  
-  // `data/json/topics_refined_exp/Graph_5000-1614758844.json`, ////factor: 1 (uniform edge length) ordered by centralizing large sub-trees
-  // `data/json/topics_refined_exp/Graph_5000-1614758844-nodes-1.json`, 
-
-  //topics-linear
-  // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
-];
+//   //topics-linear
+//   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
+//   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
+// ];
 
 //// tree of life 
 // let fns = [
 // // (~3000 nodes)
-//   'data/json/tol_graphs_exp/Graph_4-1615352218.json', //uniform, mw-radial
+// // tree of life uniform
+//   // 'data/json/tol_graphs_exp/Graph_4-1615352218.json', //mw-radial
 //   //'data/json/tol_graphs_exp/Graph_4-1615352218-nodes-3.json',
+// // tree of life linear
+//   'data/json/tol_graphs_linear/Graph_4-1615872482.json',
+//   'data/json/tol_graphs_linear/Graph_4-1615872482-nodes-1.json',
+//   // 'data/json/tol_graphs_linear/Graph_4-1615875081.json',
+
 // // (~5000 nodes)
 //   // 'data/json/tol_graphs_exp/Graph_6-1615403421.json', //uniform, sfdp+mw-radial
 //   // 'data/json/tol_graphs_exp/Graph_6-1615405627.json', //uniform, mw-radial
 // ];
 
 // math genealogy
-// let fns = [
+let fns = [
 //   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
 //   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
-// ];
+//   linear
+  // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
+  'data/json/math_genealogy_linear/Graph_3-1615880448.json',
+  'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json' 
+
+];
 
 
 
@@ -217,7 +218,7 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
 
   // data.level2scale = {}; //crossing free init layout 
   let maxLevel = d3.max(data.nodes, d=>d.level);
-  if(fns[0].includes('topics_refined')){
+  if(fns[0].includes('topics')){
     data.level2scale = {};
     data.level2scale[maxLevel] = 20;
   }else if(fns[0].includes('topics_steiner')){
@@ -238,12 +239,12 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
     }
   }else if(fns[0].includes('tol_graphs')){
     data.level2scale = {
-      5:15,
+      8:15,
       //7:50
     };
   }else if(fns[0].includes('math_genealogy')){
     data.level2scale = {
-      4:15,
+      8:15,
     };
   }
   console.log(data.level2scale);

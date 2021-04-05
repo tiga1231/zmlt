@@ -102061,8 +102061,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //consts
 var FONT = 'arial'; // const [maxFont, minFont] = [16,12];
 
-var maxFont = 26,
-    minFont = 22;
+var maxFont = 18,
+    minFont = 14;
 var maxEdgeWidth = 3,
     minEdgeWidth = 0.5; //globals
 
@@ -102547,6 +102547,6 @@ var _vis = require("./vis");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //main
-(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default);
+(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default, [0, -1000], 15);
 },{"./geojson/tol-BT/im_cluster.geojson":"geojson/tol-BT/im_cluster.geojson","./geojson/tol-BT/im_cluster_boundary.geojson":"geojson/tol-BT/im_cluster_boundary.geojson","./geojson/tol-BT/im_alledges.geojson":"geojson/tol-BT/im_alledges.geojson","./geojson/tol-BT/im_nodes.geojson":"geojson/tol-BT/im_nodes.geojson","./vis":"vis.js"}]},{},["tol-BT.js"], null)
 //# sourceMappingURL=/tol-BT.59c517ae.js.map

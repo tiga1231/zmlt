@@ -102589,6 +102589,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // import edgeData from './geojson/topics-CG/im_alledges.geojson';
 // import nodeData from './geojson/topics-CG/im_nodes.geojson';
 //main
-(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default, [0, 0], 100, _node_zoom_levels.default); //, center, resolution);
+(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default, [0, 0], 60, _node_zoom_levels.default); //, center, resolution);
 },{"./geojson/mingwei-topics-refined/im_cluster.geojson":"geojson/mingwei-topics-refined/im_cluster.geojson","./geojson/mingwei-topics-refined/im_cluster_boundary.geojson":"geojson/mingwei-topics-refined/im_cluster_boundary.geojson","./geojson/mingwei-topics-refined/im_alledges.geojson":"geojson/mingwei-topics-refined/im_alledges.geojson","./geojson/mingwei-topics-refined/im_nodes.geojson":"geojson/mingwei-topics-refined/im_nodes.geojson","./geojson/mingwei-topics-refined/node_zoom_levels":"geojson/mingwei-topics-refined/node_zoom_levels.json","./vis":"vis.js"}]},{},["topics-CG.js"], null)
 //# sourceMappingURL=/topics-CG.43424eeb.js.map

@@ -102590,6 +102590,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // import nodeData from './geojson/lastfm-CG/im_nodes.geojson';
 //main
 console.log(_node_zoom_levels.default);
-(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default, [0, 0], 5, _node_zoom_levels.default);
+(0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default, [0, 0], 50, _node_zoom_levels.default);
 },{"./geojson/mingwei-lastfm-refined/im_cluster.geojson":"geojson/mingwei-lastfm-refined/im_cluster.geojson","./geojson/mingwei-lastfm-refined/im_cluster_boundary.geojson":"geojson/mingwei-lastfm-refined/im_cluster_boundary.geojson","./geojson/mingwei-lastfm-refined/im_alledges.geojson":"geojson/mingwei-lastfm-refined/im_alledges.geojson","./geojson/mingwei-lastfm-refined/im_nodes.geojson":"geojson/mingwei-lastfm-refined/im_nodes.geojson","./geojson/mingwei-lastfm-refined/node_zoom_levels.json":"geojson/mingwei-lastfm-refined/node_zoom_levels.json","./vis":"vis.js"}]},{},["lastfm-CG.js"], null)
 //# sourceMappingURL=/lastfm-CG.0e6c9b5b.js.map

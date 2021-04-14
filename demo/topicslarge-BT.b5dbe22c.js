@@ -102586,7 +102586,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 //main
 var center = [0, 0];
-var resolution = 40;
+var resolution = 30;
 (0, _vis.draw)(_im_cluster.default, _im_cluster_boundary.default, _im_alledges.default, _im_nodes.default, center, resolution, _node_zoom_levels.default);
 },{"./geojson/topicslarge-BT/im_cluster.geojson":"geojson/topicslarge-BT/im_cluster.geojson","./geojson/topicslarge-BT/im_cluster_boundary.geojson":"geojson/topicslarge-BT/im_cluster_boundary.geojson","./geojson/topicslarge-BT/im_alledges.geojson":"geojson/topicslarge-BT/im_alledges.geojson","./geojson/topicslarge-BT/im_nodes.geojson":"geojson/topicslarge-BT/im_nodes.geojson","./geojson/topicslarge-BT/node_zoom_levels.json":"geojson/topicslarge-BT/node_zoom_levels.json","./vis":"vis.js"}]},{},["topicslarge-BT.js"], null)
 //# sourceMappingURL=/topicslarge-BT.b5dbe22c.js.map

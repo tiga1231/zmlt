@@ -165,7 +165,7 @@ let forceLabelLevel = -1;
 //   // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
 
 //   //topics-linear
-//   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
+//   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-min.json`,
 //   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
 // ];
 
@@ -186,18 +186,46 @@ let forceLabelLevel = -1;
 // ];
 
 // math genealogy
+// let fns = [
+// //   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
+// //   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
+// //   linear
+//   // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
+//   'data/json/math_genealogy_linear/Graph_3-1615880448.json',
+//   'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json' 
+
+// ];
+// 
+
+
+/// external layouts
+/// DELG
+// let fns = [
+//   `data/external/lastfm-DELG-min.json`,
+//   `data/external/lastfm-DELG-nodes-0.json`,
+// ];
+// let fns = [
+//   `./data/external/topics-DELG-min.json`,
+//   `./data/external/topics-DELG-nodes-0.json`,
+// ];
+// let fns = [
+//   `./data/external/tol-DELG-min.json`,
+//   `./data/external/tol-DELG-nodes-0.json`,
+// ];
+// 
+/// BT
+// let fns = [
+//   `data/external/lastfm-BT-min.json`,
+//   `data/external/lastfm-BT-nodes-0.json`,
+// ];
+// let fns = [
+//   `./data/external/topics-BT-min.json`,
+//   `./data/external/topics-BT-nodes-0.json`,
+// ];
 let fns = [
-//   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
-//   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
-//   linear
-  // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
-  'data/json/math_genealogy_linear/Graph_3-1615880448.json',
-  'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json' 
-
+  `./data/external/tol-BT-min.json`,
+  `./data/external/tol-BT-nodes-0.json`,
 ];
-
-
-
 let promises = Promise.all(fns.map(fn=>d3.json(fn)))
 .then((data)=>{
   let nodes;
@@ -576,7 +604,7 @@ function initScales(nodes, w, h){
   scales.sr = d3.scaleLinear().domain(extentLevel).range([0,0]);
   scales.ss = d3.scaleLinear().domain(extentLevel).range([4,1]);
   // scales.sl = d3.scaleLinear().domain(extentLevel).range([18, 12]); //label font size;
-  scales.sl = d3.scaleLinear().domain(extentLevel).range([14, 14]); //label font size;
+  scales.sl = d3.scaleLinear().domain(extentLevel).range([16, 16]); //label font size;
   // scales.sc = d3.scaleLinear().domain(extentLevel).range(['#08306b', '#9ecae1']); //node & label color
   scales.sc = d3.scaleLinear().domain(extentLevel).range(['black', 'black']); //node & label color
 

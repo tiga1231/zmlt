@@ -28,177 +28,49 @@ let forceLabel = false;
 let forceLabelLevel = -1;
 
 
-
-// window.enabledNodes;
-
 //--------data----------
-// d3.json('data/json/lastfm-iqbal/lastfm_8.json').then(data=>{
-
-// //lastfm-ryn
-// d3.json('data/json/lastfm-ryn/lastfm_155nodes.json').then(data=>{
-// d3.json('data/json/lastfm-ryn/lastfm_155nodes_nodes-4.json').then(nodes=>{
-
-
-// //topics-800
-// d3.json('data/json/topics-800/topics-800.json').then(data=>{
-// d3.json('data/json/topics-800/topics-800.json').then(nodes=>{
-
-// math-genealogy-509
-// d3.json('./data/json/math-genealogy/math-509.json').then(data=>{
-// d3.json('data/json/math-genealogy/math-509-nodes-1.json').then(nodes=>{
-
-// math-euler-293
-// d3.json('./data/json/math-genealogy/euler-293.json').then(data=>{
-// d3.json('./data/json/math-genealogy/euler-293.json').then(nodes=>{
-
-//eval: topics-800
-// d3.json('data/json/topics-800/topics-800.json').then(data=>{
-// d3.json('data/eval/topics-800/topics-800.json').then(nodes=>{
-
-//eval: covid-800
-// d3.json('data/json/covid-487/covid-487.json').then(data=>{
-// d3.json('data/json/covid-487/covid-487.json').then(nodes=>{
-
-
-
-// topics-faryad-5000
-// d3.json('data/json/topics_faryad_5000/Graph_2000.json').then(data=>{
-// d3.json('data/json/topics_faryad_5000/Graph_500-nodes-5.json').then(nodes=>{
-
-
-// let fn = 'topics-5000-low-degree/old/topics-8-sfdp';
-// let version = 16; //layout version
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}-2.json`).then(nodes=>{
-
-
-// let fn = 'topics-5000/Graph_5000';
-// let version = 6; //layout version
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-
-
-
-//demo lastfm
-// d3.json(`data/json/lastfm/Graph_8-min.json`).then(data=>{
-// d3.json(`data/json/lastfm/Graph_8-nodes-12.json`).then(nodes=>{
-
-//demo topics
-// d3.json('data/json/TopicsLayersData-0/Graph_5000-min.json').then(data=>{
-// d3.json('data/json/TopicsLayersData-0/Graph_5000-radial-nodes-7.json').then(nodes=>{
-// d3.json('data/json/topics_refined/Graph_5000-min.json').then(data=>{
-// d3.json('data/json/topics_refined/Graph_5000-nodes-1.json').then(nodes=>{
-
-
-
-// //train topics (//no longer work)
-// let fn = 'TopicsLayersData-0/Graph_5000-radial';
-// let version = 3;
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-//train topics refined
-// let fn = 'topics_refined/Graph_5000';
-// let version = 1;
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-//train lastfm refined
-// let fn = 'lastfm_refined/Graph_8_2587';
-// let version = 1;
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-
-//paper graph 1
-// let fn = 'TopicsLayersData-0/Graph_5000'; //no longer works
-// let version = 3;
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-//paper graph 2
-// let fn = 'lastfm/Graph_8';
-// let version = 12; //layout version
-// d3.json(`data/json/${fn}.json`).then(data=>{
-// d3.json(`data/json/${fn}-nodes-${version}.json`).then(nodes=>{
-
-
-
-// train steiner
-// let fns = [
-  // 'data/json/topics_steiner/Graph_15-1608744450.json',
-  // 'data/json/topics_steiner/Graph_15-1608744450-nodes-1.json',
-// ];
-// let fns = [
-//   'data/json/lastfm_steiner/Graph_14-1608710991.json', //graph and init pos
-//   'data/json/lastfm_steiner/Graph_14-1608710991-nodes-1.json',//node positions
-// ]; 
-
-
-//random init and rotation
-// let t = 1609349995;
-// let t = 1609350593;
-// let t = 1609350655;
-// let t = 1609350673;
-// let t = 1609350693;
-// let t = 1609350737;
-// let t = 1609350756;
-
 // //// last.fm
-// let fns = [
-//   // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
-//   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`, 
-//   // `data/json/lastfm_linear/Graph_8-1615801589.json`,
-//   // `data/json/lastfm_linear/Graph_8-1615802931.json`,
-//   `data/json/lastfm_linear/Graph_8-1615803307.json`,
-//   `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
-// ];
+let fns = [
+  // // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
+  // // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`, 
+  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+];
  
 //// topics
 // let fns = [
-//   `data/json/topics_steiner_exp/Graph_15-1614145975.json`, 
-// ];
-// let fns = [
-//   // `data/json/topics_refined_exp/Graph_5000-1614147219.json`, ////factor: 1 (uniform edge length)
-//   // // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-2.json`, 
-//   // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
+//   // // topics-exponential (uniform edge length)
+//   // // `data/json/topics_refined_exp/Graph_5000-1614147219.json`, //// 
+//   // // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
 
-//   //topics-linear
-//   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-min.json`,
-//   `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
+//   // // topics-linear
+//   // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
+//   // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
 // ];
 
-//// tree of life 
+//// tree of life (~3000 nodes)
 // let fns = [
-// // (~3000 nodes)
 // // tree of life uniform
-//   // 'data/json/tol_graphs_exp/Graph_4-1615352218.json', //mw-radial
+//   // 'data/json/tol_graphs_exp/Graph_4-1615352218.json',
 //   //'data/json/tol_graphs_exp/Graph_4-1615352218-nodes-3.json',
 // // tree of life linear
 //   'data/json/tol_graphs_linear/Graph_4-1615872482.json',
 //   'data/json/tol_graphs_linear/Graph_4-1615872482-nodes-1.json',
-//   // 'data/json/tol_graphs_linear/Graph_4-1615875081.json',
-
-// // (~5000 nodes)
-//   // 'data/json/tol_graphs_exp/Graph_6-1615403421.json', //uniform, sfdp+mw-radial
-//   // 'data/json/tol_graphs_exp/Graph_6-1615405627.json', //uniform, mw-radial
 // ];
+
 
 // math genealogy
 // let fns = [
-// //   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
-// //   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
-// //   linear
-//   // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
-//   'data/json/math_genealogy_linear/Graph_3-1615880448.json',
-//   'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json' 
-
+// // //   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
+// // //   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
+// // //   linear
+// //   // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
+// //   'data/json/math_genealogy_linear/Graph_3-1615880448.json',
+// //   'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json',
 // ];
-// 
 
 
-/// external layouts
+/// external layouts to show in figures
 /// DELG
 // let fns = [
 //   `data/external/lastfm-DELG-min.json`,
@@ -222,10 +94,13 @@ let forceLabelLevel = -1;
 //   `./data/external/topics-BT-min.json`,
 //   `./data/external/topics-BT-nodes-0.json`,
 // ];
-let fns = [
-  `./data/external/tol-BT-min.json`,
-  `./data/external/tol-BT-nodes-0.json`,
-];
+// let fns = [
+//   `./data/external/tol-BT-min.json`,
+//   `./data/external/tol-BT-nodes-0.json`,
+// ];
+
+
+
 let promises = Promise.all(fns.map(fn=>d3.json(fn)))
 .then((data)=>{
   let nodes;
@@ -235,14 +110,9 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
     [data, nodes] = data;
   }
   window.data = data;
-
-  // if(IS_PROGRESSIVE){
-  //   window.enabledNodes = new Set(data.node_id.slice(0,progress));
-  // }else{
-  //   window.enabledNodes = new Set(data.nodeIds);
-  // }
-    
   preprocess(data, nodes);
+
+
 
   // data.level2scale = {}; //crossing free init layout 
   let maxLevel = d3.max(data.nodes, d=>d.level);
@@ -275,10 +145,11 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
       8:15,
     };
   }
+
+
   console.log(data.level2scale);
 
   let canvas = init(data);
-
   if(shouldDraw){
     canvas.draw(shouldLabel, forceLabel);
   }

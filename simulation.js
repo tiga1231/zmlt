@@ -11,7 +11,7 @@ importScripts("utils.js");
 importScripts("lib/numeric-1.2.6.js");
 
 
-
+//// globals 
 let simulation, collision_sims;
 let niter = 500;
 let dataObj;
@@ -25,8 +25,8 @@ let progress;
 let maxEdgeWeight;
 let minEdgeWeight;
 let intervalId;
+let dpr;
 let iter = 0;
-let dpr = 1;
 
 
 function addNode(){
@@ -114,12 +114,6 @@ onmessage = function(event) {
       .distance(e=>e.weight/minEdgeWeight)
       .strength(e=>0.2)
     )
-    // .force('stress-test', 
-    //   forceStress(nodes, virtualEdges.filter(e=>e.hops >= 3))
-    //   .strength(e=>0.5 / Math.pow(e.weight/minEdgeWeight, 1.3))
-    //   .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
-    //   // .distance(e=>e.weight/minEdgeWeight)
-    // )
     .force('stress', 
       // lastfm-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)

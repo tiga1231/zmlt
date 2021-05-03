@@ -310,8 +310,9 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0=1){
 
   };
 
-  force.initialize = (nodes)=>{
-    nodes = nodes;
+  force.initialize = (nodes1, edges1)=>{
+    nodes = nodes1;
+    edges = edges1;
     return force;
   };
 
@@ -577,13 +578,10 @@ function forcePre(scales, rotate=true){
 
 
 
-function forcePost(edges){
+function forcePost(nodes, edges){
 
   let forcePost_ = (alpha)=>{
-    let nodes, edges;
-    nodes = force.nodes;
-    edges = force.edges
-
+    
     for(let n of nodes){
       [n.x0, n.y0] = [n.x, n.y];
       [n.vx0, n.vy0] = [n.vx, n.vy];
@@ -622,9 +620,9 @@ function forcePost(edges){
   };
 
   let force = forcePost_;
-  force.initialize = (nodes)=>{
-    force.nodes = nodes;
-    force.edges = edges;
+  force.initialize = (nodes1, edges1)=>{
+    nodes = nodes1;
+    edges = edges1;
     return force;
   };
 
@@ -674,7 +672,7 @@ function forceStress(nodes, edges, nSample, stochastic=true){
   let force = (alpha)=>{
     alpha = schedule(alpha);
     if(stochastic){
-      for(let i=0; i<nSample; i++){
+      for(let i=0; i<Math.min(nSample, edges.length); i++){
         let e = edges[randint(0,edges.length)];
         oneIter(e, alpha);
       }
@@ -685,7 +683,8 @@ function forceStress(nodes, edges, nSample, stochastic=true){
     }
   }
 
-  force.initialize = ()=>{
+  force.initialize = (edges1)=>{
+    edges = edges1;
     return force;
   };
 

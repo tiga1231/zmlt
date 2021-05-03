@@ -9,6 +9,9 @@ const HIDE_OVERLAP = false;
 const DPR = window.devicePixelRatio;
 // const font = 'monospace';
 const FONT = 'Times';
+const HIDDEN_NODE_ALPHA = 0.05;
+const HIDDEN_EDGE_ALPHA = 0.0;
+const HIDDEN_LABEL_ALPHA = 0.0;
 
 //globals
 let shouldTick = true;
@@ -18,7 +21,9 @@ let bg = darkMode ? '#322':'#fff';
 
 let runtime = [];
 let nodes;
-let progress = 1e9;
+
+let progress = undefined;
+let enabledNodes = undefined;
 
 let shouldDraw = true;
 let shouldLabel = true;
@@ -33,8 +38,11 @@ let forceLabelLevel = -1;
 let fns = [
   // // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
   // // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`, 
-  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
   // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+  
+  //dynamic drawing test
+  `data/json/lastfm_linear/Graph_8-1620029861.json`,
 ];
  
 //// topics
@@ -110,11 +118,10 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
     [data, nodes] = data;
   }
   window.data = data;
+  window.progress = IS_PROGRESSIVE ? 1 : data.nodes.length;
+  window.enabledNodes = new Set(data.node_id.slice(0, window.progress));
   preprocess(data, nodes);
 
-
-
-  // data.level2scale = {}; //crossing free init layout 
   let maxLevel = d3.max(data.nodes, d=>d.level);
   if(fns[0].includes('topics')){
     data.level2scale = {};
@@ -174,7 +181,6 @@ function init(data){
   canvas.levelScalePairs = getNonOverlapLevels(canvas);
   markNonOverlapLevels(canvas);
   markLabelByLevel(canvas.data.nodes, canvas);
-  
   let simData = {
     nodes, 
     edges, 
@@ -185,7 +191,7 @@ function init(data){
     xRange: scales.sy.range(),
     yDomain: scales.sy.domain(),
     yRange: scales.sy.range(),
-    progress: 1,
+    progress: window.progress,
     dpr: DPR,
     level2scale: data.level2scale,
   };
@@ -408,7 +414,7 @@ function initSimulationWorker(canvas, simData){
       canvas.data.nodes = data.nodes;
       canvas.data.edges = data.edges;
       canvas.simulation = data.simulation;
-      // window.enabledNodes = data.enabledNodes;
+      window.enabledNodes = data.enabledNodes;
       updateBbox(canvas.data.nodes, canvas);
       markLabelByLevel(canvas.data.nodes, canvas);
       if(shouldDraw){
@@ -472,7 +478,7 @@ function initScales(nodes, w, h){
   // .range(['#a6bddb','#023858']);
 
   let extentLevel = d3.extent(nodes, d=>d.level);
-  scales.sr = d3.scaleLinear().domain(extentLevel).range([0,0]);
+  scales.sr = d3.scaleLinear().domain(extentLevel).range([1,1]);
   scales.ss = d3.scaleLinear().domain(extentLevel).range([4,1]);
   // scales.sl = d3.scaleLinear().domain(extentLevel).range([18, 12]); //label font size;
   scales.sl = d3.scaleLinear().domain(extentLevel).range([16, 16]); //label font size;
@@ -928,7 +934,7 @@ function preprocess(data, nodes){
     data.id2index[d.id] = d.index;
     d.label = d.label.slice(0,16);
     d.norm = Math.sqrt(d.x*d.x + d.y*d.y);
-    d.update = true;//IS_PROGRESSIVE ? window.enabledNodes.has(d.id) : true;
+    d.update = IS_PROGRESSIVE ? window.enabledNodes.has(d.id) : true;
   });
   data.node_center = math.mean(data.nodes.map(d=>[d.x, d.y]), 0);
 
@@ -1190,13 +1196,15 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
   }
 
   //draw nodes
-  ctx.globalAlpha = 1.0;
+  // ctx.globalAlpha = 1.0;
   ctx.fillStyle = '#08306b';
   let k = Math.pow(transform.k, 1/2)*DPR;
   for(let n of nodes){
     let x = n.bbox.cx;
     let y = n.bbox.cy;
     let r = n.r*k;
+
+    ctx.globalAlpha = n.update ? 1.0 : HIDDEN_NODE_ALPHA;
     ctx.beginPath();
     // ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.ellipse(x, y, r, r, 0, 0, 2 * Math.PI);
@@ -1208,8 +1216,6 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
 
   //draw text
   if(label){
-    
-
     let l0 = -1;
     for(let n of nodes.filter(d=>d.shouldShowLabel)){
       let x = n.bbox.cx;
@@ -1228,7 +1234,7 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
         l0 = l;
       }
       ctx.strokeStyle = '#fff';
-      ctx.globalAlpha = 1.0;
+      ctx.globalAlpha = n.update ? 1 : HIDDEN_LABEL_ALPHA;
       ctx.lineWidth = 8;
       ctx.strokeText(n.label, x, y);
       ctx.fillText(n.label, x, y);
@@ -1276,6 +1282,7 @@ function drawEdges(ctx, edges, scales, transform){
     let y1 = e.target.bbox.cy;
     let lw = Math.max(1, scales.sr(Math.min(e.source.level, e.target.level)) / 2);
     ctx.lineWidth = lw * k * DPR;
+    ctx.globalAlpha = e.source.update && e.target.update ? 1.0 : HIDDEN_EDGE_ALPHA;
     ctx.beginPath();
     ctx.moveTo(x0, y0);
     ctx.lineTo(x1, y1);

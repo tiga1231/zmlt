@@ -33,19 +33,43 @@ function addNode(){
   console.log(`${progress}/${nodes.length}`);
   let start = progress;
   progress += 1;
+  root = nodes[0];
   if(progress <= nodes.length){
     enabledNodes = initNodePosition(
-      nodes.slice(start, progress), 
+      nodes.slice(start, progress),
+      root, 
       enabledNodes, 
       nodes, 
       edges, 
-      id2index, 
-      true);
+      id2index
+    );
+    //updateforce
+    updateForce(
+      nodes.slice(0, progress), 
+      edges.filter(e=>e.source.update && e.target.update),
+      virtualEdges.filter(e=>e.source.update && e.target.update),
+    );
   }
   simulation.alpha(0.99);
   return;
 };
 
+function updateForce(nodes, edges, virtualEdges){
+  simulation.force('charge').initialize(nodes);
+  simulation.force('central').initialize(nodes);
+
+  simulation.force('link').initialize(edges);
+  simulation.force('stress-edge').initialize(edges);
+
+  simulation.force('stress').initialize(virtualEdges);
+
+  simulation.force('node-edge-repulsion').initialize(nodes, edges);
+  simulation.force('post').initialize(nodes, edges);
+
+  for (let l in dataObj.level2scale){
+    simulation.force(`collide-${l}`).initialize(nodes);
+  }
+}
 
 onmessage = function(event) {
   dataObj = event.data;
@@ -62,25 +86,28 @@ onmessage = function(event) {
     scales.sx = d3.scaleLinear().domain(dataObj.xDomain).range(dataObj.xRange);
     scales.sy = d3.scaleLinear().domain(dataObj.yDomain).range(dataObj.yRange);
   }
-  // else if(type === 'add-node'){  
-  //   addNode();
-  //   train(1);
-  // }else if(type === 'auto-add-nodes'){
-  //   let niter = 40;
-  //   while(enabledNodes.size < nodes.length){
-  //     addNode();
-  //     if(enabledNodes.size % 50 == 0){
-  //       simulation
-  //       .alpha(0.90)
-  //       .velocityDecay(0.4)
-  //       .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-  //       .restart();
-  //       simulation.tick(niter);
-  //       post();
-  //     }
-  //   }
-  //   train(10);
-  // }
+  else if(type === 'add-node'){  
+    addNode();
+    train(10);
+    post();
+  }else if(type === 'auto-add-nodes'){
+    let niter = 4;
+    let freq = 2;
+    while(enabledNodes.size < nodes.length){
+      addNode();
+      //for every <freq> nodes added, restart the simulation and train for <niter> iterations
+      if(enabledNodes.size % freq == 0){
+        simulation
+        .alpha(0.90)
+        .velocityDecay(0.4)
+        .alphaDecay(1 - Math.pow(0.001, 1 / niter))
+        .restart();
+        simulation.tick(niter);
+        post();
+      }
+    }
+    train(10);
+  }
   else{
     //default init event
     nodes = dataObj.nodes;
@@ -112,7 +139,7 @@ onmessage = function(event) {
     .force('link',
       d3.forceLink(edges)
       .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>0.2)
+      .strength(e=>e.source.update && e.target.update ? 0.2:0)
     )
     .force('stress', 
       // lastfm-uniform
@@ -154,7 +181,7 @@ onmessage = function(event) {
       // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 2))
       // math-genealogy-linear
-      forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
+      forceStress(nodes, virtualEdges, nodes.length*6)
       .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       .strength(e=>0.03 / Math.pow(e.weight/minEdgeWeight, 2))
     )
@@ -162,49 +189,49 @@ onmessage = function(event) {
       // topics-refined-linear
       forceStress(nodes, edges, nodes.length, false)
       .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>0.2)
+      .strength(e=>0)
     )
-    .force('stress-local', 
-      // //lastfm-uniform
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6))
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.3 / Math.pow(e.weight/minEdgeWeight, 2))
-      // //lastfm-linear
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 2))
-      // topics-refined-uniform
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2))
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
-      // topics-refined-linear
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops > 1))
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
-      //topics-steiner-uniform
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2))
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+    // .force('stress-local', 
+    //   // //lastfm-uniform
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6))
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.3 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   // //lastfm-linear
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   // topics-refined-uniform
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2))
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   // topics-refined-linear
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops > 1))
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   //topics-steiner-uniform
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2))
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
       
-      // tree-of-life-uniform
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2), nodes.length)
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
-      // // tree-of-life-linear
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
-      // 
-      // //math-genealogy-uniform
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
-      // .distance(e=>e.weight/minEdgeWeight)
-      // .strength(e=>0.3 / Math.pow(e.weight/minEdgeWeight, 2))
-      // //math-genealogy-linear
-      forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops > 1), nodes.length)
-      .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>0.4 / Math.pow(e.weight/minEdgeWeight, 2))
-    )
-    // // // // // //other aesthetics
+    //   // tree-of-life-uniform
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops !== 2), nodes.length)
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   // // tree-of-life-linear
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.2 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   // 
+    //   // //math-genealogy-uniform
+    //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6), nodes.length)
+    //   // .distance(e=>e.weight/minEdgeWeight)
+    //   // .strength(e=>0.3 / Math.pow(e.weight/minEdgeWeight, 2))
+    //   // //math-genealogy-linear
+    //   forceStress(nodes, virtualEdges.filter(e=>e.hops < 6 && e.hops > 1), nodes.length)
+    //   .distance(e=>e.weight/minEdgeWeight)
+    //   .strength(e=>0.4 / Math.pow(e.weight/minEdgeWeight, 2))
+    // )
+    // // // // // // //other aesthetics
     .force('central', 
      d3.forceRadial(cx, cy, 0)
      // .strength(0.0005)//lastfm-uniform
@@ -219,8 +246,8 @@ onmessage = function(event) {
     )
     .force('charge', 
      d3.forceManyBody()
-     .distanceMin(0.1)
-     .distanceMax(10)
+     // .distanceMin(0.1)
+     // .distanceMax(10)
      // .strength(d=> -0.01)//lastfm-uniform
      // .strength(d=> -0.01)//lastfm-linear
      // .strength(d=> -0.001)//topics-refined-uniform
@@ -229,7 +256,8 @@ onmessage = function(event) {
      // .strength(d=> -0.05)//tree-of-life-uniform
      // .strength(d=> -0.05)//tree-of-life-linear
      // .strength(d=> -0.001)//math-genealogy-uniform
-     .strength(d=> -0.01)//math-genealogy-linear
+     // .strength(-0.01)//math-genealogy-linear
+     .strength(d => d.update?-0.1:0)//math-genealogy-linear
     )
     .force('node-edge-repulsion', 
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.5)// lastfm-uniform
@@ -245,7 +273,7 @@ onmessage = function(event) {
     .stop();
 
 
-    // //label overlap removal
+    // // //label overlap removal
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     collision_sims = [];
@@ -260,12 +288,16 @@ onmessage = function(event) {
       .force(`collide-${l}`, 
         d3.forceCollide()
         .radius(d=>{
-          let [x0, y0] = [d.bbox.width/2, d.bbox.height/2];
-          // let a = d.bbox.width/2;
-          let a = Math.sqrt(x0*x0 + y0*y0*scaleY*scaleY); //figure out the major axis (a) of the ellipse 
-          let r = a / s + margin;
-          r = scales.sx.invert(r) - origin;
-          return r;
+          if(d.update){
+            let [x0, y0] = [d.bbox.width/2, d.bbox.height/2];
+            // let a = d.bbox.width/2;
+            let a = Math.sqrt(x0*x0 + y0*y0*scaleY*scaleY); //figure out the major axis (a) of the ellipse 
+            let r = a / s + margin;
+            r = scales.sx.invert(r) - origin;
+            return r;
+          }else{
+            return 0;
+          }
         })
         .strength(0.1)
         .iterations(1)
@@ -275,7 +307,7 @@ onmessage = function(event) {
       // .stop();
       // collision_sims.push(sim);
     }
-    simulation.force('post', forcePost(edges));
+    simulation.force('post', forcePost(nodes, edges));
 
 
 
@@ -324,23 +356,23 @@ function train(niter, wait=false){
   .alphaDecay(1 - Math.pow(0.001, 1 / niter));
   
 
-
-  if(!wait){
+  // if(!wait){
     collision_sims.forEach(sim=>sim.restart());
     simulation.restart();
-  }else{
-    for(let i = 0; i<niter; i++){
-      collision_sims.forEach(sim=>sim.tick());
-      simulation.tick();
-    }
-    postMessage({
-      type: 'tick', 
-      progress: niter / niter,
-      nodes, 
-      edges,
-      enabledNodes,
-    });
-  }
+  // }else{
+  //   for(let i = 0; i<niter; i++){
+  //     collision_sims.forEach(sim=>sim.tick());
+  //     simulation.tick();
+  //   }
+
+  //   postMessage({
+  //     type: 'tick', 
+  //     progress: niter / niter,
+  //     nodes, 
+  //     edges,
+  //     enabledNodes,
+  //   });
+  // }
   
   // for (var i = 0; i<niter; i+=1) {
   //   simulation.tick(10);

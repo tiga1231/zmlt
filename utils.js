@@ -148,76 +148,47 @@ function labelOverlap(labelNodes){
 }
 
 
-function initNodePosition(newNodes, currentNodes0, allNodes, allEdges, id2index, useInitital=true){
+function initNodePosition(newNodes, root, currentNodes0, allNodes, allEdges, id2index, useInitital=false){
   for(let node of newNodes){
     node.update = true;
-    // let edge = allEdges.filter(e=>
-    //   (currentNodes0.size == 0 || currentNodes0.has(e.source.id)) && e.target.id === node.id
-    //   ||
-    //   (currentNodes0.size == 0 || currentNodes0.has(e.target.id)) && e.source.id === node.id
-    // );
-    // let parent = edge[0].source.id !== node.id ? edge[0].source : edge[0].target;
-
-    let currentEdges = allEdges.filter(e=>{
-      return (
-        currentNodes0.has(e.source.id) && currentNodes0.has(e.target.id)
-      );
-    });
-
-    let parent = {x: Math.random(), y: Math.random()};
-    if(useInitital){
-      if(node.parent === undefined || node.parent === null){
-        parent = {
-          x: node.x, 
-          y: node.y,
-          xInit: node.x, 
-          yInit: node.y,
-        };
-      }else{
-        // parent = node.neighbors.filter(d=>currentNodes0.has(d))[0];
-        // parent = allNodes.filter(d=>d.id == parent)[0];
-        parent = allNodes[id2index[node.parent]];
-      }
+    if(node.id == root.id){
+      node.x = 0;
+      node.y = 0;
+      continue;
     }
 
+    let currentEdges = allEdges.filter(e=>{
+      return e.source.update && e.target.update;
+      // return (
+      //   currentNodes0.has(e.source.id) && currentNodes0.has(e.target.id)
+      // );
+    });
+
+    let parent = allNodes[id2index[node.parent]];
     let count = 1;
     let r = 1;
-    // if(useInitital && node.xInit !== undefined){
-    //   node.x = parent.x + (node.xInit - parent.xInit);
-    //   node.y = parent.y + (node.yInit - parent.yInit);
-    // }else{
-    //   node.x = (Math.random()-0.5)*1 + parent.x;
-    //   node.y = (Math.random()-0.5)*1 + parent.y;
-    // }
     let edges1 = allEdges.filter(e=>(
       currentNodes0.has(e.source.id) && node.id === e.target.id
       || currentNodes0.has(e.target.id) && node.id === e.source.id
     ));
+
     do {
       // r = 1/count;
       r *= 0.8;
-      if(useInitital && node.xInit !== undefined){
-        let dx = Math.max(0.001,r)*(node.xInit - parent.xInit);
-        let dy = Math.max(0.001,r)*(node.yInit - parent.yInit);
-        let theta = Math.PI*2*(1-r)*(Math.random()-0.5);
-        let cos = Math.cos(theta);
-        let sin = Math.sin(theta);
-        [dx, dy] = [cos*dx+sin*dy, -sin*dx+cos*dy];
-        node.x = parent.x + dx;
-        node.y = parent.y + dy;
-        // if(count > 1){
-        //   node.x += (Math.random()-0.5); 
-        //   node.y += (Math.random()-0.5);
-        // }else if(count > 10){
-        //   node.x = parent.x + (Math.random()-0.5); 
-        //   node.y = parent.y + (Math.random()-0.5); 
-        // }
+      if(parent.id === root.id){
+        node.x = root.x + (Math.random()-0.5)*r; 
+        node.y = root.y + (Math.random()-0.5)*r; 
       }else{
-        node.x = parent.x + (Math.random()-0.5); 
-        node.y = parent.y + (Math.random()-0.5); 
+        let dx = parent.x - root.x;
+        let dy = parent.y - root.y;
+        let l = Math.sqrt(dx*dx+dy*dy);
+        let cos = dx/l;
+        let sin = dy/l; 
+        node.x = parent.x + r * (node.weight*2) * cos; 
+        node.y = parent.y + r * (node.weight*2) * sin; 
       }
       count+=1;
-    } while(countCrossings(currentEdges, edges1)>0);
+    }while(countCrossings(currentEdges, edges1)>0);
     currentNodes0.add(node.id);
   }
   return currentNodes0;

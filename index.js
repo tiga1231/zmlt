@@ -414,7 +414,11 @@ function initSimulationWorker(canvas, simData){
       canvas.data.nodes = data.nodes;
       canvas.data.edges = data.edges;
       canvas.simulation = data.simulation;
+      
+      window.data.nodes = data.nodes;
+      window.data.edges = data.edges;
       window.enabledNodes = data.enabledNodes;
+      
       updateBbox(canvas.data.nodes, canvas);
       markLabelByLevel(canvas.data.nodes, canvas);
       if(shouldDraw){

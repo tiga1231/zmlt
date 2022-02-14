@@ -9,7 +9,7 @@ const HIDE_OVERLAP = false;
 const DPR = window.devicePixelRatio;
 // const font = 'monospace';
 const FONT = 'Times';
-const HIDDEN_NODE_ALPHA = 0.05;
+const HIDDEN_NODE_ALPHA = 0.0;
 const HIDDEN_EDGE_ALPHA = 0.0;
 const HIDDEN_LABEL_ALPHA = 0.0;
 
@@ -29,53 +29,16 @@ let shouldDraw = true;
 let shouldLabel = true;
 let shouldMarkOverlap = false;
 
-let forceLabel = false;
-let forceLabelLevel = -1;
+let forceLabel = true;
+let forceLabelLevel = 99;
 
 
 //--------data----------
-// //// last.fm
 let fns = [
-  // // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
-  // // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`, 
-  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
-  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
-  
-  //dynamic drawing test
-  `data/json/lastfm_linear/Graph_8-1620029861.json`,
+    'out.json',
 ];
- 
-//// topics
-// let fns = [
-//   // // topics-exponential (uniform edge length)
-//   // // `data/json/topics_refined_exp/Graph_5000-1614147219.json`, //// 
-//   // // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
-
-//   // // topics-linear
-//   // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
-//   // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
-// ];
-
-//// tree of life (~3000 nodes)
-// let fns = [
-// // tree of life uniform
-//   // 'data/json/tol_graphs_exp/Graph_4-1615352218.json',
-//   //'data/json/tol_graphs_exp/Graph_4-1615352218-nodes-3.json',
-// // tree of life linear
-//   'data/json/tol_graphs_linear/Graph_4-1615872482.json',
-//   'data/json/tol_graphs_linear/Graph_4-1615872482-nodes-1.json',
-// ];
 
 
-// math genealogy
-// let fns = [
-// // //   `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
-// // //   `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
-// // //   linear
-// //   // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
-// //   'data/json/math_genealogy_linear/Graph_3-1615880448.json',
-// //   'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json',
-// ];
 
 
 /// external layouts to show in figures
@@ -123,6 +86,9 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
   preprocess(data, nodes);
 
   let maxLevel = d3.max(data.nodes, d=>d.level);
+  data.level2scale = {};
+  data.level2scale[maxLevel] = Math.sqrt(data.nodes.length) / 4; //default
+
   if(fns[0].includes('topics')){
     data.level2scale = {};
     data.level2scale[maxLevel] = 20;
@@ -196,6 +162,9 @@ function init(data){
     level2scale: data.level2scale,
   };
   canvas.worker = initSimulationWorker(canvas, simData);
+  canvas.worker.postMessage({
+    type: 'auto-add-nodes'
+  });
 
   initInteraction(canvas);
 

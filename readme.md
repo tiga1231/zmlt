@@ -1,4 +1,4 @@
-0. Assume <txt_dir>/*.txt store leveled graphs and each file contains graph edges in the format
+0. Assuming <txt_dir>/*.txt store leveled graphs and each file contains graph edges in the format
     "node1_label" -- "node2_label"
     ...
 1. python txt2json.py <txt_dir> out.json

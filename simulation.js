@@ -139,7 +139,7 @@ onmessage = function(event) {
     .force('link',
       d3.forceLink(edges)
       .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>e.source.update && e.target.update ? 0.2:0)
+      .strength(e=>e.source.update && e.target.update ? 0.5:0)
     )
     .force('stress', 
       // lastfm-uniform

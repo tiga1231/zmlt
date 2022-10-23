@@ -1,12 +1,13 @@
 // //--------code----------
 const colorscheme = d3.schemeAccent;//schemePastel1
 const OPACITY_NOT_UPDATE = 0.1;
-const IS_PROGRESSIVE = true;
+const IS_PROGRESSIVE = false;
+
 const IS_DYNAMIC = false;
 const EDGE_COLOR = '#000';
 // const EDGE_COLOR = d3.rgb(249,180,35);
 const HIDE_OVERLAP = false;
-const DPR = window.devicePixelRatio;
+const DPR = 1;//window.devicePixelRatio;
 // const font = 'monospace';
 const FONT = 'Times';
 const HIDDEN_NODE_ALPHA = 0.05;
@@ -36,14 +37,21 @@ let forceLabelLevel = -1;
 //--------data----------
 // //// last.fm
 let fns = [
-  // // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
-  // // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`, 
-  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
-  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+  // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
+  // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
+
+  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
   
   //dynamic drawing test
-  `data/json/lastfm_linear/Graph_8-1620029861.json`,
+  // `data/json/lastfm_linear/Graph_8-1620029861.json`,
 ];
+
+fns = [
+  // `./data/batch-tree-result-json/topics.json`,
+  // `./data/batch-tree-result-json/last.fm-linear.json`,
+  `./data/batch-tree-result-json/tol-linear.json`,
+]
  
 //// topics
 // let fns = [
@@ -118,11 +126,11 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
     [data, nodes] = data;
   }
   window.data = data;
-  window.progress = IS_PROGRESSIVE ? 1 : data.nodes.length;
+  window.progress = IS_PROGRESSIVE ? 1 : data.node_id.length;
   window.enabledNodes = new Set(data.node_id.slice(0, window.progress));
   preprocess(data, nodes);
 
-  let maxLevel = d3.max(data.nodes, d=>d.level);
+  let maxLevel = d3.max(data.nodes, d=>d.level) || 8;
   if(fns[0].includes('topics')){
     data.level2scale = {};
     data.level2scale[maxLevel] = 20;
@@ -148,6 +156,10 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
       //7:50
     };
   }else if(fns[0].includes('math_genealogy')){
+    data.level2scale = {
+      8:15,
+    };
+  }else{
     data.level2scale = {
       8:15,
     };
@@ -179,8 +191,9 @@ function init(data){
   
   updateBbox(canvas.data.nodes, canvas);
   canvas.levelScalePairs = getNonOverlapLevels(canvas);
+
   markNonOverlapLevels(canvas);
-  markLabelByLevel(canvas.data.nodes, canvas);
+  // markLabelByLevel(canvas.data.nodes, canvas);
   let simData = {
     nodes, 
     edges, 
@@ -286,7 +299,9 @@ function updateBbox(nodes, canvas){
 function getNonOverlapLevels(canvas){
   let nodes = canvas.data.nodes;
   updateBbox(nodes, canvas);
-  let levels = Array.from(new Set(nodes.map(d=>d.level))).sort((a,b)=>a-b);
+  let levels = new Set(nodes.map(d=>d.level));
+  console.log(levels);
+  levels = Array.from(levels).sort((a,b)=>a-b);
   let res = [];
   for (let l of levels){
     let bbox = nodes.filter(d=>d.level <= l).map(d=>d.bbox);

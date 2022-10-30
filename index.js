@@ -47,11 +47,24 @@ let fns = [
   // `data/json/lastfm_linear/Graph_8-1620029861.json`,
 ];
 
+
+// figure 10
 fns = [
-  // `./data/batch-tree-result-json/topics.json`,
-  // `./data/batch-tree-result-json/last.fm-linear.json`,
-  `./data/batch-tree-result-json/tol-linear.json`,
+  // './data/external/lastfm/CIR.json',
+  // './data/external/lastfm/prism.json',
+  // './data/external/lastfm/lastfm_delg_elliptical.json',
+  './data/external/lastfm/bt_delg.json',
+  // './data/external/lastfm/bt_cg.json',
 ]
+
+console.log(fns);
+// figures for appendix
+// fns = [
+//   // `./data/batch-tree-result-json/topics.json`,
+//   // `./data/batch-tree-result-json/last.fm-linear.json`,
+//   `./data/batch-tree-result-json/topics-linear.json`,
+//   // `./data/batch-tree-result-json/tol-linear.json`,
+// ]
  
 //// topics
 // let fns = [
@@ -497,7 +510,7 @@ function initScales(nodes, w, h){
   // .range(['#a6bddb','#023858']);
 
   let extentLevel = d3.extent(nodes, d=>d.level);
-  scales.sr = d3.scaleLinear().domain(extentLevel).range([1,1]);
+  scales.sr = d3.scaleLinear().domain(extentLevel).range([0,0]);
   scales.ss = d3.scaleLinear().domain(extentLevel).range([4,1]);
   // scales.sl = d3.scaleLinear().domain(extentLevel).range([18, 12]); //label font size;
   scales.sl = d3.scaleLinear().domain(extentLevel).range([16, 16]); //label font size;

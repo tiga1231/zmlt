@@ -633,6 +633,7 @@ function forcePost(nodes, edges){
 
 
 function forceStress(nodes, edges, nSample, stochastic=true){
+  edges = edges;
   
   let sampleSize;
   let strength = (e)=>1;
@@ -671,6 +672,7 @@ function forceStress(nodes, edges, nSample, stochastic=true){
   }
   let force = (alpha)=>{
     alpha = schedule(alpha);
+    console.log(edges);
     if(stochastic){
       for(let i=0; i<Math.min(nSample, edges.length); i++){
         let e = edges[randint(0,edges.length)];

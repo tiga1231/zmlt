@@ -312,7 +312,9 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0=1){
 
   force.initialize = (nodes1, edges1)=>{
     nodes = nodes1;
-    edges = edges1;
+    if(edges1 !== undefined){
+      edges = edges1;
+    }
     return force;
   };
 
@@ -560,9 +562,6 @@ function forcePre(scales, rotate=true){
     for(let n of force.nodes){
       updateBboxXY(n, n.bbox, scales);
     }
-
-
-
     
   };
 
@@ -590,7 +589,8 @@ function forcePost(nodes, edges){
     for(let n of _.shuffle(nodes)){
       let edges1 = edges.filter(e=>n.id === e.source.id || n.id === e.target.id);
       let t = 1.0;
-      let steps = 12;
+      let steps = 8;
+      let down_scale = 0.8;
       while(steps > 0){
         n.x = n.x0 + n.vx;
         n.y = n.y0 + n.vy;
@@ -598,8 +598,8 @@ function forcePost(nodes, edges){
         if(crossings == 0){
           break;
         }else{
-          n.vx *= 0.8;
-          n.vy *= 0.8;
+          n.vx *= down_scale;
+          n.vy *= down_scale;
         }
         steps -= 1;
       }
@@ -612,9 +612,8 @@ function forcePost(nodes, edges){
     }
 
     for(let n of nodes){
+      //restore the node pos and let the simulation handle update through n.vx and n.vy
       [n.x, n.y] = [n.x0, n.y0];
-      // [n.x, n.y] = [n.x0+n.vx, n.y0+n.vy];
-      // [n.vx, n.vy] = [0, 0];
     }
 
   };

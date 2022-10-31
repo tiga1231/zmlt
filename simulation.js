@@ -133,23 +133,23 @@ onmessage = function(event) {
     self.progress = progress;
     // def force
     simulation = d3.forceSimulation(nodes)
-    .velocityDecay(0.4)
+    .velocityDecay(0.8)
     .alphaDecay(1 - Math.pow(0.001, 1 / niter))
     .force('pre', forcePre(scales))
     .force('link',
       d3.forceLink(edges)
       .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>e.source.update && e.target.update ? 0.5:0)
+      /*.strength(e=>e.source.update && e.target.update ? 0.9:0)*/
     )
-    .force('stress', 
+    /*.force('stress', */
       // lastfm-uniform
-      forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
-      .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
-      .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1.3))
+      /*forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)*/
+      /*.distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))*/
+      /*.strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1.3))*/
       // lastfm-linear
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
-      // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
-      // .strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 1.3))
+    /*forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)*/
+    /*.distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))*/
+    /*.strength(e=>0.1 / Math.pow(e.weight/minEdgeWeight, 1.3))*/
       
       // topics-refined-uniform
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
@@ -190,7 +190,7 @@ onmessage = function(event) {
       /*forceStress(nodes, edges, nodes.length, false)*/
       /*.distance(e=>e.weight/minEdgeWeight)*/
       /*.strength(e=>0)*/
-    )
+    /*)*/
     // .force('stress-local', 
     //   // //lastfm-uniform
     //   // forceStress(nodes, virtualEdges.filter(e=>e.hops < 6))
@@ -232,8 +232,8 @@ onmessage = function(event) {
     //   .strength(e=>0.4 / Math.pow(e.weight/minEdgeWeight, 2))
     // )
     // // // // // // //other aesthetics
-    .force('central', 
-     d3.forceRadial(cx, cy, 0)
+    /*.force('central', */
+    /*d3.forceRadial(cx, cy, 0)*/
      // .strength(0.0005)//lastfm-uniform
      // .strength(0.0005)//lastfm-linear
      // .strength(0.0005)//topics-refined-uniform
@@ -242,10 +242,11 @@ onmessage = function(event) {
      // .strength(0.0005)//tree-of-life-uniform
      // .strength(0.002)//tree-of-life-linear
      // .strength(0.0001)//math-genealogy-uniform
-     .strength(0.0001)//math-genealogy-linear
-    )
-    .force('charge', 
-     d3.forceManyBody()
+    /*.strength(0.0001)//math-genealogy-linear*/
+    /*)*/
+      .force('charge', 
+        d3.forceManyBody()
+        .theta(0.5)
      // .distanceMin(0.1)
      // .distanceMax(10)
      // .strength(d=> -0.01)//lastfm-uniform
@@ -257,19 +258,19 @@ onmessage = function(event) {
      // .strength(d=> -0.05)//tree-of-life-linear
      // .strength(d=> -0.001)//math-genealogy-uniform
      // .strength(-0.01)//math-genealogy-linear
-     .strength(d => d.update?-0.1:0)//math-genealogy-linear
-    )
-      /*.force('node-edge-repulsion', */
+        .strength(d => d.update?-0.002:0)//math-genealogy-linear
+      )
+      .force('node-edge-repulsion', 
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.5)// lastfm-uniform
-      // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// lastfm-linear
+      forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// lastfm-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// topics-refined-uniform
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.2)// topics-refined-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.01)// topics-steiner-uniform
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// tree-of-life-uniform
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.3)// tree-of-life-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.02)//math-genealogy-uniform
-      /*forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)//math-genealogy-linear*/
-      /*)*/
+        /*forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)//math-genealogy-linear*/
+      )
     .stop();
 
 

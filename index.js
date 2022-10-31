@@ -40,7 +40,7 @@ let fns = [
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
 
   `data/json/lastfm_linear/Graph_8-1615803307.json`,
-  `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
   
   //dynamic drawing test
   // `data/json/lastfm_linear/Graph_8-1620029861.json`,
@@ -595,6 +595,7 @@ function initZoom(canvas){
   let zoom = d3.zoom()
   .scaleExtent([0.1, 1000])
   .on('zoom', (transform0)=>{
+
     if(transform0 === undefined){
       canvas.transform = d3.event.transform.scale(scale0);
     }else{
@@ -739,8 +740,10 @@ function initKeyboard(canvas){
     }else if(key === '/'){//log
       exportJson(pos(canvas.data.nodes),`nodes.json`);
     }else if(key === 'e'){ //evaluation
-      canvas.levelScalePairs = getNonOverlapLevels(canvas);
-      
+      //canvas.levelScalePairs = getNonOverlapLevels(canvas);
+      markNonOverlapLevels(canvas);
+      markLabelByLevel(canvas.data.nodes, canvas);
+
       let edges = canvas.data.edges;
       let bboxes = canvas.data.nodes.map(d=>d.bbox);
       let iel = bestIdealEdgeLengthPreservation(edges, edges.map(e=>e.weight));

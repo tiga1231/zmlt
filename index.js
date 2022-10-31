@@ -3,7 +3,6 @@ const colorscheme = d3.schemeAccent;//schemePastel1
 const OPACITY_NOT_UPDATE = 0.1;
 const IS_PROGRESSIVE = false;
 
-const IS_DYNAMIC = false;
 const EDGE_COLOR = '#000';
 // const EDGE_COLOR = d3.rgb(249,180,35);
 const HIDE_OVERLAP = false;
@@ -49,13 +48,13 @@ let fns = [
 
 
 // figure 10
-fns = [
+/*fns = [*/
   // './data/external/lastfm/CIR.json',
   // './data/external/lastfm/prism.json',
   // './data/external/lastfm/lastfm_delg_elliptical.json',
-  './data/external/lastfm/bt_delg.json',
+  // './data/external/lastfm/bt_delg.json',
   // './data/external/lastfm/bt_cg.json',
-]
+/*]*/
 
 console.log(fns);
 // figures for appendix

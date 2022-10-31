@@ -622,7 +622,9 @@ function forcePost(nodes, edges){
   let force = forcePost_;
   force.initialize = (nodes1, edges1)=>{
     nodes = nodes1;
-    edges = edges1;
+    if (edges1 !== undefined){
+      edges = edges1;
+    }
     return force;
   };
 
@@ -633,13 +635,12 @@ function forcePost(nodes, edges){
 
 
 function forceStress(nodes, edges, nSample, stochastic=true){
-  edges = edges;
   
   let sampleSize;
   let strength = (e)=>1;
   let distance = (e)=>1;
   let schedule = (a)=>Math.sqrt(a);
-  // let schedule = (a)=>0.8;
+  
   if(nSample === undefined){
     nSample = nodes.length * 6;
   }
@@ -670,9 +671,9 @@ function forceStress(nodes, edges, nSample, stochastic=true){
     e.target.vx += -vx;
     e.target.vy += -vy;
   }
-  let force = (alpha)=>{
+
+  function force(alpha){
     alpha = schedule(alpha);
-    console.log(edges);
     if(stochastic){
       for(let i=0; i<Math.min(nSample, edges.length); i++){
         let e = edges[randint(0,edges.length)];
@@ -685,8 +686,10 @@ function forceStress(nodes, edges, nSample, stochastic=true){
     }
   }
 
-  force.initialize = (edges1)=>{
-    edges = edges1;
+  force.initialize = (nodes, edges1)=>{
+    if (edges1 !== undefined){
+      edges = edges1;
+    }
     return force;
   };
 

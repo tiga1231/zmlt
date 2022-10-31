@@ -143,9 +143,9 @@ onmessage = function(event) {
     )
     .force('stress', 
       // lastfm-uniform
-      // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
-      // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
-      // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1.3))
+      forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
+      .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
+      .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 1.3))
       // lastfm-linear
       // forceStress(nodes, virtualEdges.filter(e=>e.hops >= 6), nodes.length*6)
       // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
@@ -181,15 +181,15 @@ onmessage = function(event) {
       // .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
       // .strength(e=>0.01 / Math.pow(e.weight/minEdgeWeight, 2))
       // math-genealogy-linear
-      forceStress(nodes, virtualEdges, nodes.length*6)
-      .distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))
-      .strength(e=>0.03 / Math.pow(e.weight/minEdgeWeight, 2))
-    )
-    .force('stress-edge', 
+      /*forceStress(nodes, virtualEdges, nodes.length*6)*/
+      /*.distance(e=>Math.pow(e.weight/minEdgeWeight, 0.95+1/e.hops))*/
+      /*.strength(e=>0.03 / Math.pow(e.weight/minEdgeWeight, 2))*/
+      /*)*/
+      /*.force('stress-edge', */
       // topics-refined-linear
-      forceStress(nodes, edges, nodes.length, false)
-      .distance(e=>e.weight/minEdgeWeight)
-      .strength(e=>0)
+      /*forceStress(nodes, edges, nodes.length, false)*/
+      /*.distance(e=>e.weight/minEdgeWeight)*/
+      /*.strength(e=>0)*/
     )
     // .force('stress-local', 
     //   // //lastfm-uniform
@@ -259,7 +259,7 @@ onmessage = function(event) {
      // .strength(-0.01)//math-genealogy-linear
      .strength(d => d.update?-0.1:0)//math-genealogy-linear
     )
-    .force('node-edge-repulsion', 
+      /*.force('node-edge-repulsion', */
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.5)// lastfm-uniform
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// lastfm-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// topics-refined-uniform
@@ -268,8 +268,8 @@ onmessage = function(event) {
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)// tree-of-life-uniform
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.3)// tree-of-life-linear
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.02)//math-genealogy-uniform
-      forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)//math-genealogy-linear
-    )
+      /*forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.1)//math-genealogy-linear*/
+      /*)*/
     .stop();
 
 
@@ -303,11 +303,11 @@ onmessage = function(event) {
         .iterations(1)
       )
       .force(`post-scale`, forceScaleY(n, d=>1/scaleY ))
-      // .force('post', forcePost(edges));
-      // .stop();
+      .force('post', forcePost(nodes, edges))
+      .stop();
       // collision_sims.push(sim);
     }
-    simulation.force('post', forcePost(nodes, edges));
+      /*simulation.force('post', forcePost(nodes, edges));*/
 
 
 

@@ -109,6 +109,7 @@ onmessage = function(event) {
     train(10);
   }
   else{
+    let config = dataObj.forceConfig;
     //default init event
     nodes = dataObj.nodes;
     edges = dataObj.edges;
@@ -123,7 +124,7 @@ onmessage = function(event) {
     
     progress = dataObj.progress;
     [minEdgeWeight, maxEdgeWeight] = d3.extent(edges, e=>e.weight);
-    console.log([minEdgeWeight, maxEdgeWeight]);
+    console.log('edge weight range = ', [minEdgeWeight, maxEdgeWeight]);
     let maxDist = d3.max(virtualEdges, e=>e.weight);
     let [minHop, maxHop] = d3.extent(virtualEdges, e=>e.hops);
     let maxLevel = d3.max(nodes, d=>d.level);
@@ -133,8 +134,6 @@ onmessage = function(event) {
     self.progress = progress;
     // def force
     simulation = d3.forceSimulation(nodes)
-    .velocityDecay(0.8)
-    .alphaDecay(1 - Math.pow(0.001, 1 / niter))
     .force('pre', forcePre(scales))
     .force('link',
       d3.forceLink(edges)
@@ -232,21 +231,20 @@ onmessage = function(event) {
     //   .strength(e=>0.4 / Math.pow(e.weight/minEdgeWeight, 2))
     // )
     // // // // // // //other aesthetics
-    /*.force('central', */
-    /*d3.forceRadial(cx, cy, 0)*/
+    .force('central',
+    d3.forceRadial(0, cx, cy)
      // .strength(0.0005)//lastfm-uniform
      // .strength(0.0005)//lastfm-linear
      // .strength(0.0005)//topics-refined-uniform
      // .strength(0.001)//topics-refined-linear
      // .strength(0.0001)//topics-steiner-uniform
      // .strength(0.0005)//tree-of-life-uniform
-     // .strength(0.002)//tree-of-life-linear
+     .strength(0.002)//tree-of-life-linear
      // .strength(0.0001)//math-genealogy-uniform
-    /*.strength(0.0001)//math-genealogy-linear*/
-    /*)*/
+      // .strength(0.0001)//math-genealogy-linear
+    )
       .force('charge', 
-        d3.forceManyBody()
-        .theta(0.5)
+        d3.forceManyBody()//.theta(0.5)
      // .distanceMin(0.1)
      // .distanceMax(10)
      // .strength(d=> -0.01)//lastfm-uniform
@@ -258,7 +256,7 @@ onmessage = function(event) {
      // .strength(d=> -0.05)//tree-of-life-linear
      // .strength(d=> -0.001)//math-genealogy-uniform
      // .strength(-0.01)//math-genealogy-linear
-        .strength(d => d.update?-0.002:0)//math-genealogy-linear
+        .strength(d => config.charge.strength)//math-genealogy-linear
       )
       .force('node-edge-repulsion', 
       // forceNodeEdgeRepulsion(nodes, edges, enabledNodes, 0.5)// lastfm-uniform
@@ -278,7 +276,7 @@ onmessage = function(event) {
     const origin = scales.sx.invert(0);
     const margin = 2;//in pixel
     collision_sims = [];
-    let scaleY = 5;
+    let scaleY = config.overlap.scaleY;
     for (let l in dataObj.level2scale){
       l = parseFloat(l);
       let s = dataObj.level2scale[l];
@@ -308,7 +306,6 @@ onmessage = function(event) {
       .stop();
       // collision_sims.push(sim);
     }
-      /*simulation.force('post', forcePost(nodes, edges));*/
 
 
 

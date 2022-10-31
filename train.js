@@ -56,7 +56,7 @@ let fns = [
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
 
-  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
   // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
   
   // dynamic drawing test
@@ -84,7 +84,7 @@ let fns = [
   // `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
   // `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
   // linear
-  // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
+  'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
   // 'data/json/math_genealogy_linear/Graph_3-1615880448.json',
   // 'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json',
 ];

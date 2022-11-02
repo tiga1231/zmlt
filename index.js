@@ -42,7 +42,7 @@ let fns = [
 //   './data/external/lastfm/prism.json',
 //   './data/external/lastfm/lastfm_delg_elliptical.json',
   // './data/external/lastfm/bt_delg.json',
-  './data/external/lastfm/bt_cg.json',
+  // './data/external/lastfm/bt_cg.json',
 
   // `./data/batch-tree-result-json/figure-10/last.fm-linear-delg-mode.json`,
   // `./data/batch-tree-result-json/figure-10/last.fm-linear-cg-mode.json`,
@@ -60,8 +60,8 @@ let fns = [
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
 
-  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
-  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
   
   // dynamic drawing test
   // `data/json/lastfm_linear/Graph_8-1620029861.json`,
@@ -450,7 +450,7 @@ function markNonOverlapLevels(canvas){
 
 function initSimulationWorker(canvas, simData){
 
-  let worker = new Worker('simulation.js');
+  let worker = new Worker('simulation-worker.js');
   worker.postMessage(simData);
   worker.onmessage = function(event) {
     let data = event.data;

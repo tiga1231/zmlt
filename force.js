@@ -1,4 +1,4 @@
-importScripts("lib/underscore-min.js");
+// importScripts("lib/underscore-min.js");
 
 
 function forceRestoreCache(nodes) {

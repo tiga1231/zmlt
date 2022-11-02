@@ -7,15 +7,14 @@
 
 <!-- <script src="https://d3js.org/d3-quadtree.v1.js"></script> -->
 
-
 <script src='lib/underscore-min.js'></script>
 <script src='lib/numeric-1.2.6.js'></script>
 <script src='lib/math.js'></script>
 <script src='lib/bentley-ottman.js'></script>
 
 <script src='utils.js'></script>
-<!-- <script src='force.js'></script> -->
-
+<script src='force.js'></script>
+<script src='simulation.js'></script>
 
 <style>
 body{
@@ -33,8 +32,8 @@ canvas{
 }
 #resetButton{
   position: absolute;
-  width: 30px;
-  height: 20px;
+  /*width: 30px;*/
+  /*height: 20px;*/
 }
 .labelText{
   font-weight: 100;
@@ -48,14 +47,19 @@ canvas{
   stroke: #333;
   stroke-width: 1;
 }
-
 </style>
 </head>
 
+
+
+
 <body>
-<canvas id='main'></canvas>
-<script src='train.js'></script>
-<a id='download-json'></a>
-<button id='resetButton'></button>
+  <canvas id='main'></canvas>
+
+  <script src='explore-parameters.js'></script>
+
+  <a id='download-json'></a>
+  <button id='resetButton'>Reset zoom</button>
+
 </body>
 </html>

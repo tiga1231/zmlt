@@ -120,6 +120,84 @@ let fns = [
 // ];
 
 
+
+let promises = Promise.all(fns.map(fn => d3.json(fn)))
+  .then(main);
+
+
+
+
+function main(data) {
+  let nodes;
+  if (data.length == 1) {
+    data = data[0];
+  } else {
+    [data, nodes] = data;
+  }
+  window.data = data;
+  window.progress = IS_PROGRESSIVE ? 1 : data.node_id.length;
+  window.enabledNodes = new Set(data.node_id.slice(0, window.progress));
+  preprocess(data, nodes);
+
+  let canvas = init(data);
+  window.canvas = canvas;
+  if (shouldDraw) {
+    canvas.draw(shouldLabel, forceLabel);
+  }
+
+  //simulation
+  
+  let niter = 300;
+  let simData = canvas.simData;
+  let config = initDefaultForceConfig(data);
+
+
+  // Scan the parameter space
+  let outputPrefix = 'scaleY';
+  let values = [1, 2, 3, 5, 10, 15, 20];
+  let setConfig = (data, scaleY) => {
+    data.forceConfig.overlap.scaleY = scaleY;
+  };
+
+  resetNodePosition(simData.nodes);
+  let iter = 0;
+  let t0 = window.performance.now();
+  let simulation = initSimulation(simData, config)
+    .on('tick', function(){
+      iter += 1;
+      if(iter % (niter/10) == 0){
+        console.log('iter', iter);
+      }
+    })
+    .on('end', ()=>{
+      evaluate(data, t0);
+    })
+    .alpha(0.99)
+    .velocityDecay(0.2)
+    .alphaDecay(1 - Math.pow(0.001, 1 / niter))
+    .restart();
+
+}
+
+function resetNodePosition(nodes){
+  nodes.forEach((d,i)=>{
+    d.x = d.init_pos[0];
+    d.y = d.init_pos[1];
+  });
+}
+
+
+function updateLabelVisibility(canvas){
+  //Mark  non-overlap scales for each label
+  updateBbox(canvas.data.nodes, canvas);
+  canvas.levelScalePairs = getNonOverlapLevelScalePairs(canvas);
+  markNonOverlapLevels(canvas);
+
+  // markLabelByLevel(canvas.data.nodes, canvas.levelScalePairs, canvas.transform.k);
+}
+ 
+
+
 function initLevel2scale(data) {
   let maxLevel = d3.max(data.nodes, d => d.level) || 8;
   let level2scale = {};
@@ -154,7 +232,7 @@ function initLevel2scale(data) {
 
 
 
-function initForceConfig(data) {
+function initDefaultForceConfig(data) {
   let extent = d3.extent(data.nodes, d => Math.sqrt(d.x * d.x + d.y * d.y));
   let diameter = 2 * (extent[1] - extent[0]);
   let forceConfig = {
@@ -171,79 +249,15 @@ function initForceConfig(data) {
     nodeEdgeRepulsion: {
       strength: 0.1
     },
+    level2scale: initLevel2scale(data),
   };
   return forceConfig;
 }
 
 
-let outputPrefix = 'scaleY';
-let values = [1, 2, 3, 5, 10, 15, 20];
-let setConfig = (data, scaleY) => {
-  data.forceConfig.overlap.scaleY = scaleY;
-  console.log('forceConfig', data.forceConfig);
-};
 
 
-function start(data, canvas){
 
-  //reset node positions
-  data.nodes.forEach((d,i)=>{
-    d.x = window.pos0[i].x;
-    d.y = window.pos0[i].y;
-  });
-  //TODO fixme
-  // canvas.worker.postMessage({
-  //   type: 'update-node',
-  //   nodes: data.nodes,
-  // });
-
-  console.log(data.nodes[0]);
-  setConfig(data, values.shift());
-  pressKey('r'); // restart force simulation;
-}
-
-
-let promises = Promise.all(fns.map(fn => d3.json(fn)))
-  .then((data) => {
-    let nodes;
-    if (data.length == 1) {
-      data = data[0];
-    } else {
-      [data, nodes] = data;
-    }
-    window.data = data;
-    window.progress = IS_PROGRESSIVE ? 1 : data.node_id.length;
-    window.enabledNodes = new Set(data.node_id.slice(0, window.progress));
-    preprocess(data, nodes);
-
-    data.level2scale = initLevel2scale(data);
-    data.forceConfig = initForceConfig(data);
-    
-
-
-    console.log('level2scale', data.level2scale);
-    // console.log('forceConfig', data.forceConfig);
-
-    // //Option 1: run once
-    // let canvas = init(data);
-    // if (shouldDraw) {
-    //   canvas.draw(shouldLabel, forceLabel);
-    // }
-    // pressKey('h'); // hide view
-    // pressKey('r'); // restart;
-
-
-    //Option 2: automate the evaluation
-    window.pos0 = data.nodes.map(d=>({x:d.x, y:d.y}));
-    let canvas = init(data);
-    if (shouldDraw) {
-      canvas.draw(shouldLabel, forceLabel);
-    }
-    pressKey('h'); // hide view
-    start(data, canvas);
-
-
-  });
 
 
 function init(data) {
@@ -262,52 +276,23 @@ function init(data) {
   let scales = initScales(nodes, width, height);
   let canvas = initCanvas(width, height, canvasData, scales, draw);
 
-  updateBbox(canvas.data.nodes, canvas);
-  canvas.levelScalePairs = getNonOverlapLevels(canvas);
-
-  markNonOverlapLevels(canvas);
+  // updateBbox(canvas.data.nodes, canvas);
+  // markNonOverlapLevels(canvas);
   // markLabelByLevel(canvas.data.nodes, canvas);
-  let simData = {
-    nodes,
-    edges,
-    virtualEdges: data.virtual_edges,
-    enabledNodes: window.enabledNodes,
-    id2index: data.id2index,
-    xDomain: scales.sx.domain(),
-    xRange: scales.sy.range(),
-    yDomain: scales.sy.domain(),
-    yRange: scales.sy.range(),
-    progress: window.progress,
-    dpr: DPR,
-    level2scale: data.level2scale,
-    forceConfig: data.forceConfig,
-  };
-  canvas.worker = initSimulationWorker(canvas, simData);
-
   initInteraction(canvas);
 
-
-  // let svg = initOverlay();
-  // initStyles();
-  // initKeyboard();
-
-
-
-  // let simData = {
-  //   nodes, 
-  //   edges, 
-  //   virtualEdges, 
-  //   enabledNodes: window.enabledNodes, 
-  //   id2index,
-  //   xDomain: scales.sx.domain(),
-  //   xRange: scales.sy.range(),
-  //   yDomain: scales.sy.domain(),
-  //   yRange: scales.sy.range(),
-  //   progress: progress,
-  // };
-  // let worker = initSimulationWorker(simData);
-
-
+  canvas.simData = {
+      nodes: data.nodes,
+      edges: data.edges,
+      virtualEdges: data.virtual_edges,
+      enabledNodes: window.enabledNodes,
+      id2index: data.id2index,
+      xDomain: scales.sx.domain(),
+      xRange: scales.sy.range(),
+      yDomain: scales.sy.domain(),
+      yRange: scales.sy.range(),
+      dpr: DPR,
+    };
 
   return canvas;
 }
@@ -369,7 +354,8 @@ function updateBbox(nodes, canvas) {
 }
 
 
-function getNonOverlapLevels(canvas) {
+function getNonOverlapLevelScalePairs(canvas) {
+  /*For each node levels, figure out the minimal zoom scale that induces no label overlap*/ 
   let nodes = canvas.data.nodes;
   updateBbox(nodes, canvas);
   let levels = new Set(nodes.map(d => d.level));
@@ -383,45 +369,6 @@ function getNonOverlapLevels(canvas) {
   return res;
 }
 
-
-// function areaUtilization(bboxes){
-//   //binary search minimal non-overlap scale
-//   //then compute area usage
-//   bboxes.forEach((b,i)=>b.index=i);
-//   let sx = (d)=>(d.x+d.x+d.width)/2;
-//   let sy = (d)=>(d.y+d.y+d.height)/2;
-//   let tree = d3.quadtree(bboxes, sx, sy);
-
-//   const min0 = 1;
-//   const max0 = 1000;
-//   let lowerbound = min0;
-//   let upperbound = min0;
-//   for(let i=0; i<bboxes.length; i++){
-//     let bi = bboxes[i];
-//     let x = sx(bi);
-//     let y = sy(bi);
-//     let r = bi.width;
-//     let neighbors = searchQuadtree(tree, sx, sy, x-r, x+r, y-r, y+r);
-//     for(let j of neighbors){
-//       if(i!==j){
-//         let bj = bboxes[j];
-//         let min = min0;
-//         let max = max0;
-//         for(let k=0; k<20; k++){
-//           let tmp = (min+max)/2;
-//           if(isRectCollide2(bi, bj, tmp)){
-//             [min,max] = [tmp, max];
-//           }else{
-//             [min,max] = [min, tmp];
-//           }
-//         }
-//         lowerbound = Math.max(min, lowerbound);
-//         upperbound = Math.max(max, upperbound);
-//       }
-//     }
-//   }
-//   return [upperbound, areaCoverage(bboxes, upperbound)];
-// }
 
 function markScale(nodes, higher, all) {
   let sx = d => d.bbox.cx;
@@ -481,61 +428,8 @@ function markNonOverlapLevels(canvas) {
     markScale(nodes_l, higher, nodes);
     l0 = l;
   }
-
-  // for(let i=0; i<nodes.length; i++){
-  //   markScale(nodes.slice(i ,i+1), nodes.slice(0,i), nodes);
-  // }
 }
 
-
-function initSimulationWorker(canvas, simData) {
-
-  let worker = new Worker('simulation.js');
-  worker.postMessage(simData);
-  worker.onmessage = function(event) {
-    let data = event.data;
-    let type = data.type;
-    if (type === 'tick') {
-      let runtime = performance.now() - window.t0; //in ms
-      console.log(`${(data.progress * 100).toFixed(2)}%, runtime: ${(runtime/1000).toFixed(2)} sec`, );
-      canvas.data.nodes = data.nodes;
-      canvas.data.edges = data.edges;
-      canvas.simulation = data.simulation;
-
-      window.data.nodes = data.nodes;
-      window.data.edges = data.edges;
-      window.enabledNodes = data.enabledNodes;
-
-      updateBbox(canvas.data.nodes, canvas);
-      markLabelByLevel(canvas.data.nodes, canvas);
-      if (shouldDraw) {
-        canvas.draw(shouldLabel, forceLabel);
-      }
-    }
-    if (type === 'end') {
-      pressKey('e');
-      if (values.length) {
-        start(window.data, canvas);
-      }
-
-
-      // window.nodes = data.nodes;
-      // window.edges = data.edges;
-      // window.simulation = data.simulation;
-      // window.enabledNodes = data.enabledNodes;
-      // draw(
-      //   data.nodes, data.edges, 
-      //   drawData.nodeCircles, drawData.linkLines, 
-      //   drawData.labelTexts, drawData.labelBoxes,
-      //   drawData.scales.sx, drawData.scales.sy, 
-      //   drawData.transform
-      // );
-      // let t = performance.now() - window.t0;
-      // console.log('training time', t/1000, 'secs');
-    }
-  };
-  return worker;
-}
 
 
 function setCanvasSize(canvas, w, h) {
@@ -589,63 +483,11 @@ function initScales(nodes, w, h) {
 }
 
 
-function initOverlay() {
-  let ax = d3.axisBottom(scales.sx); //.tickSize(-(sy.range()[1]-sy.range()[0]));
-  let ay = d3.axisLeft(scales.sy); //.tickSize(-(sx.range()[1]-sx.range()[0]));
-  let gx = svg.selectAll('.gx')
-    .data([0, ])
-    .enter()
-    .append('g')
-    .attr('class', 'gx')
-    .attr('transform', `translate(0,${scales.sy.range()[1]})`)
-    .style('color', '#aaa')
-    .call(ax);
-  let gy = svg.selectAll('.gy')
-    .data([0, ])
-    .enter()
-    .append('g')
-    .attr('class', 'gy')
-    .attr('transform', 'translate(30,0)')
-    .style('color', '#aaa')
-    .call(ay);
-
-}
-
-
-function debugMsg() {
-  let edgesTmp = window.edges.filter(e => window.enabledNodes.has(e.source.id) && window.enabledNodes.has(e.target.id));
-  let nodesTmp = window.nodes.filter(d => window.enabledNodes.has(d.id));
-  // let labelTextNodesTmp = labelTexts.filter(d=>window.enabledNodes.has(d.id)).nodes();
-  // let labelTextNodesTmp = labelTexts.filter(d=>d.update).nodes();
-  let labelTextNodesTmp = labelTexts.nodes();
-  console.log(
-    'zoom:',
-    parseFloat(transform.k.toFixed(2)),
-    '\n',
-    'overlap:',
-    // labelOverlap(labelTextNodesTmp),
-    '\n',
-    'crossings:',
-    countCrossings(edgesTmp),
-    '\n',
-    'edge length:',
-    parseFloat(
-      idealEdgeLengthPreservation2(edgesTmp, edgesTmp.map(e => e.weight))
-      .toFixed(4)
-    ),
-    '\n',
-    'label area:',
-    parseFloat(areaCoverage(labelTextNodesTmp).toFixed(6)),
-    '\n',
-  );
-}
 
 
 
 function initInteraction(canvas) {
   initZoom(canvas);
-  // initDrag();
-  initKeyboard(canvas);
 }
 
 
@@ -653,6 +495,8 @@ function initZoom(canvas) {
   let sx0, sy0;
   let scale0 = 1;
   // let transform = d3.zoomIdentity.scale(scale0 * dpr);
+
+  canvas.levelScalePairs = getNonOverlapLevelScalePairs(canvas);
 
   let zoom = d3.zoom()
     .scaleExtent([0.1, 1000])
@@ -671,16 +515,10 @@ function initZoom(canvas) {
       }
       canvas.scales.sx = canvas.transform.rescaleX(sx0);
       canvas.scales.sy = canvas.transform.rescaleY(sy0);
-      // ax.scale(scales.sx);
-      // ay.scale(scales.sy);
-      // gx.call(ax);
-      // gy.call(ay);
-      // 
-      // 
 
       updateBbox(canvas.data.nodes, canvas);
       // Show label according to non-overlap zoom scale
-      markLabelByLevel(canvas.data.nodes, canvas);
+      markLabelByLevel(canvas.data.nodes, canvas.levelScalePairs, canvas.transform.k);
       // optional: greedy labeling
       // markLabelByOverlap(canvas.data.nodes, canvas);
 
@@ -706,256 +544,91 @@ function initZoom(canvas) {
 }
 
 
-function initDrag() {
-  let drag = simulation => {
-    return d3.drag()
-      .on('start', (d) => {
-        if (!d3.event.active) {
-          simulation.alpha(0.1).alphaTarget(0.0).restart();
-        }
-        if (d.type !== 'label') {
-          d.fx = d.x;
-          d.fy = d.y;
-        } else {
-          d.fx = d.for.x;
-          d.fy = d.for.y;
-        }
 
-      })
-      .on('drag', (d) => {
+function evaluate(data, t0=0){
+  let runtime = (performance.now() - t0) / 1000;
+  // canvas.levelScalePairs = getNonOverlapLevels(canvas);
+  // markNonOverlapLevels(canvas);
+  // markLabelByLevel(data.nodes, canvas);
 
-        if (d.type !== 'label') {
-          d.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
-          d.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
-        } else {
-          d.for.fx = scales.sx.invert(d3.event.sourceEvent.offsetX);
-          d.for.fy = scales.sy.invert(d3.event.sourceEvent.offsetY);
-        }
-      })
-      .on('end', (d) => {
-        if (!d3.event.active) {
-          simulation.alpha(0.3).alphaTarget(0);
-        }
-        if (d.type !== 'label') {
-          d.fx = null;
-          d.fy = null;
-        } else {
-          d.for.fx = null;
-          d.for.fy = null;
-        }
-      });
-  };
-}
-
-function pressKey(key) {
-  window.dispatchEvent(new KeyboardEvent('keydown', {
-    'key': key
-  }));
-}
+  let edges = data.edges;
+  let bboxes = data.nodes.map(d=>d.bbox);
+  let iel = bestIdealEdgeLengthPreservation(data.edges, data.edges.map(e=>e.weight));
+  let [scale, cm] = areaUtilization(bboxes);
+  console.log('edge:', +iel.toFixed(4));
+  console.log('compactness:', +cm.toFixed(6));
+  console.log('ideal scale:', +scale.toFixed(6));
+  console.log('Runtime:', runtime);
 
 
-function initKeyboard(canvas) {
-  let worker = canvas.worker;
-  const digits = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
-
-
-  window.addEventListener('keydown', (event) => {
-    let key = event.key;
-    if (key === 'p') { //[P]ause
-      worker.postMessage({
-        type: 'stop'
-      });
-    } else if (key === 'r') { //[R]estart
-      window.t0 = performance.now();
-      console.log('t0', window.t0);
-      worker.postMessage({
-        type: 'restart'
-      });
-    } else if (key === 'c') { //show [C]ollision
-      shouldMarkOverlap = !shouldMarkOverlap;
-      if (shouldMarkOverlap) {
-        markLabelByOverlap(canvas.data.nodes.filter(d => d.shouldShowLabel), canvas);
-      }
-      canvas.draw(shouldLabel, forceLabel, shouldMarkOverlap);
-    } else if (key === 'l') { //hide [l]abel
-      shouldLabel = !shouldLabel;
-      canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-      if (shouldDraw) {
-        canvas.draw(shouldLabel, forceLabel);
-      }
-    } else if (key === 'h') { //[h]ide all
-      shouldDraw = !shouldDraw;
-      canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-      if (shouldDraw) {
-        canvas.draw(shouldLabel, forceLabel);
-      }
-    } else if (key === 'a') { //[A]dd a node
-      window.t0 = performance.now();
-      worker.postMessage({
-        type: 'add-node',
-      });
-    } else if (key === 'd') { //show [D]ebug message
-      debugMsg();
-    } else if (key === 'b') { //background
-      darkMode = !darkMode;
-      bg = darkMode ? '#322' : '#fff';
-      svg.style('background', bg);
-    } else if (key === 's') {
-      worker.postMessage({
-        type: 'auto-add-nodes'
-      });
-    } else if (key === '/') { //log
-      exportJson(pos(canvas.data.nodes), `nodes.json`);
-    } else if (key === 'e') { //evaluation
-      let runtime = performance.now() - window.t0; //in ms
-
-      canvas.levelScalePairs = getNonOverlapLevels(canvas);
-      markNonOverlapLevels(canvas);
-      markLabelByLevel(canvas.data.nodes, canvas);
-
-      let edges = canvas.data.edges;
-      let bboxes = canvas.data.nodes.map(d => d.bbox);
-      let iel = bestIdealEdgeLengthPreservation(edges, edges.map(e => e.weight));
-      let [scale, cm] = areaUtilization(bboxes);
-
-      let quality = {
-        edge: +iel.toFixed(2),
-        area: +cm.toFixed(4),
-        runtime: +(runtime / 1000).toFixed(0),
-      };
-
-      let suffix = performance.now();
-      exportJson({
-        pos: pos(canvas.data.nodes)
-      }, `${outputPrefix}-nodes-${suffix}.json`);
-      exportJson({
-        config: data.forceConfig,
-        quality: quality,
-      }, `${outputPrefix}-quality-${suffix}.json`);
-
-
-
-      // evalMsg(nodes, edges, labelTexts);
-    } else if (digits.has(key)) {
-      if (forceLabelLevel == parseInt(key)) {
-        forceLabel = !forceLabel;
-      } else {
-        forceLabel = true;
-      }
-      if (!forceLabel) {
-        forceLabelLevel = -1;
-      } else {
-        forceLabelLevel = parseInt(key);
-      }
-      console.log(forceLabel, forceLabelLevel);
-      markLabelByLevel(canvas.data.nodes, canvas);
-      canvas.draw(shouldLabel, forceLabel);
-    }
-  });
 }
 
 
 
-function initStyles() {
-  //  nodes.forEach((d,i)=>{
-  //   let bbox = labelTextNodes[i].getBoundingClientRect();
-  //   updateBbox(d, bbox, scales);
-  // });
-  zoom.on('zoom')(transform); //draw
-
-  const linkLines = svg
-    .selectAll('.link')
-    .data(edges)
-    .join('line')
-    .attr('class', 'link')
-    .attr('stroke', EDGE_COLOR); //colorscheme[Math.max(e.source.level,e.target.level)-1]);
-
-  const nodeCircles = svg
-    .selectAll('.node')
-    .data(nodes)
-    .join('circle')
-    .attr('class', 'node')
-    .attr('r', d => sr(d.level))
-    // .attr('fill', d=>colorscheme[(d.level-1) % colorscheme.length])
-    .attr('fill', d => sc(d.level))
-    // .attr('fill', d=>'#1f78b4')
-    .attr('stroke', EDGE_COLOR)
-    .attr('stroke-width', d => 0)
-  // .call(drag(simulation));
-
-  const labelBoxes = svg
-    .selectAll('.labelBox')
-    .data(nodes)
-    .join('rect')
-    .attr('class', 'labelBox');
-  // .style('fill', '#aaf')
-  // .attr('stroke', '#333')
-  // .attr('stroke-width', 1)
-  // .attr('opacity', 0.1);
-
-  const labelTexts = svg
-    .selectAll('.labelText')
-    .data(nodes)
-    .join('text')
-    .attr('class', 'labelText')
-    // .style('fill', d=>d3.color(colorscheme[(d.level-1) % colorscheme.length]))
-    // .attr('fill', d=>d3.rgb(57,60,66))
-    .attr('fill', d => d3.color(sc(d.level)))
-    .style('font-size', d => `${20-d.level}px`)
-    // .style('font-weight', 100)
-    // .style('text-anchor', 'middle')
-    // .style('alignment-baseline', 'middle')
-    // .style('filter', f'url(#whiteOutlineEffect)')
-    .style('display', shouldHideLabel ? 'none' : '')
-    .text(d => d.label);
-  // .call(drag(simulation));
-
+function debugMsg(data) {
+  let edges = data.edges;
+  let nodes = data.nodes;
   let labelTextNodes = labelTexts.nodes();
-  window.labelTexts = labelTexts;
-  window.labelTextNodes = labelTextNodes;
-  //let bboxes = labelTextNodes.map(d=>d.getBoundingClientRect());
-  //let maxWidth = bboxes.reduce((a,b)=>a.width>b.width?a.width:b.width);
-  //let maxHeight = bboxes.reduce((a,b)=>a.height>b.height?a.height:b.height);
-
+  console.log(
+    'zoom:',
+    parseFloat(transform.k.toFixed(2)),
+    '\n',
+    'overlap:',
+    // labelOverlap(labelTextNodesTmp),
+    '\n',
+    'crossings:',
+    countCrossings(edges),
+    '\n',
+    'edge length:',
+    parseFloat(
+      idealEdgeLengthPreservation2(edges, edges.map(e => e.weight))
+      .toFixed(4)
+    ),
+    '\n',
+    'label area:',
+    parseFloat(areaCoverage(labelTextNodes).toFixed(6)),
+    '\n',
+  );
 }
 
 
 
-function evalMsg(nodes, edges, labelTexts, counts = undefined) {
-  if (counts === undefined) {
-    counts = Array.from(new Set(nodes.map(d => d.nodeCount)));
-    counts.sort((a, b) => a - b);
-  }
-  let dl = []; // desired (edge) length
-  let cm = []; // compactness / area utilization
-  // for(let level=1; level <= maxLevel; level++){
-  for (let nc of counts) {
-    // let edgesTmp = edges.filter(e=>e.source.level <= level && e.target.level <= level);
-    // let nodesTmp = nodes.filter(d=>d.level <= level);
-    // let bboxesTmp = labelTexts.filter(d=>d.level<=level).nodes().map(d=>d.getBoundingClientRect());
 
-    let edgesTmp = edges.filter(e => e.source.nodeCount <= nc && e.target.nodeCount <= nc);
-    let nodesTmp = nodes.filter(d => d.nodeCount <= nc);
-    let bboxesTmp = labelTexts.filter(d => d.nodeCount <= nc).nodes().map(d => d.getBoundingClientRect());
-    let idealEdgeLength = bestIdealEdgeLengthPreservation(edgesTmp, edgesTmp.map(e => e.weight));
-    let [scale, area] = areaUtilization(bboxesTmp);
+// function evalMsg(nodes, edges, labelTexts, counts = undefined) {
+//   if (counts === undefined) {
+//     counts = Array.from(new Set(nodes.map(d => d.nodeCount)));
+//     counts.sort((a, b) => a - b);
+//   }
+//   let dl = []; // desired (edge) length
+//   let cm = []; // compactness / area utilization
+//   // for(let level=1; level <= maxLevel; level++){
+//   for (let nc of counts) {
+//     // let edgesTmp = edges.filter(e=>e.source.level <= level && e.target.level <= level);
+//     // let nodesTmp = nodes.filter(d=>d.level <= level);
+//     // let bboxesTmp = labelTexts.filter(d=>d.level<=level).nodes().map(d=>d.getBoundingClientRect());
 
-    dl.push(idealEdgeLength);
-    cm.push(area);
-    console.log(
-      'node count:', nc, '\n',
-      'edge length:', parseFloat(idealEdgeLength.toFixed(4)), '\n',
-      'area utilization:', parseFloat(area.toFixed(6)), 'at zoom', scale, '\n',
-    );
-  }
+//     let edgesTmp = edges.filter(e => e.source.nodeCount <= nc && e.target.nodeCount <= nc);
+//     let nodesTmp = nodes.filter(d => d.nodeCount <= nc);
+//     let bboxesTmp = labelTexts.filter(d => d.nodeCount <= nc).nodes().map(d => d.getBoundingClientRect());
+//     let idealEdgeLength = bestIdealEdgeLengthPreservation(edgesTmp, edgesTmp.map(e => e.weight));
+//     let [scale, area] = areaUtilization(bboxesTmp);
 
-  let table = '';
-  for (let i = 0; i < dl.length; i++) {
-    table += `\\textbf{$T_${i+1}$} & ${dl[i].toFixed(2)} & ${cm[i].toFixed(4)}\\\\ \\hline \n`;
-    table += `${i+1} & ${dl[i].toFixed(2)} & ${cm[i].toFixed(4)} \\\\hline]\n`;
-  }
-  console.log(table);
-}
+//     dl.push(idealEdgeLength);
+//     cm.push(area);
+//     console.log(
+//       'node count:', nc, '\n',
+//       'edge length:', parseFloat(idealEdgeLength.toFixed(4)), '\n',
+//       'area utilization:', parseFloat(area.toFixed(6)), 'at zoom', scale, '\n',
+//     );
+//   }
+
+//   let table = '';
+//   for (let i = 0; i < dl.length; i++) {
+//     table += `\\textbf{$T_${i+1}$} & ${dl[i].toFixed(2)} & ${cm[i].toFixed(4)}\\\\ \\hline \n`;
+//     table += `${i+1} & ${dl[i].toFixed(2)} & ${cm[i].toFixed(4)} \\\\hline]\n`;
+//   }
+//   console.log(table);
+// }
 
 
 // //--------functions----------
@@ -1007,8 +680,6 @@ function preprocess(data, nodes) {
     }
   }
 
-
-
   if (data.virtual_edge_source !== undefined) {
     data.virtual_edges = [];
     for (let i = 0; i < data.virtual_edge_source.length; i++) {
@@ -1020,8 +691,6 @@ function preprocess(data, nodes) {
       }
     }
   }
-
-
 
   let prescale_pos = 1;
   let prescale_weight = 1;
@@ -1039,6 +708,7 @@ function preprocess(data, nodes) {
       d.xInit = d.x;
       d.yInit = d.y;
     }
+    d.init_pos = [d.x, d.y];
     d.index = i;
     data.id2index[d.id] = d.index;
     d.label = d.label.slice(0, 16);
@@ -1106,7 +776,6 @@ function pos(nodes) {
 let l2k = d3.scaleLinear()
   .domain([1, 4])
   .range([2, 8]);
-
 
 function sa(level, currentZoom) {
   let alpha = 1;
@@ -1198,93 +867,31 @@ function markLabelByOverlap(nodes, canvas) {
 }
 
 
-// function labelOverlap(labelNodes){
-//   let count = 0;
-//   // let overlapMatrix = [];
-//   for(let i=0; i<labelNodes.length; i++){
-//     // overlapMatrix.push([]);
-//     let l1 = labelNodes[i];
-//     l1.show = true;
-//   }
-
-//   let bboxes = labelNodes.map(l=>l.getBoundingClientRect());
-
-//   labelNodes.forEach(d=>d.overlap = new Set());
-//   for(let i=0; i<labelNodes.length; i++){
-//     // overlapMatrix[i][i] = 0;
-//     let l1 = labelNodes[i];
-//     let bbox1 = bboxes[i];
-
-//     for(let j=i+1; j<labelNodes.length; j++){
-//       let l2 = labelNodes[j];
-//       let bbox2 = bboxes[j];
-//       let overlap = isRectCollide(bbox1, bbox2);
-//       if(overlap){
-//         // overlapMatrix[i][j] = 1;
-//         // overlapMatrix[j][i] = 1;
-//         // l2.overlap.add(i);
-//         // l1.overlap.add(j);
-//         // l1.show = false;
-//         l2.show = false;
-//         count += 1;
-//       }else{
-//         // overlapMatrix[i][j] = 0;
-//         // overlapMatrix[i][j] = 0;
-//       }
-//     }
-//   }
-//   // window.overlapMatrix = overlapMatrix;
-
-//   return count;
-// }
-// 
-// 
-// 
-// def draw
 function draw(label = true, forceLabel = false, markOverlap = true) {
-  // nodes, edges, nodeCircles, linkLines, labelTexts, labelBoxes,sx, sy, transform
+  // this being the canvas;
   let ctx = this.context;
   let data = this.data;
-  // if(!shouldDraw || shouldHideAll) {
-  //   return;
-  // }
-  // markCrossing(data.edges);
   if (this.data.nodesByLevel === undefined) {
     this.data.nodesByLevel = data.nodes.slice().sort((a, b) => a.level - b.level);
   }
   ctx.clearRect(0, 0, this.width, this.height);
-
-  // let nodes = this.data.nodesByLevel.filter(d=>{
-  let nodes = this.data.nodes
-  // .filter(d=>{
-  //   return d.update 
-  //   && d.bbox.cx > 0 
-  //   && d.bbox.cx < this.width 
-  //   && d.bbox.cy > 0 
-  //   && d.bbox.cy < this.height;
-  // });
-  let edges = data.edges;
-  // .filter(e=>{
-  //   return e.source.update && e.target.update;
-  // });
+  let nodes = this.data.nodes;
+  let edges = this.data.edges;
   drawEdges(ctx, edges, this.scales, this.transform);
   drawNodes(ctx, nodes, this.scales, this.transform, label, forceLabel, markOverlap);
-
 }
 
 
-function markLabelByLevel(nodes, canvas) {
-  let scale = canvas.transform.k;
-  let levelScalePairs = canvas.levelScalePairs;
+function markLabelByLevel(nodes, levelScalePairs, currentZoomScale) {
+  let scale = currentZoomScale;
   let showLevel = 0;
   for (ls of levelScalePairs) {
-    if (ls[1] < scale) {
+    if (ls[1] < currentZoomScale) {
       showLevel = ls[0];
     }
   }
   for (let n of nodes) {
-    // if(n.level <= forceLabelLevel || n.level <= showLevel ){
-    if (n.level <= forceLabelLevel || n.labelScale <= canvas.transform.k) {
+    if (n.level <= forceLabelLevel || n.labelScale <= currentZoomScale) {
       n.shouldShowLabel = true;
     } else {
       n.shouldShowLabel = false;
@@ -1316,7 +923,6 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
 
     ctx.globalAlpha = n.update ? 1.0 : HIDDEN_NODE_ALPHA;
     ctx.beginPath();
-    // ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.ellipse(x, y, r, r, 0, 0, 2 * Math.PI);
     ctx.fill();
   }
@@ -1371,11 +977,8 @@ function drawNodes(ctx, nodes, scales, transform, label, forceLabel, markOverlap
           ctx.stroke();
         }
       }
-
-
     }
   }
-
 }
 
 
@@ -1389,7 +992,7 @@ function drawEdges(ctx, edges, scales, transform) {
     let y0 = e.source.bbox.cy;
     let x1 = e.target.bbox.cx;
     let y1 = e.target.bbox.cy;
-    let lw = Math.max(1, scales.sr(Math.min(e.source.level, e.target.level)) / 2);
+    let lw = 0.5; //Math.max(0.5, scales.sr(Math.min(e.source.level, e.target.level)) / 2);
     ctx.lineWidth = lw * k * DPR;
     ctx.globalAlpha = e.source.update && e.target.update ? 1.0 : HIDDEN_EDGE_ALPHA;
     ctx.beginPath();

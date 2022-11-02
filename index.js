@@ -35,28 +35,32 @@ let forceLabelLevel = -1;
 
 //--------data----------
 
+let fns = [
+
 // figure 10
-// let fns = [
 //   './data/external/lastfm/CIR.json',
 //   './data/external/lastfm/prism.json',
 //   './data/external/lastfm/lastfm_delg_elliptical.json',
-//   './data/external/lastfm/bt_delg.json',
-//   './data/external/lastfm/bt_cg.json',
+  // './data/external/lastfm/bt_delg.json',
+  './data/external/lastfm/bt_cg.json',
+
+  // `./data/batch-tree-result-json/figure-10/last.fm-linear-delg-mode.json`,
+  // `./data/batch-tree-result-json/figure-10/last.fm-linear-cg-mode.json`,
+
 
 // // figures for appendix
 //   `./data/batch-tree-result-json/topics.json`,
 //   `./data/batch-tree-result-json/last.fm-linear.json`,
 //   `./data/batch-tree-result-json/topics-linear.json`,
 //   `./data/batch-tree-result-json/tol-linear.json`,
-// ];
 
-let fns = [
+
 
   // last.fm
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
 
-  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
   // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
   
   // dynamic drawing test
@@ -154,6 +158,27 @@ function initLevel2scale(data){
 }
 
 
+function initForceConfig(data) {
+  let extent = d3.extent(data.nodes, d => Math.sqrt(d.x * d.x + d.y * d.y));
+  let diameter = 2 * (extent[1] - extent[0]);
+  let forceConfig = {
+    charge: {
+      strength: -2e-5 * diameter
+    },
+    overlap: {
+      scaleY: 5
+    },
+    central: {
+      r: 0,
+      strength: 0.002
+    },
+    nodeEdgeRepulsion: {
+      strength: 0.1
+    },
+  };
+  return forceConfig;
+}
+
 
 let promises = Promise.all(fns.map(fn=>d3.json(fn)))
 .then((data)=>{
@@ -169,15 +194,8 @@ let promises = Promise.all(fns.map(fn=>d3.json(fn)))
   preprocess(data, nodes);
 
   data.level2scale = initLevel2scale(data);
+  data.forceConfig = initForceConfig(data);
   console.log('level2scale', data.level2scale);
-  
-  let extent = d3.extent(data.nodes, d=>Math.sqrt(d.x*d.x + d.y*d.y));
-  let diameter = 2*(extent[1] - extent[0]);
-  data.forceConfig = {
-    // charge:{strength: -0.002},
-    charge:  {strength: - 2e-5 * diameter },
-    overlap: {scaleY: 5},
-  };
   console.log('forceConfig', data.forceConfig);
 
 
@@ -1316,7 +1334,7 @@ function drawEdges(ctx, edges, scales, transform){
     let y0 = e.source.bbox.cy;
     let x1 = e.target.bbox.cx;
     let y1 = e.target.bbox.cy;
-    let lw = Math.max(1, scales.sr(Math.min(e.source.level, e.target.level)) / 2);
+    let lw = Math.max(0.5, scales.sr(Math.min(e.source.level, e.target.level)) / 2);
     ctx.lineWidth = lw * k * DPR;
     ctx.globalAlpha = e.source.update && e.target.update ? 1.0 : HIDDEN_EDGE_ALPHA;
     ctx.beginPath();

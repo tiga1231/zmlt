@@ -37,7 +37,7 @@ function initSimulation(dataObj, config) {
 
   progress = dataObj.progress;
   [minEdgeWeight, maxEdgeWeight] = d3.extent(edges, e => e.weight);
-  console.log('simulation.js: edge weight range = ', [minEdgeWeight, maxEdgeWeight]);
+  // console.log('simulation.js: edge weight range = ', [minEdgeWeight, maxEdgeWeight]);
 
   let maxDist = d3.max(virtualEdges, e => e.weight);
   let [minHop, maxHop] = d3.extent(virtualEdges, e => e.hops);
@@ -51,7 +51,11 @@ function initSimulation(dataObj, config) {
     .force('pre', forcePre(scales))
     .force('link',
       d3.forceLink(edges)
-      .distance(e => e.weight / minEdgeWeight)
+      .distance(
+        config.edge.mode == 'linear' ?
+          (e =>  e.weight / minEdgeWeight) : 
+          (e => minEdgeWeight)
+      )
       /*.strength(e=>e.source.update && e.target.update ? 0.9:0)*/
     )
     .force('charge',
@@ -92,7 +96,7 @@ function initSimulation(dataObj, config) {
             return 0;
           }
         })
-        .strength(0.1)
+        .strength(0.05)
         .iterations(1)
       )
       .force(`post-scale`, forceScaleY(n, d => 1 / scaleY))

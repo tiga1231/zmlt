@@ -50,84 +50,146 @@ let forceLabelLevel = -1;
 //   `./data/batch-tree-result-json/tol-linear.json`,
 // ];
 
-let fns = [
 
-  // last.fm
-  // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
-  // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
-
-  `data/json/lastfm_linear/Graph_8-1615803307.json`,
-  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
-
-  // dynamic drawing test
-  // `data/json/lastfm_linear/Graph_8-1620029861.json`,
-
-
-  // topics
-  // topics-exponential (uniform edge length)
-  // `data/json/topics_refined_exp/Graph_5000-1614147219.json`, //// 
-  // `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
-
-  // topics-linear
-  // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
-  // `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
-
-  // tree of life (~3000 nodes)
-  // tree of life uniform
-  // 'data/json/tol_graphs_exp/Graph_4-1615352218.json',
-  // 'data/json/tol_graphs_exp/Graph_4-1615352218-nodes-3.json',
-  // tree of life linear
-  // 'data/json/tol_graphs_linear/Graph_4-1615872482.json',
-  // 'data/json/tol_graphs_linear/Graph_4-1615872482-nodes-1.json',
-
-  // math genealogy
-  // `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
-  // `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
-  // linear
-  // 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
-  // 'data/json/math_genealogy_linear/Graph_3-1615880448.json',
-  // 'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json',
-];
-
-
-/// external layouts to show in figures
-/// DELG
 // let fns = [
-//   `data/external/lastfm-DELG-min.json`,
-//   `data/external/lastfm-DELG-nodes-0.json`,
-// ];
-// let fns = [
-//   `./data/external/topics-DELG-min.json`,
-//   `./data/external/topics-DELG-nodes-0.json`,
-// ];
-// let fns = [
-//   `./data/external/tol-DELG-min.json`,
-//   `./data/external/tol-DELG-nodes-0.json`,
-// ];
-// 
-/// BT
-// let fns = [
-//   `data/external/lastfm-BT-min.json`,
-//   `data/external/lastfm-BT-nodes-0.json`,
-// ];
-// let fns = [
-//   `./data/external/topics-BT-min.json`,
-//   `./data/external/topics-BT-nodes-0.json`,
-// ];
-// let fns = [
-//   `./data/external/tol-BT-min.json`,
-//   `./data/external/tol-BT-nodes-0.json`,
+
+// `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
+// `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
+
+// `data/json/lastfm_linear/Graph_8-1615803307.json`,
+// `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+
+// topics
+// topics-exponential (uniform edge length)
+// `data/json/topics_refined_exp/Graph_5000-1614147219.json`, //// 
+// `data/json/topics_refined_exp/Graph_5000-1614147219-nodes-5.json`, 
+
+// topics-linear
+// `data/json/topics_faryad_8level_linear/Graph_5000-1615834916.json`,
+// `data/json/topics_faryad_8level_linear/Graph_5000-1615834916-nodes-3.json`,
+
+// tree of life (~3000 nodes)
+// tree of life uniform
+// 'data/json/tol_graphs_exp/Graph_4-1615352218.json',
+// 'data/json/tol_graphs_exp/Graph_4-1615352218-nodes-3.json',
+// tree of life linear
+// 'data/json/tol_graphs_linear/Graph_4-1615872482.json',
+// 'data/json/tol_graphs_linear/Graph_4-1615872482-nodes-1.json',
+
+// math genealogy
+// `data/json/math_genealogy_exp/Graph_3-1615778978.json`,
+// `data/json/math_genealogy_exp/Graph_3-1615778978-nodes-3.json`,
+// linear
+// 'data/json/math_genealogy_linear/Graph_3-1615878481.json' 
+// 'data/json/math_genealogy_linear/Graph_3-1615880448.json',
+// 'data/json/math_genealogy_linear/Graph_3-1615880448-nodes-1.json',
 // ];
 
 
+// graphs for parameter scan
+let edge_modes = ['linear', 'uniform'];
+let graphs = [{
+  graph_name: 'lastfm',
+  fn: 'data/json/lastfm_linear/Graph_6-1667445298.json',
+}, {
+  graph_name: 'topics',
+  fn: 'data/json/topics_faryad_5000_linear/Graph_2000-1667445499.json',
+}, {
+  graph_name: 'tol',
+  fn: 'data/json/tol_graphs_linear/Graph_4_2000-1667445553.json',
+}, {
+  graph_name: 'math_genealogy',
+  fn: 'data/json/math_genealogy_linear/Graph_3_2000-1667445712.json',
+}, ]
 
+
+
+// default config
+let default_config = {
+  charge: {
+    // strength: -2e-5
+    strength: -0.001
+  },
+  edge: {
+    mode: 'linear',
+    // mode: 'uniform'
+  },
+  overlap: {
+    scaleY: 5
+  },
+  central: {
+    r: 0,
+    strength: 0.002
+  },
+  nodeEdgeRepulsion: {
+    strength: 0.1
+  },
+  level2scale: {
+    8: 15
+  },
+};
+
+
+let niter = 300;
+
+// let parameter_name = 'charge_strength';
+// let values = [-0, -0.00003, -0.0001, -0.0003, -0.001, -0.003, -0.01, -0.03, -0.1, -0.3];
+// function setForceParameter(config, v) {
+//   config.charge.strength = v;
+// };
+
+let parameter_name = 'node_edge_strength';
+let values = [0.01, 0.03, 0.1, 0.3, 0.6];
+function setForceParameter(config, v){
+  config.nodeEdgeRepulsion.strength = v;
+};
+
+// let parameter_name = 'ellipse_aspect_ratio';
+// let values = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20];
+// function setForceParameter(config, v){
+//   config.overlap.scaleY = v;
+// };
+
+
+// let mode = 'debug';
+let mode = '';
+
+if(mode == 'debug'){
+  values = values.slice(0,1);
+  graphs = graphs.slice(0,1);
+  edge_modes = edge_modes.slice(0,1);
+}
+
+console.log('parameter_name:', parameter_name);
+console.log('parameter_values:', values);
+let fns = graphs.map(g => g.fn);
+let all_results = [];
 let promises = Promise.all(fns.map(fn => d3.json(fn)))
-  .then(main);
+  .then(function(graph_data) {
+    graph_data.forEach((data, i) => {
+      for (let edge_mode of edge_modes) {
+        for (let v of values) {// Scan the parameter space
+          
+          let config = JSON.parse(JSON.stringify(default_config));
+          config.edge.mode = edge_mode;
+          setForceParameter(config, v);
+
+          let additional_records = {};
+          additional_records['graph'] = graphs[i].graph_name;
+          additional_records[parameter_name] = v;
+          let results = main([data, ], config, additional_records);
+          all_results = all_results.concat(results);
+        }
+      }
+    });
+    if (mode !== 'debug') {
+      exportJson(all_results, `${parameter_name}.json`);
+    }
+  });
 
 
 
-
-function main(data) {
+function main(data, config, additional_records) {
   let nodes;
   if (data.length == 1) {
     data = data[0];
@@ -146,117 +208,155 @@ function main(data) {
   }
 
   //simulation
-  
-  let niter = 300;
   let simData = canvas.simData;
-  let config = initDefaultForceConfig(data);
-
-
-  // Scan the parameter space
-  let outputPrefix = 'scaleY';
-  let values = [1, 2, 3, 5, 10, 15, 20];
-  let setConfig = (data, scaleY) => {
-    data.forceConfig.overlap.scaleY = scaleY;
-  };
-
   resetNodePosition(simData.nodes);
+
+  let results = [];
+
+
   let iter = 0;
   let t0 = window.performance.now();
   let simulation = initSimulation(simData, config)
-    .on('tick', function(){
-      iter += 1;
-      if(iter % (niter/10) == 0){
-        console.log('iter', iter);
-      }
-    })
-    .on('end', ()=>{
-      evaluate(data, t0);
-    })
     .alpha(0.99)
     .velocityDecay(0.2)
     .alphaDecay(1 - Math.pow(0.001, 1 / niter))
-    .restart();
 
+  if (mode == 'debug') {
+
+    //option 1, draw on every iteration, only work for single config. since the 'iter' is async.
+    simulation
+      .on('tick', function() {
+        iter += 1;
+        canvas.zoom.on('zoom')(d3.zoomIdentity);
+        if (iter % (niter / 10) == 0) {
+          console.log('iter', iter);
+        }
+      })
+      .on('end', () => {
+        let result = evaluate(data, t0);
+        console.log(result);
+        updateLabelVisibility(canvas);
+      })
+      .restart();
+  } else {
+    //option 2:
+    simulation.tick(niter);
+    let result = evaluate(data, t0);
+    Object.entries(additional_records).forEach((key_value)=>{
+      let [k,v] = key_value;
+      result[k] = v;
+    })
+    // result[parameter_name] = v;
+    // result.graph = graph_name;
+    result.edge_mode = config.edge.mode;
+    console.log(result);
+    results.push(result);
+    // updateLabelVisibility(canvas);
+    // canvas.zoom.on('zoom')(d3.zoomIdentity);
+  }
+  return results;
 }
 
-function resetNodePosition(nodes){
-  nodes.forEach((d,i)=>{
+
+function evaluate(data, t0) {
+  let runtime = (performance.now() - t0) / 1000;
+  // canvas.levelScalePairs = getNonOverlapLevels(canvas);
+  // markNonOverlapLevels(canvas);
+  // markLabelByLevel(data.nodes, canvas);
+
+  let edges = data.edges;
+  let bboxes = data.nodes.map(d => d.bbox);
+  let iel = bestIdealEdgeLengthPreservation(data.edges, data.edges.map(e => e.weight));
+  let [scale, cm] = areaUtilization(bboxes);
+  // console.log('edge', +iel.toFixed(4));
+  // console.log('compactness:', +cm.toFixed(6));
+  // console.log('ideal scale:', +scale.toFixed(6));
+  // console.log('Runtime:', runtime);
+  return {
+    edge_length_preservation: iel,
+    compactness: cm,
+    runtime: runtime,
+    // optimalScale: scale,
+  }
+}
+
+
+
+function resetNodePosition(nodes) {
+  nodes.forEach((d, i) => {
     d.x = d.init_pos[0];
     d.y = d.init_pos[1];
   });
 }
 
 
-function updateLabelVisibility(canvas){
+
+function updateLabelVisibility(canvas) {
   //Mark  non-overlap scales for each label
   updateBbox(canvas.data.nodes, canvas);
   canvas.levelScalePairs = getNonOverlapLevelScalePairs(canvas);
   markNonOverlapLevels(canvas);
-
   // markLabelByLevel(canvas.data.nodes, canvas.levelScalePairs, canvas.transform.k);
 }
- 
-
-
-function initLevel2scale(data) {
-  let maxLevel = d3.max(data.nodes, d => d.level) || 8;
-  let level2scale = {};
-  if (fns[0].includes('topics')) {
-    level2scale[maxLevel] = 20;
-  } else if (fns[0].includes('topics_steiner')) {
-    level2scale[maxLevel - 1] = 20;
-    level2scale[maxLevel] = 200;
-  } else if (fns[0].includes('lastfm')) {
-    let baseScale = 1;
-    let scaleFactor = Math.pow(15, 1 / (maxLevel - 1));
-    for (let i = 1; i <= maxLevel; i++) {
-      if (i == maxLevel) {
-        level2scale[i] = baseScale * Math.pow(scaleFactor, i - 1);
-      }
-    }
-  } else if (fns[0].includes('tol_graphs')) {
-    level2scale = {
-      8: 15,
-    };
-  } else if (fns[0].includes('math_genealogy')) {
-    level2scale = {
-      8: 15,
-    };
-  } else {
-    level2scale = {
-      8: 15,
-    };
-  }
-  return level2scale;
-}
 
 
 
-function initDefaultForceConfig(data) {
-  let extent = d3.extent(data.nodes, d => Math.sqrt(d.x * d.x + d.y * d.y));
-  let diameter = 2 * (extent[1] - extent[0]);
-  let forceConfig = {
-    charge: {
-      strength: -2e-5 * diameter
-    },
-    overlap: {
-      scaleY: 5
-    },
-    central: {
-      r: 0,
-      strength: 0.002
-    },
-    nodeEdgeRepulsion: {
-      strength: 0.1
-    },
-    level2scale: initLevel2scale(data),
-  };
-  return forceConfig;
-}
+// function initLevel2scale(data) {
+//   let maxLevel = d3.max(data.nodes, d => d.level) || 8;
+//   let level2scale = {};
+//   if (fns[0].includes('topics')) {
+//     level2scale[maxLevel] = 20;
+//   } else if (fns[0].includes('topics_steiner')) {
+//     level2scale[maxLevel - 1] = 20;
+//     level2scale[maxLevel] = 200;
+//   } else if (fns[0].includes('lastfm')) {
+//     // let baseScale = 1;
+//     // let scaleFactor = Math.pow(15, 1 / (maxLevel - 1));
+//     // for (let i = 1; i <= maxLevel; i++) {
+//     //   level2scale[i] = baseScale * Math.pow(scaleFactor, i - 1);
+//     // }
+//     level2scale = {
+//       8: 15,
+//     };
+//   } else if (fns[0].includes('tol_graphs')) {
+//     level2scale = {
+//       8: 15,
+//     };
+//   } else if (fns[0].includes('math_genealogy')) {
+//     level2scale = {
+//       8: 15,
+//     };
+//   } else {
+//     level2scale = {
+//       8: 15,
+//     };
+//   }
+//   return level2scale;
+// }
 
 
 
-
+// function initDefaultForceConfig(data) {
+//   let extent = d3.extent(data.nodes, d => Math.sqrt(d.x * d.x + d.y * d.y));
+//   let diameter = 2 * (extent[1] - extent[0]);
+//   let forceConfig = {
+//     charge: {
+//       strength: -2e-5 * diameter
+//     },
+//     overlap: {
+//       scaleY: 5
+//     },
+//     central: {
+//       r: 0,
+//       strength: 0.002
+//     },
+//     nodeEdgeRepulsion: {
+//       strength: 0.1
+//     },
+//     level2scale: initLevel2scale(data),
+//   };
+//   return forceConfig;
+// }
 
 
 
@@ -276,23 +376,23 @@ function init(data) {
   let scales = initScales(nodes, width, height);
   let canvas = initCanvas(width, height, canvasData, scales, draw);
 
-  // updateBbox(canvas.data.nodes, canvas);
+  updateBbox(canvas.data.nodes, canvas);
   // markNonOverlapLevels(canvas);
   // markLabelByLevel(canvas.data.nodes, canvas);
   initInteraction(canvas);
 
   canvas.simData = {
-      nodes: data.nodes,
-      edges: data.edges,
-      virtualEdges: data.virtual_edges,
-      enabledNodes: window.enabledNodes,
-      id2index: data.id2index,
-      xDomain: scales.sx.domain(),
-      xRange: scales.sy.range(),
-      yDomain: scales.sy.domain(),
-      yRange: scales.sy.range(),
-      dpr: DPR,
-    };
+    nodes: data.nodes,
+    edges: data.edges,
+    virtualEdges: data.virtual_edges,
+    enabledNodes: window.enabledNodes,
+    id2index: data.id2index,
+    xDomain: scales.sx.domain(),
+    xRange: scales.sy.range(),
+    yDomain: scales.sy.domain(),
+    yRange: scales.sy.range(),
+    dpr: DPR,
+  };
 
   return canvas;
 }
@@ -355,7 +455,7 @@ function updateBbox(nodes, canvas) {
 
 
 function getNonOverlapLevelScalePairs(canvas) {
-  /*For each node levels, figure out the minimal zoom scale that induces no label overlap*/ 
+  /*For each node levels, figure out the minimal zoom scale that induces no label overlap*/
   let nodes = canvas.data.nodes;
   updateBbox(nodes, canvas);
   let levels = new Set(nodes.map(d => d.level));
@@ -484,8 +584,6 @@ function initScales(nodes, w, h) {
 
 
 
-
-
 function initInteraction(canvas) {
   initZoom(canvas);
 }
@@ -530,7 +628,6 @@ function initZoom(canvas) {
       // console.log('zoom', canvas.transform.k);
     });
   d3.select(canvas).call(zoom);
-
   d3.select('#resetButton')
     .on('click', () => {
       d3.select(canvas)
@@ -539,27 +636,7 @@ function initZoom(canvas) {
         .ease(d3.easeCubicInOut)
         .call(zoom.transform, d3.zoomIdentity);
     });
-
-
-}
-
-
-
-function evaluate(data, t0=0){
-  let runtime = (performance.now() - t0) / 1000;
-  // canvas.levelScalePairs = getNonOverlapLevels(canvas);
-  // markNonOverlapLevels(canvas);
-  // markLabelByLevel(data.nodes, canvas);
-
-  let edges = data.edges;
-  let bboxes = data.nodes.map(d=>d.bbox);
-  let iel = bestIdealEdgeLengthPreservation(data.edges, data.edges.map(e=>e.weight));
-  let [scale, cm] = areaUtilization(bboxes);
-  console.log('edge:', +iel.toFixed(4));
-  console.log('compactness:', +cm.toFixed(6));
-  console.log('ideal scale:', +scale.toFixed(6));
-  console.log('Runtime:', runtime);
-
+  canvas.zoom = zoom;
 
 }
 
@@ -590,7 +667,6 @@ function debugMsg(data) {
     '\n',
   );
 }
-
 
 
 
@@ -871,9 +947,9 @@ function draw(label = true, forceLabel = false, markOverlap = true) {
   // this being the canvas;
   let ctx = this.context;
   let data = this.data;
-  if (this.data.nodesByLevel === undefined) {
-    this.data.nodesByLevel = data.nodes.slice().sort((a, b) => a.level - b.level);
-  }
+  // if (this.data.nodesByLevel === undefined) {
+  //   this.data.nodesByLevel = data.nodes.slice().sort((a, b) => a.level - b.level);
+  // }
   ctx.clearRect(0, 0, this.width, this.height);
   let nodes = this.data.nodes;
   let edges = this.data.edges;

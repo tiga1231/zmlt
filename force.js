@@ -47,7 +47,7 @@ function forceScaleY(nodes, scaleAccessor) {
     for (let n of nodes) {
       let k = scaleAccessor(n);
       n.y *= k;
-      n.vy *= 1 / k;
+      // n.vy *= k;
     }
   };
 

@@ -37,14 +37,14 @@ let forceLabelLevel = -1;
 
 let fns = [
 
-// figure 10
+// figure 2, comparing existing algs (CIR, prism,...) to ours, with a zoomed in view.
 //   './data/external/lastfm/CIR.json',
 //   './data/external/lastfm/prism.json',
 //   './data/external/lastfm/lastfm_delg_elliptical.json',
   // './data/external/lastfm/bt_delg.json',
   // './data/external/lastfm/bt_cg.json',
 
-  // `./data/batch-tree-result-json/figure-10/last.fm-linear-delg-mode.json`,
+  `./data/batch-tree-result-json/figure-10/last.fm-linear-delg-mode.json`,
   // `./data/batch-tree-result-json/figure-10/last.fm-linear-cg-mode.json`,
 
 
@@ -55,13 +55,14 @@ let fns = [
 //   `./data/batch-tree-result-json/tol-linear.json`,
 
 
+  //inital layouts for training
 
   // last.fm
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341.json`, ////factor: 1 (uniform edge length)
   // `data/json/lastfm_steiner_exp/Graph_14-1614144341-nodes-1.json`,
 
-  `data/json/lastfm_linear/Graph_8-1615803307.json`,
-  `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
+  // `data/json/lastfm_linear/Graph_8-1615803307-nodes-1.json`,
   
   // dynamic drawing test
   // `data/json/lastfm_linear/Graph_8-1620029861.json`,

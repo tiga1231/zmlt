@@ -96,7 +96,7 @@ function initSimulation(dataObj, config) {
             return 0;
           }
         })
-        .strength(0.05)
+        .strength(0.04)
         .iterations(1)
       )
       .force(`post-scale`, forceScaleY(n, d => 1 / scaleY))

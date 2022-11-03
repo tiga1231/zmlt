@@ -1,0 +1,642 @@
+[
+  {
+    "edge_length_preservation": 0.3323354706748909,
+    "compactness": 0.13640138510315203,
+    "runtime": 5.07270000000298,
+    "charge_strength": 0,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.32571163453260343,
+    "compactness": 0.13028355180675838,
+    "runtime": 7.0825,
+    "charge_strength": -0.00003,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.31909717514451236,
+    "compactness": 0.12298161811036888,
+    "runtime": 7.008099999994039,
+    "charge_strength": -0.0001,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.31420295850103286,
+    "compactness": 0.11762165248631773,
+    "runtime": 7.01279999999702,
+    "charge_strength": -0.0003,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.29911337611308947,
+    "compactness": 0.11332425683828301,
+    "runtime": 6.65309999999404,
+    "charge_strength": -0.001,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.29325588030665095,
+    "compactness": 0.07266876464239583,
+    "runtime": 6.198,
+    "charge_strength": -0.003,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.38754570625949936,
+    "compactness": 0.03441751734088844,
+    "runtime": 5.682200000002981,
+    "charge_strength": -0.01,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5823757812513493,
+    "compactness": 0.012856348458015185,
+    "runtime": 5.405799999997019,
+    "charge_strength": -0.03,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.925595330859838,
+    "compactness": 0.004752958173983636,
+    "runtime": 5.262900000005961,
+    "charge_strength": -0.1,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.3295755620969743,
+    "compactness": 0.0014149660619099664,
+    "runtime": 5.347,
+    "charge_strength": -0.3,
+    "graph": "lastfm",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5404737027080618,
+    "compactness": 0.12299171940644892,
+    "runtime": 4.73179999999702,
+    "charge_strength": 0,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5340320078044579,
+    "compactness": 0.13025118188817839,
+    "runtime": 6.906899999991059,
+    "charge_strength": -0.00003,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5330486669892587,
+    "compactness": 0.1288609513696911,
+    "runtime": 6.82259999999404,
+    "charge_strength": -0.0001,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5209365643030756,
+    "compactness": 0.1296719248614368,
+    "runtime": 6.775199999988079,
+    "charge_strength": -0.0003,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.48179728623309065,
+    "compactness": 0.10849302585515092,
+    "runtime": 6.451,
+    "charge_strength": -0.001,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.45859794651629304,
+    "compactness": 0.08155081377851978,
+    "runtime": 6.0077000000029805,
+    "charge_strength": -0.003,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5483764988608752,
+    "compactness": 0.035546120183446495,
+    "runtime": 5.73229999999702,
+    "charge_strength": -0.01,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7593823018120125,
+    "compactness": 0.013493737121791551,
+    "runtime": 5.581800000011921,
+    "charge_strength": -0.03,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.1201580184217463,
+    "compactness": 0.004500112834301362,
+    "runtime": 5.37870000000298,
+    "charge_strength": -0.1,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.5418103225318394,
+    "compactness": 0.0014135255312383902,
+    "runtime": 5.52589999999106,
+    "charge_strength": -0.3,
+    "graph": "lastfm",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.40454999121514473,
+    "compactness": 0.08441849493531263,
+    "runtime": 3.88079999999702,
+    "charge_strength": 0,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4188496148263762,
+    "compactness": 0.07838273690483959,
+    "runtime": 6.12920000000298,
+    "charge_strength": -0.00003,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4037521674728767,
+    "compactness": 0.07512196421508481,
+    "runtime": 6.0767000000029805,
+    "charge_strength": -0.0001,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3736540783250785,
+    "compactness": 0.08368683804388723,
+    "runtime": 6.00579999999702,
+    "charge_strength": -0.0003,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3499861793590476,
+    "compactness": 0.07678655024061837,
+    "runtime": 5.8369000000059605,
+    "charge_strength": -0.001,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3052691626563236,
+    "compactness": 0.08109483470699329,
+    "runtime": 5.677599999994039,
+    "charge_strength": -0.003,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.31793872656699,
+    "compactness": 0.05323445035225721,
+    "runtime": 5.23790000000596,
+    "charge_strength": -0.01,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4454702125985788,
+    "compactness": 0.026204330544228077,
+    "runtime": 4.922,
+    "charge_strength": -0.03,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6445306156005964,
+    "compactness": 0.009286545207853757,
+    "runtime": 4.8113999999910595,
+    "charge_strength": -0.1,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.8776507968040294,
+    "compactness": 0.003475796861069106,
+    "runtime": 4.72240000000596,
+    "charge_strength": -0.3,
+    "graph": "topics",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5816463757062543,
+    "compactness": 0.06524041577509826,
+    "runtime": 3.7787999999970197,
+    "charge_strength": 0,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5816795726214966,
+    "compactness": 0.0806580185651134,
+    "runtime": 6.089200000002981,
+    "charge_strength": -0.00003,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5777101438652569,
+    "compactness": 0.0743813399415873,
+    "runtime": 6.07479999999702,
+    "charge_strength": -0.0001,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5635281562981936,
+    "compactness": 0.07273045744386518,
+    "runtime": 5.9777999999970195,
+    "charge_strength": -0.0003,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5270234441500539,
+    "compactness": 0.07786289151010453,
+    "runtime": 5.85690000000596,
+    "charge_strength": -0.001,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.4832460331440176,
+    "compactness": 0.08105723792869375,
+    "runtime": 5.683,
+    "charge_strength": -0.003,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.4476252054294432,
+    "compactness": 0.05521208854210661,
+    "runtime": 5.2517999999970195,
+    "charge_strength": -0.01,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5572581807878866,
+    "compactness": 0.027089969184287112,
+    "runtime": 5.03290000000596,
+    "charge_strength": -0.03,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7442042871422679,
+    "compactness": 0.0095846511738279,
+    "runtime": 4.7935,
+    "charge_strength": -0.1,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.9661567355038929,
+    "compactness": 0.0033415422174138646,
+    "runtime": 4.75779999999702,
+    "charge_strength": -0.3,
+    "graph": "topics",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5787863167537415,
+    "compactness": 0.0611167808806001,
+    "runtime": 5.011400000005961,
+    "charge_strength": 0,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5816299720084613,
+    "compactness": 0.06255753354996779,
+    "runtime": 7.316899999991059,
+    "charge_strength": -0.00003,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5788966186820397,
+    "compactness": 0.06718244334764834,
+    "runtime": 7.28420000000298,
+    "charge_strength": -0.0001,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5794177196773961,
+    "compactness": 0.07754937504983128,
+    "runtime": 7.26879999999702,
+    "charge_strength": -0.0003,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.584579994553809,
+    "compactness": 0.07743045838804896,
+    "runtime": 7.019300000011921,
+    "charge_strength": -0.001,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5860188525616608,
+    "compactness": 0.09770775838364154,
+    "runtime": 6.658400000005961,
+    "charge_strength": -0.003,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5287337509544441,
+    "compactness": 0.12365363882237204,
+    "runtime": 5.8456000000089405,
+    "charge_strength": -0.01,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5193925826853611,
+    "compactness": 0.06915364896590559,
+    "runtime": 5.326100000008941,
+    "charge_strength": -0.03,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7313083409793968,
+    "compactness": 0.024368320605371665,
+    "runtime": 5.163799999997019,
+    "charge_strength": -0.1,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.0353156775716974,
+    "compactness": 0.008775792407650721,
+    "runtime": 4.9742000000029805,
+    "charge_strength": -0.3,
+    "graph": "tol",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7390532612362195,
+    "compactness": 0.060801354485587676,
+    "runtime": 4.663799999997019,
+    "charge_strength": 0,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7176426080459763,
+    "compactness": 0.06759211703040816,
+    "runtime": 6.9989000000059605,
+    "charge_strength": -0.00003,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7147010707171372,
+    "compactness": 0.06744555945133417,
+    "runtime": 6.899899999991059,
+    "charge_strength": -0.0001,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7138678125308285,
+    "compactness": 0.05835178916017339,
+    "runtime": 6.897600000008941,
+    "charge_strength": -0.0003,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7076726919473988,
+    "compactness": 0.07629155420201257,
+    "runtime": 6.7286000000089405,
+    "charge_strength": -0.001,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7201556285841647,
+    "compactness": 0.08417251250179185,
+    "runtime": 6.490799999997019,
+    "charge_strength": -0.003,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.6595966204311657,
+    "compactness": 0.11617341316763438,
+    "runtime": 5.89470000000298,
+    "charge_strength": -0.01,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.6202962081797134,
+    "compactness": 0.06548585349813636,
+    "runtime": 5.308,
+    "charge_strength": -0.03,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.8418211089767015,
+    "compactness": 0.024138964909401466,
+    "runtime": 5.27009999999404,
+    "charge_strength": -0.1,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.1812311647581097,
+    "compactness": 0.009098458603878694,
+    "runtime": 5.033199999988079,
+    "charge_strength": -0.3,
+    "graph": "tol",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.30908837955721213,
+    "compactness": 0.07791327493108481,
+    "runtime": 6.419900000005961,
+    "charge_strength": 0,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.32242096980662516,
+    "compactness": 0.07752170794586756,
+    "runtime": 8.616,
+    "charge_strength": -0.00003,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3247012130016899,
+    "compactness": 0.06570828515982335,
+    "runtime": 8.68559999999404,
+    "charge_strength": -0.0001,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.30506583477145016,
+    "compactness": 0.06662185331864978,
+    "runtime": 8.29759999999404,
+    "charge_strength": -0.0003,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3273200409903078,
+    "compactness": 0.04842314556088331,
+    "runtime": 7.728100000008941,
+    "charge_strength": -0.001,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3951078942824689,
+    "compactness": 0.02958360289891274,
+    "runtime": 6.9035,
+    "charge_strength": -0.003,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.547747704507134,
+    "compactness": 0.011390949368780696,
+    "runtime": 6.16440000000596,
+    "charge_strength": -0.01,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.8054120946214753,
+    "compactness": 0.004184716375270291,
+    "runtime": 5.854400000005961,
+    "charge_strength": -0.03,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.1339104970651301,
+    "compactness": 0.0015455341016153547,
+    "runtime": 5.66479999999702,
+    "charge_strength": -0.1,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.4377601152752173,
+    "compactness": 0.0007858100201800376,
+    "runtime": 5.58020000000298,
+    "charge_strength": -0.3,
+    "graph": "math_genealogy",
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5294020491808157,
+    "compactness": 0.1173125922121269,
+    "runtime": 5.45670000000298,
+    "charge_strength": 0,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5233523072171065,
+    "compactness": 0.09965532419801576,
+    "runtime": 7.8215,
+    "charge_strength": -0.00003,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.519089716709669,
+    "compactness": 0.0937759082717633,
+    "runtime": 7.743399999991059,
+    "charge_strength": -0.0001,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5366930007665984,
+    "compactness": 0.0819270916436983,
+    "runtime": 7.48089999999106,
+    "charge_strength": -0.0003,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5580740998096656,
+    "compactness": 0.06474319028390771,
+    "runtime": 6.987899999991059,
+    "charge_strength": -0.001,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5966370792359598,
+    "compactness": 0.035840632532964226,
+    "runtime": 6.39,
+    "charge_strength": -0.003,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7860581085319407,
+    "compactness": 0.012269240091145257,
+    "runtime": 5.978100000008941,
+    "charge_strength": -0.01,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.0356668528108681,
+    "compactness": 0.004975951393280658,
+    "runtime": 5.704699999988079,
+    "charge_strength": -0.03,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.3556053755498902,
+    "compactness": 0.0014782645741655278,
+    "runtime": 5.70660000000894,
+    "charge_strength": -0.1,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.632989546276003,
+    "compactness": 0.0005647629768455698,
+    "runtime": 5.714,
+    "charge_strength": -0.3,
+    "graph": "math_genealogy",
+    "edge_mode": "uniform"
+  }
+]

@@ -1,0 +1,578 @@
+[
+  {
+    "edge_length_preservation": 1.0983205290224478,
+    "compactness": 0.003168683286292875,
+    "runtime": 8.335,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7912680434731111,
+    "compactness": 0.00468403850475782,
+    "runtime": 7.98570000000298,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6147784786047858,
+    "compactness": 0.009644125218601654,
+    "runtime": 7.57309999999404,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.44214487393750873,
+    "compactness": 0.023920315976128412,
+    "runtime": 7.20409999999404,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.39110799176164857,
+    "compactness": 0.043635710951048734,
+    "runtime": 6.9915,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3519916012417175,
+    "compactness": 0.07775469809032257,
+    "runtime": 6.79160000000894,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.2994826088807412,
+    "compactness": 0.10995347861775294,
+    "runtime": 6.706,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.30724729461072237,
+    "compactness": 0.09355675518852243,
+    "runtime": 6.70479999999702,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.36988290850624644,
+    "compactness": 0.0712024050210638,
+    "runtime": 6.791300000011921,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.2469062821667585,
+    "compactness": 0.002270612626511163,
+    "runtime": 8.54690000000596,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.9462294079235154,
+    "compactness": 0.0035499096743394263,
+    "runtime": 8.03020000000298,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7370083849882803,
+    "compactness": 0.009025286126077598,
+    "runtime": 7.547899999991059,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5909262632531839,
+    "compactness": 0.02101660894643943,
+    "runtime": 6.916300000011921,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5150568251102974,
+    "compactness": 0.043784874956403666,
+    "runtime": 6.648700000002981,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5312175260784909,
+    "compactness": 0.06007956782604441,
+    "runtime": 6.49070000000298,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.47970185422775236,
+    "compactness": 0.11468913348982783,
+    "runtime": 6.356600000008941,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.4883994625687556,
+    "compactness": 0.10024373926709888,
+    "runtime": 6.256799999997019,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.6052623603616528,
+    "compactness": 0.0732768357801731,
+    "runtime": 6.3258999999910595,
+    "graph": "lastfm",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.239405965183962,
+    "compactness": 0.0023455776673107164,
+    "runtime": 8.12809999999404,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.9761447437672077,
+    "compactness": 0.005291374983608486,
+    "runtime": 7.5702000000029805,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7356117004754218,
+    "compactness": 0.008528032340121025,
+    "runtime": 7.09929999999702,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4865451300978288,
+    "compactness": 0.015850762306798636,
+    "runtime": 6.7888999999910595,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3933794644720827,
+    "compactness": 0.03220547281025456,
+    "runtime": 6.45479999999702,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3821733444890367,
+    "compactness": 0.06012248972285081,
+    "runtime": 6.27459999999404,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.37914085204381176,
+    "compactness": 0.08485983153488001,
+    "runtime": 5.931800000011921,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.3491787859585441,
+    "compactness": 0.07504205070780605,
+    "runtime": 5.871399999991059,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5241639257887984,
+    "compactness": 0.05502620206445187,
+    "runtime": 5.99709999999404,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.3107952693945308,
+    "compactness": 0.001973297597650429,
+    "runtime": 8.19989999999106,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.0339180403898673,
+    "compactness": 0.004113556361943509,
+    "runtime": 7.50279999999702,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.8230130707862894,
+    "compactness": 0.008295468659519925,
+    "runtime": 7.047899999991059,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5511920720008375,
+    "compactness": 0.0140848575582698,
+    "runtime": 6.650200000002981,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.46969595584672674,
+    "compactness": 0.026020572287129964,
+    "runtime": 6.30090000000596,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.47181019164612314,
+    "compactness": 0.04579805178098376,
+    "runtime": 6.091800000011921,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.52364454632071,
+    "compactness": 0.08090059081784708,
+    "runtime": 5.85359999999404,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.607788653221874,
+    "compactness": 0.07056297746417904,
+    "runtime": 5.84279999999702,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.6991598142484857,
+    "compactness": 0.056794907016629384,
+    "runtime": 5.8435,
+    "graph": "topics",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.590638578823129,
+    "compactness": 0.0013449648811787028,
+    "runtime": 8.98579999999702,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.1689154016178531,
+    "compactness": 0.002992507283200409,
+    "runtime": 8.553,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.9425820674823893,
+    "compactness": 0.007341599812786544,
+    "runtime": 7.74979999999702,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6003281176805005,
+    "compactness": 0.017519712455374373,
+    "runtime": 7.3193999999910595,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4714594636515073,
+    "compactness": 0.02749393534235562,
+    "runtime": 7.1135,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4638603514933152,
+    "compactness": 0.044460162828472344,
+    "runtime": 7.0275,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5777404530644642,
+    "compactness": 0.06955639235274685,
+    "runtime": 7.167100000008941,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7806252797180911,
+    "compactness": 0.08226176601393162,
+    "runtime": 7.303099999994039,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.123019247681871,
+    "compactness": 0.07645807976669157,
+    "runtime": 7.64439999999106,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.6428366283390008,
+    "compactness": 0.001659241213763053,
+    "runtime": 9.11429999999702,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.3171729519352797,
+    "compactness": 0.003184731237088127,
+    "runtime": 8.252099999994039,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.9788074647875111,
+    "compactness": 0.005954133582770254,
+    "runtime": 7.778900000005961,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.6614741997636866,
+    "compactness": 0.017312390574738067,
+    "runtime": 7.3056000000089405,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5334140293033608,
+    "compactness": 0.02880476270119414,
+    "runtime": 6.90279999999702,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5840709745825733,
+    "compactness": 0.03995329421773687,
+    "runtime": 6.8425,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7275418951933712,
+    "compactness": 0.06609474034862721,
+    "runtime": 6.803100000008941,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.9316718859868428,
+    "compactness": 0.06176343258887052,
+    "runtime": 6.9495,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.320011809166538,
+    "compactness": 0.06904343988431545,
+    "runtime": 7.3761000000089405,
+    "graph": "tol",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.8059142960535892,
+    "compactness": 0.0032187321519854244,
+    "runtime": 9.75569999998808,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6273343100952808,
+    "compactness": 0.006220829283512149,
+    "runtime": 9.52970000000298,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.45873092133388244,
+    "compactness": 0.009655538286475768,
+    "runtime": 8.92159999999404,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.34118255219175303,
+    "compactness": 0.01835945467056575,
+    "runtime": 8.29629999999702,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.302459782451473,
+    "compactness": 0.026545840463858366,
+    "runtime": 7.876,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.29791795569246543,
+    "compactness": 0.039974438583013965,
+    "runtime": 7.84040000000596,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.33802437440004546,
+    "compactness": 0.04523240415166428,
+    "runtime": 7.720800000011921,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.34213955100811516,
+    "compactness": 0.041190848184522795,
+    "runtime": 7.752100000008941,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.34036914831223725,
+    "compactness": 0.03942845436102236,
+    "runtime": 7.70029999999702,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.9592539643806706,
+    "compactness": 0.004188371754374724,
+    "runtime": 9.0935,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.05,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7680194313818639,
+    "compactness": 0.007311034088637172,
+    "runtime": 8.587,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5952214879755459,
+    "compactness": 0.008004064764714783,
+    "runtime": 7.97309999999404,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.47300208685652456,
+    "compactness": 0.023558272505628693,
+    "runtime": 7.49720000000298,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 0.5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.4868961652739676,
+    "compactness": 0.03415651453842742,
+    "runtime": 7.100100000008941,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5146981797327219,
+    "compactness": 0.053195699865707505,
+    "runtime": 6.9277000000029805,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 2,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5348812797735447,
+    "compactness": 0.06806425566033077,
+    "runtime": 6.9865,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 5,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5609412596029165,
+    "compactness": 0.05782156167691471,
+    "runtime": 7.04129999999702,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 10,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5465833988007902,
+    "compactness": 0.04844391241175845,
+    "runtime": 7.039899999991059,
+    "graph": "math_genealogy",
+    "ellipse_aspect_ratio": 20,
+    "edge_mode": "uniform"
+  }
+]

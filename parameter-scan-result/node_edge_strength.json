@@ -1,0 +1,322 @@
+[
+  {
+    "edge_length_preservation": 0.21241956965469969,
+    "compactness": 0.11947896115562401,
+    "runtime": 6.94140000000596,
+    "graph": "lastfm",
+    "node_edge_strength": 0.01,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.2196145644920748,
+    "compactness": 0.11620790234493861,
+    "runtime": 6.8216000000089405,
+    "graph": "lastfm",
+    "node_edge_strength": 0.03,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.2994826088807412,
+    "compactness": 0.10995347861775294,
+    "runtime": 6.79879999999702,
+    "graph": "lastfm",
+    "node_edge_strength": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5400116063911861,
+    "compactness": 0.0805759805974886,
+    "runtime": 7.30079999999702,
+    "graph": "lastfm",
+    "node_edge_strength": 0.3,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.0185441555289814,
+    "compactness": 0.023885652176977586,
+    "runtime": 8.42819999998808,
+    "graph": "lastfm",
+    "node_edge_strength": 0.6,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5596818569897382,
+    "compactness": 0.12167222543639807,
+    "runtime": 6.701,
+    "graph": "lastfm",
+    "node_edge_strength": 0.01,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5059952234582079,
+    "compactness": 0.1226215585313785,
+    "runtime": 6.511400000005961,
+    "graph": "lastfm",
+    "node_edge_strength": 0.03,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.47970185422775236,
+    "compactness": 0.11468913348982783,
+    "runtime": 6.384400000005961,
+    "graph": "lastfm",
+    "node_edge_strength": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.63571025579308,
+    "compactness": 0.08680483703677623,
+    "runtime": 6.862,
+    "graph": "lastfm",
+    "node_edge_strength": 0.3,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.0075128427085147,
+    "compactness": 0.03229462183209419,
+    "runtime": 7.46879999999702,
+    "graph": "lastfm",
+    "node_edge_strength": 0.6,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.3402997429330456,
+    "compactness": 0.08482465610100086,
+    "runtime": 6.14379999999702,
+    "graph": "topics",
+    "node_edge_strength": 0.01,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.32326806182476053,
+    "compactness": 0.08149210037269408,
+    "runtime": 6.211399999991059,
+    "graph": "topics",
+    "node_edge_strength": 0.03,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.37914085204381176,
+    "compactness": 0.08485983153488001,
+    "runtime": 6.2437999999970195,
+    "graph": "topics",
+    "node_edge_strength": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.4315439301508506,
+    "compactness": 0.07929851433812665,
+    "runtime": 6.110199999988079,
+    "graph": "topics",
+    "node_edge_strength": 0.3,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6779612083751264,
+    "compactness": 0.04799259415098324,
+    "runtime": 6.48870000000298,
+    "graph": "topics",
+    "node_edge_strength": 0.6,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5907021549126492,
+    "compactness": 0.06706757377209523,
+    "runtime": 6.018899999991059,
+    "graph": "topics",
+    "node_edge_strength": 0.01,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5562727274463914,
+    "compactness": 0.07466391375825926,
+    "runtime": 5.98309999999404,
+    "graph": "topics",
+    "node_edge_strength": 0.03,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.52364454632071,
+    "compactness": 0.08090059081784708,
+    "runtime": 5.83670000000298,
+    "graph": "topics",
+    "node_edge_strength": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5767461614690815,
+    "compactness": 0.08035155945019652,
+    "runtime": 5.997100000008941,
+    "graph": "topics",
+    "node_edge_strength": 0.3,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7466769600081113,
+    "compactness": 0.04558368175340565,
+    "runtime": 6.238,
+    "graph": "topics",
+    "node_edge_strength": 0.6,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.6022906649262746,
+    "compactness": 0.06128837453189312,
+    "runtime": 7.116,
+    "graph": "tol",
+    "node_edge_strength": 0.01,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6024142129572739,
+    "compactness": 0.06859452080110388,
+    "runtime": 7.219600000008941,
+    "graph": "tol",
+    "node_edge_strength": 0.03,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.5777404530644642,
+    "compactness": 0.06955639235274685,
+    "runtime": 7.29579999999702,
+    "graph": "tol",
+    "node_edge_strength": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.6609629060234069,
+    "compactness": 0.08492099664446233,
+    "runtime": 7.3725,
+    "graph": "tol",
+    "node_edge_strength": 0.3,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7415272285718132,
+    "compactness": 0.08094791609031987,
+    "runtime": 7.6152000000029805,
+    "graph": "tol",
+    "node_edge_strength": 0.6,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.7881574680039065,
+    "compactness": 0.0607727880841011,
+    "runtime": 6.86129999999702,
+    "graph": "tol",
+    "node_edge_strength": 0.01,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7747050900053938,
+    "compactness": 0.05532917145919915,
+    "runtime": 6.742100000008941,
+    "graph": "tol",
+    "node_edge_strength": 0.03,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7275418951933712,
+    "compactness": 0.06609474034862721,
+    "runtime": 6.9132000000029805,
+    "graph": "tol",
+    "node_edge_strength": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.7374691033008506,
+    "compactness": 0.05990837535117995,
+    "runtime": 7.0555,
+    "graph": "tol",
+    "node_edge_strength": 0.3,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.8618165991334751,
+    "compactness": 0.07839216199919724,
+    "runtime": 7.408199999988079,
+    "graph": "tol",
+    "node_edge_strength": 0.6,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.11768441813326593,
+    "compactness": 0.05698989429498077,
+    "runtime": 7.89429999999702,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.01,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.16928693830522773,
+    "compactness": 0.05590050775288318,
+    "runtime": 7.76079999999702,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.03,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.33802437440004546,
+    "compactness": 0.04523240415166428,
+    "runtime": 7.945,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.1,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 1.2218886608592892,
+    "compactness": 0.0067992781780742105,
+    "runtime": 9.83170000000298,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.3,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 4.931767202246381,
+    "compactness": 0.00002564216436007365,
+    "runtime": 21.53679999999702,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.6,
+    "edge_mode": "linear"
+  },
+  {
+    "edge_length_preservation": 0.33702351950187004,
+    "compactness": 0.07200942799620608,
+    "runtime": 7.015,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.01,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.3812144617494857,
+    "compactness": 0.07013147846507846,
+    "runtime": 7.0213999999910595,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.03,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 0.5348812797735447,
+    "compactness": 0.06806425566033077,
+    "runtime": 7.19220000000298,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.1,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 1.1374251919886889,
+    "compactness": 0.007581698694402115,
+    "runtime": 8.51139999999106,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.3,
+    "edge_mode": "uniform"
+  },
+  {
+    "edge_length_preservation": 5.82589494420491,
+    "compactness": 1.1150834588811967e-7,
+    "runtime": 26.78720000000298,
+    "graph": "math_genealogy",
+    "node_edge_strength": 0.6,
+    "edge_mode": "uniform"
+  }
+]

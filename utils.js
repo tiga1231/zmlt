@@ -324,8 +324,8 @@ function bestIdealEdgeLengthPreservation(links, lengths){
     den += il;
   }
   s = num / den;
-  console.log('best scale:', s);
-  console.log('not scaled:', idealEdgeLengthPreservation2(links, lengths, s+0.01));
+  // console.log('best scale:', s);
+  // console.log('not scaled:', idealEdgeLengthPreservation2(links, lengths, s+0.01));
   return idealEdgeLengthPreservation2(links, lengths, s);
 }
 

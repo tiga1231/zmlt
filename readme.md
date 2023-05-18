@@ -1,8 +1,10 @@
+## TODO
+- init layout script 
+- data files
+- readme
+
 # A Scalable Method for Readable Tree Layouts [[arXiv]](https://arxiv.org/abs/2305.09925)
-Compact-Initialization (RT_C)
-
-This repository contains implementation of the Readable Tree Layout, Compact-Initialization version (RT_C)
-
+This repository contains implementation of the Readable Tree Layout, with Compact-Initialization(RT_C)
 
 ## How to reproduce representative figure (Fig 20(b))
 1. Clone this directory:

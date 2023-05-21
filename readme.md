@@ -1,8 +1,7 @@
 ## TODO
-- layout initialization script 
-- clean up data files
-- finalize readme
-
+- [DONE] layout initialization script 
+- [] clean up data files
+- [] finalize readme
 
 # A Scalable Method for Readable Tree Layouts [[arXiv]](https://arxiv.org/abs/2305.09925)
 This repository contains implementation of the Readable Tree Layout, with Compact-Initialization(RT_C)

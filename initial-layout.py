@@ -476,17 +476,14 @@ for k in nodes[0]:
 for k in edges[0]:
     res[f"edge_{k}"] = [e[k] for e in edges]
 
-print(fn_out)
-with open(fn_out + "-min.json", "w") as f:
-    json.dump(res, f, indent=2)
-
+# Optionally, save a "minimal" json without virtual_edges
+# with open(fn_out + "-min.json", "w") as f:
+#     json.dump(res, f, indent=2)
 for k in virtual_edges[0]:
     res[f"virtual_edge_{k}"] = [ve[k] for ve in virtual_edges]
 
 print("writing initial layout to:")
 print(f"\t{fn_out}.json\n...")
-
 with open(fn_out + ".json", "w") as f:
     json.dump(res, f, indent=2)
-
 print("done!")

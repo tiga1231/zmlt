@@ -1,68 +1,74 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<script src='lib/d3.v5.js'></script>
-<script src="lib/d3-quadtree.v2.js"></script>
-<!-- <script src="lib/d3-ellipse-force.js"></script>  -->
-<!-- <script src="https://d3js.org/d3-quadtree.v1.js"></script> -->
+    <script src='lib/d3.v5.js'></script>
+    <script src="lib/d3-quadtree.v2.js"></script>
+    <!-- <script src="lib/d3-ellipse-force.js"></script>  -->
+    <!-- <script src="https://d3js.org/d3-quadtree.v1.js"></script> -->
 
-<script src='lib/underscore-min.js'></script>
-<script src='lib/numeric-1.2.6.js'></script>
-<script src='lib/math.js'></script>
-<script src='lib/bentley-ottman.js'></script>
+    <script src='lib/underscore-min.js'></script>
+    <script src='lib/numeric-1.2.6.js'></script>
+    <script src='lib/math.js'></script>
+    <script src='lib/bentley-ottman.js'></script>
 
-<script src='utils.js'></script>
-<!-- <script src='force.js'></script> -->
+    <script src='utils.js'></script>
+    <!-- <script src='force.js'></script> -->
 
 
-<style>
+    <style>
+        body {
+            margin: 0;
+        }
 
-body{
-  margin: 0;
-}
+        svg text {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
-svg text{
-  -webkit-user-select: none;
-   -moz-user-select: none;
-    -ms-user-select: none;
-        user-select: none;
-}
+        canvas {
+            background: #fff;
+            position: absolute;
+        }
 
-canvas{
-  background: #fff;
-  position: absolute;
-}
+        #ui {
+            position: absolute;
+        }
 
-#ui{
-  position: absolute;
-}
+        .labelText {
+            font-weight: 100;
+            font-size: 14px;
+            text-anchor: middle;
+            alignment-baseline: middle;
+            filter: url(#whiteOutlineEffect);
+        }
 
-.labelText{
-  font-weight: 100;
-  font-size: 14px;
-  text-anchor: middle;
-  alignment-baseline: middle;
-  filter: url(#whiteOutlineEffect);
-}
+        .labelBox {
+            fill: #aaf;
+            stroke: #333;
+            stroke-width: 1;
+        }
 
-.labelBox{
-  fill: #aaf;
-  stroke: #333;
-  stroke-width: 1;
-}
-
-</style>
+        p {
+            margin-block-start: 0em;
+            margin-block-end: 0em;
+        }
+    </style>
 </head>
 
 <body>
-<canvas id='main'></canvas>
-<script src='fig20b.js'></script>
-<a id='download-json'></a>
+    <canvas id='main'></canvas>
+    <script src='fig20b.js'></script>
+    <a id='download-json'></a>
 
-<div id='ui'>
-    <button id='resetButton'>Reset Camera</button>
-    <p id='message'></p>
-</div>
+    <div id='ui'>
+        <button id='resetButton'>Reset Camera</button>
+        <p id='shortcut'>[L] - Toggle Labels</p>
+        <p id='message'></p>
+    </div>
 
 </body>
+
 </html>

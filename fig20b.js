@@ -15,27 +15,25 @@ const HIDDEN_LABEL_ALPHA = 0.0;
 
 //globals
 let shouldTick = true;
-
 let darkMode = false;
 let bg = darkMode ? "#322" : "#fff";
-
 let runtime = [];
 let nodes;
 
 let progress = undefined;
 let enabledNodes = undefined;
-
 let shouldDraw = true;
 let shouldLabel = false;
 let shouldMarkOverlap = false;
-
 let forceLabel = true;
 let forceLabelLevel = 99;
 
 //--------data----------
 // reproducing RT_C in fig 20
 let fns = [
-  `data/json/lastfm_linear/Graph_8-1615803307.json`,
+    `data/json/lastfm_linear/Graph_8.json`,
+    // pre-computed initial layout
+  // `data/json/lastfm_linear/Graph_8-1615803307.json`,
 ];
 
 function initLevel2scale(data) {
@@ -86,12 +84,13 @@ function initForceConfig(data) {
       strength: 0.002,
     },
     nodeEdgeRepulsion: {
-      strength: 0.1,
+      strength: 0.4,
     },
   };
   return forceConfig;
 }
 
+// main
 let promises = Promise.all(fns.map((fn) => d3.json(fn)))
   .then((data) => {
     let nodes;

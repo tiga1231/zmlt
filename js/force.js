@@ -1,5 +1,4 @@
-importScripts("lib/underscore-min.js");
-
+importScripts("../jslib/underscore-min.js");
 
 function forceRestoreCache(nodes) {
   let force = () => {
@@ -18,14 +17,13 @@ function forceRestoreCache(nodes) {
   return force;
 }
 
-
 function forceCache(nodes) {
   let force = () => {
     for (let n of nodes) {
       if (n.cache === undefined) {
         n.cache = {
           vx: n.vx,
-          vy: n.vy
+          vy: n.vy,
         };
       } else {
         n.cache.vx += n.vx;
@@ -57,7 +55,6 @@ function forceScaleY(nodes, scaleAccessor) {
   return force;
 }
 
-
 function forceEllipse(kwargs) {
   let nodes = kwargs.nodes;
   let strength = kwargs.strength;
@@ -82,15 +79,15 @@ function forceEllipse(kwargs) {
   let force = (alpha) => {
     let tree = d3.quadtree(nodes, (d) => scales.sx(d.x), (d) => scales.sy(d.y));
     let n = -Math.log(alpha);
-    let beta = alpha > 0.5 ? (1 - alpha) * 15 / Math.sqrt(n + 5) : 7.5 / Math.sqrt(n + 5);
-
+    let beta = alpha > 0.5
+      ? (1 - alpha) * 15 / Math.sqrt(n + 5)
+      : 7.5 / Math.sqrt(n + 5);
 
     for (let i = 0; i < nodes.length; i++) {
       let n = nodes[i];
       let ni = n.ellipse;
       ni.x = scales.sx(n.x);
       ni.y = scales.sy(n.y);
-
     }
 
     for (let i = 0; i < nodes.length; i++) {
@@ -104,7 +101,15 @@ function forceEllipse(kwargs) {
       let xmax = nodes[i].bbox.right + nodes[i].bbox.width * m;
       let ymin = nodes[i].bbox.top - nodes[i].bbox.height * m;
       let ymax = nodes[i].bbox.bottom + nodes[i].bbox.height * m;
-      let neighbors = searchQuadtree(tree, (d) => scales.sx(d.x), (d) => scales.sy(d.y), xmin, xmax, ymin, ymax);
+      let neighbors = searchQuadtree(
+        tree,
+        (d) => scales.sx(d.x),
+        (d) => scales.sy(d.y),
+        xmin,
+        xmax,
+        ymin,
+        ymax,
+      );
       for (let j of neighbors) {
         if (i == j || !nodes[j].update) {
           continue;
@@ -124,7 +129,9 @@ function forceEllipse(kwargs) {
         let collide = isRectCollide(nodes[i].bbox, nodes[j].bbox);
         let dir = forceDir(nj.x - ni.x, nj.y - ni.y, ni.a, ni.b);
         // let magnitude = inside||collide ? strength/(Math.pow(dij,2)+0.1) : 0.05 * strength / dij;
-        let magnitude = collide ? strength / (Math.pow(dij, 2) + 1) : 0.01 * strength / (Math.pow(dij, 2) + 10);
+        let magnitude = collide
+          ? strength / (Math.pow(dij, 2) + 1)
+          : 0.01 * strength / (Math.pow(dij, 2) + 10);
         magnitude *= beta;
 
         let vx = magnitude * dir.x;
@@ -140,7 +147,6 @@ function forceEllipse(kwargs) {
     }
   };
 
-
   force.initialize = (newNodes) => {
     nodes = newNodes;
     for (let n of nodes) {
@@ -148,11 +154,12 @@ function forceEllipse(kwargs) {
         b: n.bbox.height / 2 * kwargs.b,
         c: n.bbox.width / 2 * kwargs.c,
       };
-      n.ellipse.a = Math.sqrt(n.ellipse.b * n.ellipse.b + n.ellipse.c * n.ellipse.c);
+      n.ellipse.a = Math.sqrt(
+        n.ellipse.b * n.ellipse.b + n.ellipse.c * n.ellipse.c,
+      );
     }
     return force;
   };
-
 
   force.strength = (s) => {
     strength = s;
@@ -161,14 +168,13 @@ function forceEllipse(kwargs) {
   return force;
 }
 
-
 function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
   let nodes = nodes0;
   let edges = edges0;
 
   function distance(a, b = {
     x: 0,
-    y: 0
+    y: 0,
   }) {
     return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
   }
@@ -186,11 +192,10 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
     // console.log(dir.y);
     let dir = {
       x: 0,
-      y: Math.sign(y)
+      y: Math.sign(y),
     };
     return dir;
   }
-
 
   let strength = (n, a, b, c) => {
     // let c = Math.sqrt(a*a-b*b);
@@ -217,7 +222,7 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
     // let beta = Math.pow((1-alpha), 7) * Math.pow(alpha, 3) * 450;
     // let beta = alpha > 0.5 ? (1-alpha) * 15/Math.sqrt(n+10) : 7.5/Math.sqrt(n+10);
 
-    let tree = d3.quadtree(nodes, d => d.x, d => d.y);
+    let tree = d3.quadtree(nodes, (d) => d.x, (d) => d.y);
 
     for (let j = 0; j < edges.length; j++) {
       let e = edges[j];
@@ -228,11 +233,10 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
       //   continue;
       // }
 
-
       //rotational and translational params
       let center = {
         x: (e0.x + e1.x) / 2,
-        y: (e0.y + e1.y) / 2
+        y: (e0.y + e1.y) / 2,
       };
       let dx = e1.x - e0.x;
       let dy = e1.y - e0.y;
@@ -252,18 +256,13 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
       f0 = rotate(f0, cos, -sin);
       f1 = rotate(f1, cos, -sin);
 
-
       let xmin = Math.min(e0.x, e1.x) - r;
       let xmax = Math.max(e0.x, e1.x) + r;
       let ymin = Math.min(e0.y, e1.y) - r;
       let ymax = Math.max(e0.y, e1.y) + r;
       e.neighbors = new Set(
-        searchQuadtree(tree,
-          d => d.x, d => d.y,
-          xmin, xmax, ymin, ymax
-        )
+        searchQuadtree(tree, (d) => d.x, (d) => d.y, xmin, xmax, ymin, ymax),
       );
-
 
       // for(let i=0; i<nodes.length; i++){
       //   let n = nodes[i];
@@ -313,7 +312,6 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
       //   n.vyTmp = undefined;
       // }
     }
-
   };
 
   force.initialize = (nodes1, edges1) => {
@@ -323,7 +321,6 @@ function forceNodeEdgeRepulsion(nodes0, edges0, enabledNodes, strength0 = 1) {
     }
     return force;
   };
-
 
   return force;
 }
@@ -353,12 +350,14 @@ function forceCompact() {
   return force;
 }
 
-
 function forceLabelCollide(
-  labels0, scales, l2z, simulation,
-  marginLeft, marginTop
+  labels0,
+  scales,
+  l2z,
+  simulation,
+  marginLeft,
+  marginTop,
 ) {
-
   // let x = (d)=>{
   //   try{
   //     let bb = d.getBoundingClientRect();
@@ -380,9 +379,9 @@ function forceLabelCollide(
   // let domain = scales.sx.domain();
   // let range = scales.sx.range();
   // let sxFactor = Math.abs( (range[1]-range[0]) / (domain[1]-domain[0]));
-  let levelRange = d3.extent(labels0, d => d.level);
+  let levelRange = d3.extent(labels0, (d) => d.level);
   // let lz = function(l){
-  //   // mapping: level => zoom-factor 
+  //   // mapping: level => zoom-factor
   //   let z = l;
   //   return z;
   // }
@@ -405,7 +404,7 @@ function forceLabelCollide(
       let zoomFactor = 1;
 
       //only consider labels that is <= certain level
-      let labels = labels0.filter(l => l2z(l.level) <= zoomFactor);
+      let labels = labels0.filter((l) => l2z(l.level) <= zoomFactor);
       let vx = Array(force.nodes.length).fill(0);
       let vy = Array(force.nodes.length).fill(0);
 
@@ -474,10 +473,9 @@ function forceLabelCollide(
             vy[j] -= force.dir.y * force.magnitude;
           }
         }
-
       }
-      console.log('alpha', alpha);
-      let beta = Math.pow((1 - alpha), 7) * Math.pow(alpha, 3) * 450;
+      console.log("alpha", alpha);
+      let beta = Math.pow(1 - alpha, 7) * Math.pow(alpha, 3) * 450;
       if (alpha < 0.5) {
         beta = Math.max(beta, alpha);
       }
@@ -503,11 +501,8 @@ function forceLabelCollide(
     return force;
   };
 
-
   return force;
 }
-
-
 
 function forceDummy() {
   let forceDummy_ = (alpha) => {};
@@ -519,7 +514,6 @@ function forceDummy() {
   };
   return force;
 }
-
 
 function forcePre(scales, rotate = true) {
   let force = (alpha) => {
@@ -551,8 +545,8 @@ function forcePre(scales, rotate = true) {
       //     }
       //   }
       //   console.log(
-      //     'alpha:', alpha.toFixed(2), 
-      //     'rot:', (thetaBest/(Math.PI)*180).toFixed(2), 
+      //     'alpha:', alpha.toFixed(2),
+      //     'rot:', (thetaBest/(Math.PI)*180).toFixed(2),
       //     'CM:', metricBest.toFixed(6)
       //   );
       // }
@@ -567,9 +561,7 @@ function forcePre(scales, rotate = true) {
     for (let n of force.nodes) {
       updateBboxXY(n, n.bbox, scales);
     }
-
   };
-
 
   force.initialize = (nodes) => {
     force.nodes = nodes;
@@ -579,19 +571,17 @@ function forcePre(scales, rotate = true) {
   return force;
 }
 
-
-
 function forcePost(nodes, edges) {
-
   let forcePost_ = (alpha) => {
-
     for (let n of nodes) {
       [n.x0, n.y0] = [n.x, n.y];
       [n.vx0, n.vy0] = [n.vx, n.vy];
     }
 
     for (let n of _.shuffle(nodes)) {
-      let edges1 = edges.filter(e => n.id === e.source.id || n.id === e.target.id);
+      let edges1 = edges.filter((e) =>
+        n.id === e.source.id || n.id === e.target.id
+      );
       let t = 1.0;
       let steps = 8;
       let down_scale = 0.8;
@@ -619,7 +609,6 @@ function forcePost(nodes, edges) {
       //restore the node pos and let the simulation handle update through n.vx and n.vy
       [n.x, n.y] = [n.x0, n.y0];
     }
-
   };
 
   let force = forcePost_;
@@ -634,10 +623,7 @@ function forcePost(nodes, edges) {
   return force;
 }
 
-
-
 function forceStress(nodes, edges, nSample, stochastic = true) {
-
   let sampleSize;
   let strength = (e) => 1;
   let distance = (e) => 1;
@@ -646,25 +632,26 @@ function forceStress(nodes, edges, nSample, stochastic = true) {
   if (nSample === undefined) {
     nSample = nodes.length * 6;
   }
+
   let oneIter = (e, alpha) => {
     let w = strength(e);
     let d = distance(e);
     let p0 = [e.source.x, e.source.y];
     let p1 = [e.target.x, e.target.y];
-
     let currentDist = Math.sqrt(
       Math.pow(p0[0] - p1[0], 2) +
-      Math.pow(p0[1] - p1[1], 2)
+        Math.pow(p0[1] - p1[1], 2),
     );
-
-    let dir = numeric.div([p1[0] - p0[0], p1[1] - p0[1]], Math.max(currentDist, 1));
+    let dir = numeric.div(
+      [p1[0] - p0[0], p1[1] - p0[1]],
+      Math.max(currentDist, 1),
+    );
     let coef = (currentDist - d) * w;
     coef = Math.sign(coef) * Math.min(
       Math.abs(coef),
       currentDist * 0.1,
       1,
     );
-
     let [dx, dy] = numeric.mul(coef, dir);
     let vx = dx * alpha;
     let vy = dy * alpha;
@@ -672,7 +659,7 @@ function forceStress(nodes, edges, nSample, stochastic = true) {
     e.source.vy += vy;
     e.target.vx += -vx;
     e.target.vy += -vy;
-  }
+  };
 
   function force(alpha) {
     alpha = schedule(alpha);
@@ -712,8 +699,6 @@ function forceStress(nodes, edges, nSample, stochastic = true) {
 
   return force;
 }
-
-
 
 function updateBboxXY(d, bbox, scales) {
   let x = scales.sx(d.x);

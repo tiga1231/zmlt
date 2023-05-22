@@ -6,8 +6,8 @@ const IS_PROGRESSIVE = false;
 const EDGE_COLOR = "#000";
 // const EDGE_COLOR = d3.rgb(249,180,35);
 const HIDE_OVERLAP = false;
-const DPR = 1; //window.devicePixelRatio;
-// const font = 'monospace';
+// const DPR = 1;
+const DPR = window.devicePixelRatio;
 const FONT = "Times";
 const HIDDEN_NODE_ALPHA = 0.0;
 const HIDDEN_EDGE_ALPHA = 0.0;
@@ -31,8 +31,8 @@ let forceLabelLevel = 99;
 //--------data----------
 // reproducing RT_C in fig 20
 let fns = [
-    `data/json/lastfm_linear/Graph_8.json`,
-    // pre-computed initial layout
+  `data/json/lastfm_linear/Graph_8.json`,
+  // pre-computed initial layout
   // `data/json/lastfm_linear/Graph_8-1615803307.json`,
 ];
 
@@ -74,7 +74,7 @@ function initForceConfig(data) {
   let diameter = 2 * (extent[1] - extent[0]);
   let forceConfig = {
     charge: {
-      strength: -2e-5 * diameter,
+      strength: -3e-5 * diameter,
     },
     overlap: {
       scaleY: 5,
@@ -84,7 +84,7 @@ function initForceConfig(data) {
       strength: 0.002,
     },
     nodeEdgeRepulsion: {
-      strength: 0.4,
+      strength: 0.6,
     },
   };
   return forceConfig;
@@ -212,7 +212,6 @@ function updateBbox(nodes, canvas) {
         y: top,
         cx: x * DPR,
         cy: y * DPR,
-
         width,
         height,
         left,
@@ -363,7 +362,7 @@ function markNonOverlapLevels(canvas) {
 }
 
 function initSimulationWorker(canvas, simData) {
-  let worker = new Worker("simulation-worker.js");
+  let worker = new Worker("js/simulation-worker.js");
   worker.postMessage(simData);
   worker.onmessage = function (event) {
     let data = event.data;
@@ -413,8 +412,8 @@ function initSimulationWorker(canvas, simData) {
 function setCanvasSize(canvas, w, h) {
   canvas.width = w * DPR;
   canvas.height = h * DPR;
-  canvas.style.width = w;
-  canvas.style.height = h;
+  canvas.style.width = `${w}px`;
+  canvas.style.height = `${h}px`;
 }
 
 function initCanvas(w, h, data, scales, draw) {

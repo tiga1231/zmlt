@@ -445,42 +445,39 @@ nodes = [
     for i in range(len(nodes))
 ]
 
-edges = [{"source": e[0], "target": e[1], **e[2]} for e in edges]
-
-hopMin = 5
-hopMax = 4
-sampleRate = 0.1
-virtual_edges = []
-for i in tqdm(range(len(nodes))):
-    for j in range(i + 1, len(nodes)):
-        if d[i, j] == 0:
-            print(f"[warning] d[{i},{j}] = 0")
-        else:
-            if (hops[i, j] >= hopMin and hops[i, j] <= hopMax
-            or random() < sampleRate):
-                dij = d[i, j]
-                e = {
-                    "source": i2k[i],
-                    "target": i2k[j],
-                    "weight": dij,
-                    "hops": hops[i, j],
-                }
-                virtual_edges.append(e)
-            else:
-                continue
-
-
 res = {}
 for k in nodes[0]:
     res[f"node_{k}"] = [n[k] for n in nodes]
+edges = [{"source": e[0], "target": e[1], **e[2]} for e in edges]
 for k in edges[0]:
     res[f"edge_{k}"] = [e[k] for e in edges]
 
 # Optionally, save a "minimal" json without virtual_edges
 # with open(fn_out + "-min.json", "w") as f:
 #     json.dump(res, f, indent=2)
-for k in virtual_edges[0]:
-    res[f"virtual_edge_{k}"] = [ve[k] for ve in virtual_edges]
+# hopMin = 5
+# hopMax = 4
+# sampleRate = 0.1
+# virtual_edges = []
+# for i in tqdm(range(len(nodes))):
+#     for j in range(i + 1, len(nodes)):
+#         if d[i, j] == 0:
+#             print(f"[warning] d[{i},{j}] = 0")
+#         else:
+#             if (hops[i, j] >= hopMin and hops[i, j] <= hopMax
+#             or random() < sampleRate):
+#                 dij = d[i, j]
+#                 e = {
+#                     "source": i2k[i],
+#                     "target": i2k[j],
+#                     "weight": dij,
+#                     "hops": hops[i, j],
+#                 }
+#                 virtual_edges.append(e)
+#             else:
+#                 continue
+# for k in virtual_edges[0]:
+#     res[f"virtual_edge_{k}"] = [ve[k] for ve in virtual_edges]
 
 print("writing initial layout to:")
 print(f"\t{fn_out}.json\n...")

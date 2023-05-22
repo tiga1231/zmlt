@@ -1,9 +1,3 @@
-## TODO
-- [DONE] layout initialization script 
-- [DONE] clean up data files
-- [] requirements.txt
-- [] finalize readme
-
 # A Scalable Method for Readable Tree Layouts [[arXiv]](https://arxiv.org/abs/2305.09925)
 This repository contains implementation of the Readable Tree Layout, with Compact-Initialization(RT_C)
 
@@ -13,7 +7,8 @@ This repository contains implementation of the Readable Tree Layout, with Compac
 
 ## How to reproduce representative figure (Fig 20(b))
 1. Clone this directory:
-`git clone --depth=1 git@github.com:tiga1231/zmlt.git`
+`git clone --depth=1 git@github.com:tiga1231/zmlt.git`<br>
+`cd zmlt/`
 
 1. Install dependencies
     - Install Python 3

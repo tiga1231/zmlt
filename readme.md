@@ -32,9 +32,9 @@ This repository contains implementation of the Readable Tree Layout, with Compac
 
 
 ## Test bench
-Hardware: MacBook Pro, M1 Pro Chip.
-OS: MacOS ventura, 13.3.1 (22E261)
-Python: 3.9.16
+Hardware: MacBook Pro, M1 Pro Chip <br>
+OS: MacOS ventura, 13.3.1 (22E261) <br>
+Python: 3.9.16 <br>
 Tested Browsers: 
 - Google Chrome. Version 112.0.5615.137 (Official Build) (arm64)
 - Safari. Version 16.4 (18615.1.26.11.23)

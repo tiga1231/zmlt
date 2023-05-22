@@ -224,18 +224,18 @@ for i, (fn, level, weight) in list(enumerate(zip(fns, levels, weights)))[::-1]:
             g.edges[e]["weight"] = weight
 
 
-print("all_pairs_shortest_path...")
-apsp = nx.all_pairs_dijkstra_path_length(g, weight="weight")
-d = np.zeros([len(g.nodes), len(g.nodes)])
-for source, target_dists in tqdm(apsp):
-    d[source, :] = [target_dists[i] for i in range(len(g.nodes))]
+# print("all_pairs_shortest_path...")
+# apsp = nx.all_pairs_dijkstra_path_length(g, weight="weight")
+# d = np.zeros([len(g.nodes), len(g.nodes)])
+# for source, target_dists in tqdm(apsp):
+#     d[source, :] = [target_dists[i] for i in range(len(g.nodes))]
 
+# print("k-hop all_pairs_shortest_path...")
+# apsp = nx.all_pairs_dijkstra_path_length(g, weight=1)
+# hops = np.zeros([len(g.nodes), len(g.nodes)])
+# for source, target_dists in tqdm(apsp):
+#     hops[source, :] = [target_dists[i] for i in range(len(g.nodes))]
 
-print("k-hop all_pairs_shortest_path...")
-apsp = nx.all_pairs_dijkstra_path_length(g, weight=1)
-hops = np.zeros([len(g.nodes), len(g.nodes)])
-for source, target_dists in tqdm(apsp):
-    hops[source, :] = [target_dists[i] for i in range(len(g.nodes))]
 fn = fns[-1]
 
 

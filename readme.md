@@ -32,6 +32,7 @@ This repository contains implementation of the Readable Tree Layout, with Compac
     The layout will start to update within 15 seconds.
     It should take ~90 sec for the process to finish, on a MacBook Pro with M1 Pro Chip.
 
+Screenshot:
 ![screenshot](screenshot.png)
 
 

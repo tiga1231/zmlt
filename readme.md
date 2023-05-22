@@ -6,28 +6,28 @@ This repository contains implementation of the Readable Tree Layout, with Compac
 - A browser with JavaScript enabled
 
 ## How to reproduce representative figure (Fig 20(b))
-1. Clone this directory:
-`git clone --depth=1 git@github.com:tiga1231/zmlt.git`<br>
-`cd zmlt/`
+1. Clone this directory:<br>
+    `git clone --depth=1 git@github.com:tiga1231/zmlt.git`<br>
+    `cd zmlt/`
 
 1. Install dependencies
     - Install Python 3
     - Install required Python packages. E.g., 
       `pip3 install -r requirements.txt`
 
-1. Run layout initialization script
+1. Run layout initialization script<br>
     `python3 initial-layout.py`
 
-1. Start a web server from this repository. E.g.,
+1. Start a web server from this repository. E.g., <br>
     `python3 -m http.server 8080`
 
-1. From a browser, go to 
-    `http://localhost:8080/fig20b.html`
+1. From a browser, go to <br>
+    `http://localhost:8080/fig20b.html` <br>
     The optimization will start automatically. 
     The layout will start to update within 15 seconds.
     It should take ~90 sec for the process to finish, on a MacBook Pro with M1 Pro Chip.
 
-Screenshot:
+### Screenshot:
 ![screenshot](screenshot.png)
 
 

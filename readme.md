@@ -18,7 +18,7 @@ This repository contains implementation of the Readable Tree Layout, with Compac
 1. Install dependencies
     - Install Python 3
     - Install required Python packages. E.g., 
-      `pip3 install requirements.txt`
+      `pip3 install -r requirements.txt`
 
 1. Run layout initialization script
     `python3 initial-layout.py`
@@ -39,6 +39,7 @@ Screenshot:
 ## Test bench
 Hardware: MacBook Pro, M1 Pro Chip.
 OS: MacOS ventura, 13.3.1 (22E261)
+Python: 3.9.16
 Tested Browsers: 
 - Google Chrome. Version 112.0.5615.137 (Official Build) (arm64)
 - Safari. Version 16.4 (18615.1.26.11.23)

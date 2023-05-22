@@ -20,12 +20,12 @@ import numpy as np
 # from scipy.spatial import Delaunay
 from tqdm import tqdm
 
-## vis
-import matplotlib.pyplot as plt
-plt.style.use("ggplot")
-plt.style.use("seaborn-colorblind")
-from matplotlib import collections  as mc
-# from IPython.display import clear_output
+# ## vis
+# import matplotlib.pyplot as plt
+# plt.style.use("ggplot")
+# plt.style.use("seaborn-colorblind")
+# from matplotlib import collections  as mc
+# # from IPython.display import clear_output
 
 nodePattern = re.compile("^(\d+) ")
 edgePattern = re.compile("^(\d+) -- (\d+)")

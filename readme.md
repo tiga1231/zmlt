@@ -2,8 +2,6 @@
 This repository contains implementation of the Readable Tree Layout, with Compact-Initialization(RT_C)
 
 ## System requirements
-- Python 3.7+
-- A browser with JavaScript enabled
 
 ## How to reproduce representative figure (Fig 20(b))
 1. Clone this directory:<br>
@@ -26,6 +24,8 @@ This repository contains implementation of the Readable Tree Layout, with Compac
     The optimization will start automatically. 
     The layout will start to update within 15 seconds.
     It should take ~90 sec for the process to finish on a MacBook Pro with M1 Pro Chip.
+1.  Meanwhile, viewer can press "L" on their keyboard to toggle the display of vertex labels and scroll up and down to zoom in and out the layout view. 
+    
 
 ### Screenshot:
 ![screenshot](screenshot.png)
